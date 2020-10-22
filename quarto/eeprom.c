@@ -47,7 +47,7 @@
 #elif defined(ARDUINO_TEENSY_MICROMOD)
 #define FLASH_BASEADDR 0x60FC0000
 #define FLASH_SECTORS  63
-#endif
+
 
 
 #if E2END > (255*FLASH_SECTORS-1)
@@ -305,4 +305,4 @@ static void flash_erase_sector(void *addr)
 	FLEXSPI_INTR = FLEXSPI_INTR_IPCMDDONE;
 	flash_wait();
 }
-
+#endif

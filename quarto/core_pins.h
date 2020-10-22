@@ -48,7 +48,7 @@
 #define RISING			3
 
 
-#if defined(__IMXRT1062__) && defined(ARDUINO_TEENSY40)
+#if defined(__IMXRT1062__)
 
 #define CORE_NUM_TOTAL_PINS	40
 #define CORE_NUM_DIGITAL	40
