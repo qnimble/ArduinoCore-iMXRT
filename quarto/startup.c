@@ -38,6 +38,18 @@ extern void __libc_init_array(void); // C++ standard library
 
 uint8_t external_psram_size = 0;
 
+void init_memory(void);
+void init_nvic(void);
+void configure_pins(void);
+extern void data_init(unsigned int romstart, unsigned int start, unsigned int len);
+extern void bss_init(unsigned int start, unsigned int len) ;
+extern unsigned int __data_section_table;
+extern unsigned int __data_section_table_end;
+extern unsigned int __bss_section_table;
+extern unsigned int __bss_section_table_end;
+
+
+
 extern int main (void);
 void startup_default_early_hook(void) {}
 void startup_early_hook(void)		__attribute__ ((weak, alias("startup_default_early_hook")));
@@ -46,12 +58,13 @@ void startup_late_hook(void)		__attribute__ ((weak, alias("startup_default_late_
 __attribute__((section(".startup"), optimize("no-tree-loop-distribute-patterns"), naked))
 void ResetHandler(void)
 {
-	unsigned int i;
+	// Disable interrupts
+	__asm volatile ("cpsid i");
 
 #if defined(__IMXRT1062__)
 	IOMUXC_GPR_GPR17 = (uint32_t)&_flexram_bank_config;
-	IOMUXC_GPR_GPR16 = 0x00200007;
 	IOMUXC_GPR_GPR14 = 0x00AA0000;
+	IOMUXC_GPR_GPR16 = 0x00000007;
 	__asm__ volatile("mov sp, %0" : : "r" ((uint32_t)&_estack) : );
 #endif
 	PMU_MISC0_SET = 1<<3; //Use bandgap-based bias currents for best performance (Page 1175)
@@ -63,17 +76,14 @@ void ResetHandler(void)
 	//GPIO7_DR_SET = (1<<3); // digitalWrite(13, HIGH);
 
 	// Initialize memory
-	memory_copy(&_stext, &_stextload, &_etext);
-	memory_copy(&_sdata, &_sdataload, &_edata);
-	memory_clear(&_sbss, &_ebss);
+	init_memory();
+	configure_cache();
 
 	// enable FPU
 	SCB_CPACR = 0x00F00000;
 
 	// set up blank interrupt & exception vector table
-	for (i=0; i < NVIC_NUM_INTERRUPTS + 16; i++) _VectorsRam[i] = &unused_interrupt_vector;
-	for (i=0; i < NVIC_NUM_INTERRUPTS; i++) NVIC_SET_PRIORITY(i, 128);
-	SCB_VTOR = (uint32_t)_VectorsRam;
+	init_nvic();
 
 	reset_PFD();
 	
@@ -97,7 +107,7 @@ void ResetHandler(void)
 	printf("\n***********IMXRT Startup**********\n");
 	printf("test %d %d %d\n", 1, -1234567, 3);
 
-	configure_cache();
+	//configure_cache();
 	configure_systick();
 	usb_pll_start();	
 	reset_PFD(); //TODO: is this really needed?
@@ -106,6 +116,10 @@ void ResetHandler(void)
 #endif
 
 	asm volatile("nop\n nop\n nop\n nop": : :"memory"); // why oh why?
+
+	//Reenable interrupts
+	__asm volatile ("cpsie i");
+
 
 	// Undo PIT timer usage by ROM startup
 	CCM_CCGR1 |= CCM_CCGR1_PIT(CCM_CCGR_ON);
@@ -133,7 +147,7 @@ void ResetHandler(void)
 	analog_init();
 	pwm_init();
 	tempmon_init();
-
+	configure_pins();
 	startup_late_hook();
 	while (millis() < 300) ; // wait at least 300ms before calling user code
 	//printf("before C++ constructors\n");
@@ -171,6 +185,92 @@ static void configure_systick(void)
 	ARM_DWT_CTRL |= ARM_DWT_CTRL_CYCCNTENA; // turn on cycle counter
 	systick_cycle_count = ARM_DWT_CYCCNT; // compiled 0, corrected w/1st systick
 }
+
+
+FLASHMEM void init_nvic(void) {
+       unsigned int i;
+       // set up blank interrupt & exception vector table
+       for (i=0; i < NVIC_NUM_INTERRUPTS + 16; i++) _VectorsRam[i] = &unused_interrupt_vector;
+       for (i=0; i < NVIC_NUM_INTERRUPTS; i++) NVIC_SET_PRIORITY(i, 128);
+       SCB_VTOR = (uint32_t)_VectorsRam;
+}
+
+
+FLASHMEM void init_memory(void) {
+       unsigned int LoadAddr, ExeAddr, SectionLen;
+       unsigned int *SectionTableAddr;
+
+       // Load base address of Global Section Table
+       SectionTableAddr = &__data_section_table;
+
+       // Copy the data sections from flash to SRAM.
+       while (SectionTableAddr < &__data_section_table_end) {
+               LoadAddr = *SectionTableAddr++;
+               ExeAddr = *SectionTableAddr++;
+               SectionLen = *SectionTableAddr++;
+               data_init(LoadAddr, ExeAddr, SectionLen);
+       }
+
+       // At this point, SectionTableAddr = &__bss_section_table;
+       // Zero fill the bss segment
+       while (SectionTableAddr < &__bss_section_table_end) {
+               ExeAddr = *SectionTableAddr++;
+               SectionLen = *SectionTableAddr++;
+               bss_init(ExeAddr, SectionLen);
+       }
+}
+
+FLASHMEM void configure_pins(void) {
+
+        /* GPIO_SD_B1_05 as FLEXSPIA_DQS */
+        IOMUXC_SW_MUX_CTL_PAD_GPIO_SD_B1_05     = 0x11;
+        IOMUXC_FLEXSPIA_DQS_SELECT_INPUT = 0;
+
+        /* GPIO_SD_B1_06 as FLEXSPIA_SS0_B */
+        IOMUXC_SW_MUX_CTL_PAD_GPIO_SD_B1_06     = 0x11;
+
+        /* GPIO_SD_B1_07 as FLEXSPIA_SCLK */
+        IOMUXC_SW_MUX_CTL_PAD_GPIO_SD_B1_07     = 0x11;
+        IOMUXC_FLEXSPIA_SCK_SELECT_INPUT = 0;
+
+        /* GPIO_SD_B1_08 as FLEXSPIA_DATA00 */
+        IOMUXC_SW_MUX_CTL_PAD_GPIO_SD_B1_08     = 0x11;
+        IOMUXC_FLEXSPIA_DATA0_SELECT_INPUT = 0;
+
+        /* GPIO_SD_B1_09 as FLEXSPIA_DATA01 */
+        IOMUXC_SW_MUX_CTL_PAD_GPIO_SD_B1_09     = 0x11;
+        IOMUXC_FLEXSPIA_DATA1_SELECT_INPUT = 0;
+
+        /* GPIO_SD_B1_10 as FLEXSPIA_DATA02 */
+        IOMUXC_SW_MUX_CTL_PAD_GPIO_SD_B1_10     = 0x11;
+        IOMUXC_FLEXSPIA_DATA2_SELECT_INPUT = 0;
+
+        /* GPIO_SD_B1_11 as FLEXSPIA_DATA03 */
+        IOMUXC_SW_MUX_CTL_PAD_GPIO_SD_B1_11     = 0x11;
+        IOMUXC_FLEXSPIA_DATA3_SELECT_INPUT = 0;
+
+
+         /* Set the following pins to:
+                 Drive Strength Field: R0/6
+                 Speed Field: max(200MHz)
+                 Open Drain Enable Field: Open Drain Disabled
+                 Pull / Keep Enable Field: Pull/Keeper Enabled
+                 Pull / Keep Select Field: Keeper
+                 Pull Up / Down Config. Field: 100K Ohm Pull Down
+                 Hyst. Enable Field: Hysteresis Disabled */
+
+        IOMUXC_SW_PAD_CTL_PAD_GPIO_SD_B1_05 = 0x10F1u;
+        IOMUXC_SW_PAD_CTL_PAD_GPIO_SD_B1_06 = 0x10F1u;
+        IOMUXC_SW_PAD_CTL_PAD_GPIO_SD_B1_07 = 0x10F1u;
+        IOMUXC_SW_PAD_CTL_PAD_GPIO_SD_B1_08 = 0x10F1u;
+        IOMUXC_SW_PAD_CTL_PAD_GPIO_SD_B1_09 = 0x10F1u;
+        IOMUXC_SW_PAD_CTL_PAD_GPIO_SD_B1_10 = 0x10F1u;
+        IOMUXC_SW_PAD_CTL_PAD_GPIO_SD_B1_11 = 0x10F1u;
+
+}
+
+
+
 
 
 // concise defines for SCB_MPU_RASR and SCB_MPU_RBAR, ARM DDI0403E, pg 696
@@ -250,13 +350,13 @@ FLASHMEM void configure_cache(void)
 	SCB_MPU_RASR = DEV_NOCACHE | READWRITE | NOEXEC | SIZE_64M;
 
 	SCB_MPU_RBAR = 0x60000000 | REGION(i++); // QSPI Flash
-	SCB_MPU_RASR = MEM_CACHE_WBWA | READONLY | SIZE_16M;
+	SCB_MPU_RASR = MEM_CACHE_WBWA | READONLY | SIZE_8M;
 
 	SCB_MPU_RBAR = 0x70000000 | REGION(i++); // FlexSPI2
-	SCB_MPU_RASR = MEM_CACHE_WBWA | READONLY | NOEXEC | SIZE_256M;
+	SCB_MPU_RASR = MEM_CACHE_WBWA | READONLY | /*NOEXEC |*/ SIZE_4M;
 
-	SCB_MPU_RBAR = 0x70000000 | REGION(i++); // FlexSPI2
-	SCB_MPU_RASR = MEM_CACHE_WBWA | READWRITE | NOEXEC | SIZE_16M;
+	//SCB_MPU_RBAR = 0x70000000 | REGION(i++); // FlexSPI2
+	//SCB_MPU_RASR = MEM_CACHE_WBWA | READWRITE | NOEXEC | SIZE_16M;
 
 	// TODO: protect access to power supply config
 
@@ -484,12 +584,12 @@ FLASHMEM void usb_pll_start()
 }
 
 FLASHMEM void reset_PFD()
-{	
+{
 	//Reset PLL2 PFDs, set default frequencies:
 	CCM_ANALOG_PFD_528_SET = (1 << 31) | (1 << 23) | (1 << 15) | (1 << 7);
 	CCM_ANALOG_PFD_528 = 0x2018101B; // PFD0:352, PFD1:594, PFD2:396, PFD3:297 MHz 	
 	//PLL3:
-	CCM_ANALOG_PFD_480_SET = (1 << 31) | (1 << 23) | (1 << 15) | (1 << 7);	
+	CCM_ANALOG_PFD_480_SET = (1 << 31) | (1 << 23) | (1 << 15) | (0 << 7);
 	CCM_ANALOG_PFD_480 = 0x13110D0C; // PFD0:720, PFD1:664, PFD2:508, PFD3:454 MHz
 }
 
