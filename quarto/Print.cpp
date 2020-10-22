@@ -37,7 +37,7 @@
 #include <Arduino.h>
 
 #include "debug/printf.h"
-#undef printf
+//#undef printf
 
 size_t Print::write(const uint8_t *buffer, size_t size)
 {
@@ -86,14 +86,14 @@ size_t Print::println(void)
 
 extern "C" {
 __attribute__((weak))
-int _write(int file, char *ptr, int len)
+int _Printwrite(int file, char *ptr, int len)
 {
 	((class Print *)file)->write((uint8_t *)ptr, len);
 	return len;
 }
 }
 
-int Print::printf(const char *format, ...)
+int Print::pprintf(const char *format, ...)
 {
 	va_list ap;
 	va_start(ap, format);
@@ -104,7 +104,7 @@ int Print::printf(const char *format, ...)
 #endif
 }
 
-int Print::printf(const __FlashStringHelper *format, ...)
+int Print::pprintf(const __FlashStringHelper *format, ...)
 {
 	va_list ap;
 	va_start(ap, format);
