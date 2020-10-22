@@ -682,6 +682,7 @@ public:
 		digitalWriteFast(8, (val & (1<<0)));
 		if (!(CORE_PIN8_DDRREG & CORE_PIN8_BITMASK))
 			CORE_PIN8_PADCONFIG = ((val & (1<<0)) ? CONFIG_PULLUP : CONFIG_NOPULLUP);
+#if CORE_NUM_DIGITAL > 9
 		digitalWriteFast(9, (val & (1<<1)));
 		if (!(CORE_PIN9_DDRREG & CORE_PIN9_BITMASK))
 			CORE_PIN9_PADCONFIG = ((val & (1<<1)) ? CONFIG_PULLUP : CONFIG_NOPULLUP);
@@ -697,6 +698,7 @@ public:
 		digitalWriteFast(13, (val & (1<<5)));
 		if (!(CORE_PIN13_DDRREG & CORE_PIN13_BITMASK))
 			CORE_PIN13_PADCONFIG = ((val & (1<<5)) ? CONFIG_PULLUP : CONFIG_NOPULLUP);
+#endif
 		return *this;
 	}
 	inline PORTBemulation & operator |= (int val) __attribute__((always_inline)) {
@@ -704,6 +706,7 @@ public:
 			digitalWriteFast(8, HIGH);
 			if (!(CORE_PIN7_DDRREG & CORE_PIN7_BITMASK)) CORE_PIN8_CONFIG = CONFIG_PULLUP;
 		}
+#if CORE_NUM_DIGITAL > 9
 		if (val & (1<<1)) {
 			digitalWriteFast(9, HIGH);
 			if (!(CORE_PIN7_DDRREG & CORE_PIN7_BITMASK)) CORE_PIN9_CONFIG = CONFIG_PULLUP;
@@ -724,6 +727,7 @@ public:
 			digitalWriteFast(13, HIGH);
 			if (!(CORE_PIN13_DDRREG & CORE_PIN13_BITMASK)) CORE_PIN13_CONFIG = CONFIG_PULLUP;
 		}
+#endif
 		return *this;
 	}
 	inline PORTBemulation & operator &= (int val) __attribute__((always_inline)) {
@@ -731,6 +735,7 @@ public:
 			digitalWriteFast(8, LOW);
 			if (!(CORE_PIN8_DDRREG & CORE_PIN8_BITMASK)) CORE_PIN8_CONFIG = CONFIG_NOPULLUP;
 		}
+#if CORE_NUM_DIGITAL > 9
 		if (!(val & (1<<1))) {
 			digitalWriteFast(9, LOW);
 			if (!(CORE_PIN9_DDRREG & CORE_PIN9_BITMASK)) CORE_PIN9_CONFIG = CONFIG_NOPULLUP;
@@ -751,6 +756,7 @@ public:
 			digitalWriteFast(13, LOW);
 			if (!(CORE_PIN13_DDRREG & CORE_PIN13_BITMASK)) CORE_PIN13_CONFIG = CONFIG_NOPULLUP;
 		}
+#endif
 		return *this;
 	}
 };
@@ -787,29 +793,35 @@ class DDRBemulation
 public:
 	inline DDRBemulation & operator = (int val) __attribute__((always_inline)) {
 		if (val & (1<<0)) set0(); else clr0();
+#if CORE_NUM_DIGITAL > 9
 		if (val & (1<<1)) set1(); else clr1();
 		if (val & (1<<2)) set2(); else clr2();
 		if (val & (1<<3)) set3(); else clr3();
 		if (val & (1<<4)) set4(); else clr4();
 		if (val & (1<<5)) set5(); else clr5();
+#endif
 		return *this;
 	}
 	inline DDRBemulation & operator |= (int val) __attribute__((always_inline)) {
 		if (val & (1<<0)) set0();
+#if CORE_NUM_DIGITAL > 9
 		if (val & (1<<1)) set1();
 		if (val & (1<<2)) set2();
 		if (val & (1<<3)) set3();
 		if (val & (1<<4)) set4();
 		if (val & (1<<5)) set5();
+#endif
 		return *this;
 	}
 	inline DDRBemulation & operator &= (int val) __attribute__((always_inline)) {
 		if (!(val & (1<<0))) clr0();
+#if CORE_NUM_DIGITAL > 9
 		if (!(val & (1<<1))) clr1();
 		if (!(val & (1<<2))) clr2();
 		if (!(val & (1<<3))) clr3();
 		if (!(val & (1<<4))) clr4();
 		if (!(val & (1<<5))) clr5();
+#endif
 		return *this;
 	}
 private:
@@ -818,6 +830,7 @@ private:
 		CORE_PIN8_CONFIG = 5 | 0x10;
 		CORE_PIN8_PADCONFIG = CONFIG_PULLUP;
 	}
+#if CORE_NUM_DIGITAL > 9
 	inline void set1() __attribute__((always_inline)) {
 		GPIO_SETBIT_ATOMIC(&CORE_PIN9_DDRREG, CORE_PIN9_BITMASK);
 		CORE_PIN9_CONFIG = 5 | 0x10;
@@ -843,12 +856,14 @@ private:
 		CORE_PIN13_CONFIG = 5 | 0x10;
 		CORE_PIN13_PADCONFIG = CONFIG_PULLUP;
 	}
+#endif
 	inline void clr0() __attribute__((always_inline)) {
 		CORE_PIN8_CONFIG = 5 | 0x10;
 		CORE_PIN8_PADCONFIG = ((CORE_PIN8_PORTREG & CORE_PIN8_BITMASK)
 		  ? CONFIG_PULLUP : CONFIG_NOPULLUP);
 		GPIO_CLRBIT_ATOMIC(&CORE_PIN8_DDRREG, CORE_PIN8_BITMASK);
 	}
+#if CORE_NUM_DIGITAL > 9
 	inline void clr1() __attribute__((always_inline)) {
 		CORE_PIN9_CONFIG = 5 | 0x10;
 		CORE_PIN9_PADCONFIG = ((CORE_PIN9_PORTREG & CORE_PIN9_BITMASK)
@@ -879,6 +894,7 @@ private:
 		  ? CONFIG_PULLUP : CONFIG_NOPULLUP);
 		GPIO_CLRBIT_ATOMIC(&CORE_PIN13_DDRREG, CORE_PIN13_BITMASK);
 	}
+#endif
 };
 
 extern DDRBemulation DDRB;
@@ -892,6 +908,7 @@ class PORTCemulation
 {
 public:
 	inline PORTCemulation & operator = (int val) __attribute__((always_inline)) {
+#if CORE_NUM_DIGITAL > 9
 		digitalWriteFast(14, (val & (1<<0)));
 		if (!(CORE_PIN14_DDRREG & CORE_PIN14_BITMASK))
 			CORE_PIN14_PADCONFIG = ((val & (1<<0)) ? CONFIG_PULLUP : CONFIG_NOPULLUP);
@@ -910,9 +927,11 @@ public:
 		digitalWriteFast(19, (val & (1<<5)));
 		if (!(CORE_PIN19_DDRREG & CORE_PIN19_BITMASK))
 			CORE_PIN19_PADCONFIG = ((val & (1<<5)) ? CONFIG_PULLUP : CONFIG_NOPULLUP);
+#endif
 		return *this;
 	}
 	inline PORTCemulation & operator |= (int val) __attribute__((always_inline)) {
+#if CORE_NUM_DIGITAL > 9
 		if (val & (1<<0)) {
 			digitalWriteFast(14, HIGH);
 			if (!(CORE_PIN14_DDRREG & CORE_PIN14_BITMASK)) CORE_PIN14_CONFIG = CONFIG_PULLUP;
@@ -937,9 +956,11 @@ public:
 			digitalWriteFast(19, HIGH);
 			if (!(CORE_PIN19_DDRREG & CORE_PIN19_BITMASK)) CORE_PIN19_CONFIG = CONFIG_PULLUP;
 		}
+#endif
 		return *this;
 	}
 	inline PORTCemulation & operator &= (int val) __attribute__((always_inline)) {
+#if CORE_NUM_DIGITAL > 9
 		if (!(val & (1<<0))) {
 			digitalWriteFast(14, LOW);
 			if (!(CORE_PIN14_DDRREG & CORE_PIN14_BITMASK)) CORE_PIN14_CONFIG = CONFIG_NOPULLUP;
@@ -964,6 +985,7 @@ public:
 			digitalWriteFast(19, LOW);
 			if (!(CORE_PIN19_DDRREG & CORE_PIN19_BITMASK)) CORE_PIN19_CONFIG = CONFIG_NOPULLUP;
 		}
+#endif
 		return *this;
 	}
 };
@@ -999,33 +1021,40 @@ class DDRCemulation
 {
 public:
 	inline DDRCemulation & operator = (int val) __attribute__((always_inline)) {
+#if CORE_NUM_DIGITAL > 9
 		if (val & (1<<0)) set0(); else clr0();
 		if (val & (1<<1)) set1(); else clr1();
 		if (val & (1<<2)) set2(); else clr2();
 		if (val & (1<<3)) set3(); else clr3();
 		if (val & (1<<4)) set4(); else clr4();
 		if (val & (1<<5)) set5(); else clr5();
+#endif
 		return *this;
 	}
 	inline DDRCemulation & operator |= (int val) __attribute__((always_inline)) {
+#if CORE_NUM_DIGITAL > 9
 		if (val & (1<<0)) set0();
 		if (val & (1<<1)) set1();
 		if (val & (1<<2)) set2();
 		if (val & (1<<3)) set3();
 		if (val & (1<<4)) set4();
 		if (val & (1<<5)) set5();
+#endif
 		return *this;
 	}
 	inline DDRCemulation & operator &= (int val) __attribute__((always_inline)) {
+#if CORE_NUM_DIGITAL > 9
 		if (!(val & (1<<0))) clr0();
 		if (!(val & (1<<1))) clr1();
 		if (!(val & (1<<2))) clr2();
 		if (!(val & (1<<3))) clr3();
 		if (!(val & (1<<4))) clr4();
 		if (!(val & (1<<5))) clr5();
+#endif
 		return *this;
 	}
 private:
+#if CORE_NUM_DIGITAL > 9
 	inline void set0() __attribute__((always_inline)) {
 		GPIO_SETBIT_ATOMIC(&CORE_PIN14_DDRREG, CORE_PIN14_BITMASK);
 		CORE_PIN14_CONFIG = 5 | 0x10;
@@ -1092,6 +1121,7 @@ private:
 		  ? CONFIG_PULLUP : CONFIG_NOPULLUP);
 		GPIO_CLRBIT_ATOMIC(&CORE_PIN19_DDRREG, CORE_PIN19_BITMASK);
 	}
+#endif
 };
 
 extern DDRCemulation DDRC;
