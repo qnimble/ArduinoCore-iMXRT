@@ -267,6 +267,10 @@ FLASHMEM void configure_pins(void) {
         IOMUXC_SW_PAD_CTL_PAD_GPIO_SD_B1_10 = 0x10F1u;
         IOMUXC_SW_PAD_CTL_PAD_GPIO_SD_B1_11 = 0x10F1u;
 
+
+        GPIO8_GDIR = 0x07; //Set LEDs as outputs
+        GPIO7_GDIR = 0xFFFFF; //Set DAC Update pins as outputs
+
 }
 
 
