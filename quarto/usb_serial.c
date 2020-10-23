@@ -131,7 +131,7 @@ void usb_serial_configure(void)
 static void rx_queue_transfer(int i)
 {
 	NVIC_DISABLE_IRQ(IRQ_USB1);
-	printf("rx queue i=%d\n", i);
+	//printf("rx queue i=%d\n", i);
 	void *buffer = rx_buffer + i * CDC_RX_SIZE_480;
 	usb_prepare_transfer(rx_transfer + i, buffer, rx_packet_size, i);
 	arm_dcache_delete(buffer, rx_packet_size);
@@ -144,7 +144,7 @@ static void rx_event(transfer_t *t)
 {
 	int len = rx_packet_size - ((t->status >> 16) & 0x7FFF);
 	int i = t->callback_param;
-	printf("rx event, len=%d, i=%d\n", len, i);
+	//printf("rx event, len=%d, i=%d\n", len, i);
 	if (len > 0) {
 		// received a packet with data
 		uint32_t head = rx_head;
