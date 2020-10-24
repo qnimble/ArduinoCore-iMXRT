@@ -284,5 +284,6 @@ SECTIONS
     _itcm_block_count = (SIZEOF(.data_RAM2) + 0x7FFF) >> 15;
 	_flexram_bank_config = 0xAAAAAAAA | ((1 << (_itcm_block_count * 2)) - 1);
 	_estack = ORIGIN(DTCM) + ((16 - _itcm_block_count) << 15) - 32;
+    _vStackTop = 0x2001f000; /* Initial Stack pointer */
     
 }
