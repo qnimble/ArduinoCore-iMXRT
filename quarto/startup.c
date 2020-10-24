@@ -20,8 +20,9 @@ extern unsigned long _estack;
 __attribute__ ((used, aligned(1024)))
 void (* _VectorsRam[NVIC_NUM_INTERRUPTS+16])(void);
 
-static void memory_copy(uint32_t *dest, const uint32_t *src, uint32_t *dest_end);
-static void memory_clear(uint32_t *dest, uint32_t *dest_end);
+void data_init(unsigned int romstart, unsigned int start, unsigned int len);
+void bss_init(unsigned int start, unsigned int len);
+
 static void configure_systick(void);
 static void reset_PFD();
 extern void systick_isr(void);
@@ -41,8 +42,6 @@ uint8_t external_psram_size = 0;
 void init_memory(void);
 void init_nvic(void);
 void configure_pins(void);
-extern void data_init(unsigned int romstart, unsigned int start, unsigned int len);
-extern void bss_init(unsigned int start, unsigned int len) ;
 extern unsigned int __data_section_table;
 extern unsigned int __data_section_table_end;
 extern unsigned int __bss_section_table;
@@ -850,20 +849,20 @@ void PJRCunused_interrupt_vector(void)
 }
 
 __attribute__((section(".startup"), optimize("no-tree-loop-distribute-patterns")))
-static void memory_copy(uint32_t *dest, const uint32_t *src, uint32_t *dest_end)
-{
-	if (dest == src) return;
-	while (dest < dest_end) {
-		*dest++ = *src++;
-	}
+void data_init(unsigned int romstart, unsigned int start, unsigned int len) {
+    unsigned int *pulDest = (unsigned int*) start;
+    unsigned int *pulSrc = (unsigned int*) romstart;
+    unsigned int loop;
+    for (loop = 0; loop < len; loop = loop + 4)
+        *pulDest++ = *pulSrc++;
 }
 
 __attribute__((section(".startup"), optimize("no-tree-loop-distribute-patterns")))
-static void memory_clear(uint32_t *dest, uint32_t *dest_end)
-{
-	while (dest < dest_end) {
-		*dest++ = 0;
-	}
+void bss_init(unsigned int start, unsigned int len) {
+    unsigned int *pulDest = (unsigned int*) start;
+    unsigned int loop;
+    for (loop = 0; loop < len; loop = loop + 4)
+        *pulDest++ = 0;
 }
 
 
