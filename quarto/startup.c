@@ -266,9 +266,18 @@ FLASHMEM void configure_pins(void) {
         IOMUXC_SW_PAD_CTL_PAD_GPIO_SD_B1_10 = 0x10F1u;
         IOMUXC_SW_PAD_CTL_PAD_GPIO_SD_B1_11 = 0x10F1u;
 
+        IOMUXC_SW_MUX_CTL_PAD_GPIO_AD_B0_00 = 0x15;
+		IOMUXC_SW_MUX_CTL_PAD_GPIO_AD_B0_01 = 0x15;
+		IOMUXC_SW_MUX_CTL_PAD_GPIO_AD_B0_02 = 0x15;
+		IOMUXC_SW_MUX_CTL_PAD_GPIO_AD_B0_03 = 0x15;
+		IOMUXC_SW_MUX_CTL_PAD_GPIO_AD_B0_04 = 0x15;
+		IOMUXC_SW_MUX_CTL_PAD_GPIO_AD_B0_05 = 0x15;
+
+
 
         GPIO8_GDIR = 0x07; //Set LEDs as outputs
         GPIO7_GDIR = 0xFFFFF; //Set DAC Update pins as outputs
+        GPIO6_GDIR = 0x03; //Set triggers as outputs
 
 }
 
