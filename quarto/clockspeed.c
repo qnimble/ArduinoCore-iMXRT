@@ -173,6 +173,8 @@ uint32_t set_arm_clock(uint32_t frequency)
 		while (!(DCDC_REG0 & DCDC_REG0_STS_DC_OK)) ; // wait voltage settling
 	}
 
+	CCM_ANALOG_MISC1 = 0x00000412; //Set LVDS Output Clock to enable at XTAL 24 MHz
+
 	return frequency;
 }
 
