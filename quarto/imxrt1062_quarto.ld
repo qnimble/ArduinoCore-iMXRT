@@ -236,7 +236,7 @@ SECTIONS
         PROVIDE(__end_bss_RAM = .) ;
         PROVIDE(__end_bss_SRAM_DTC = .) ;
         PROVIDE(end = .);
-        . +=  _itcm_block_count*0x8000;
+        . +=  _itcm_block_count*0x8000; /* inrease by ITCM size since DTCM smaller by this amount */
         PROVIDE(__end_bss_SRAM_DTC_plusCutout = .) ;
     } > DTCM AT> DTCM
 
@@ -285,5 +285,8 @@ SECTIONS
 	_flexram_bank_config = 0xAAAAAAAA | ((1 << (_itcm_block_count * 2)) - 1);
 	_estack = ORIGIN(DTCM) + ((16 - _itcm_block_count) << 15) - 32;
     _vStackTop = 0x2001f000; /* Initial Stack pointer */
+     _heap_start = ADDR(.bss.dma) + SIZEOF(.bss.dma);
+    _heap_end = ORIGIN(RAM) + LENGTH(RAM);
+    
     
 }
