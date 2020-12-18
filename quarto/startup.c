@@ -63,7 +63,7 @@ void ResetHandler(void)
 #if defined(__IMXRT1062__)
 	IOMUXC_GPR_GPR17 = (uint32_t)&_flexram_bank_config;
 	IOMUXC_GPR_GPR14 = 0x00AA0000;
-	IOMUXC_GPR_GPR16 = 0x00000007;
+	IOMUXC_GPR_GPR16 = 0x00200007;
 	__asm__ volatile("mov sp, %0" : : "r" ((uint32_t)&_estack) : );
 #endif
 	PMU_MISC0_SET = 1<<3; //Use bandgap-based bias currents for best performance (Page 1175)
