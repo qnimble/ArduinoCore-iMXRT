@@ -59,6 +59,7 @@ void ResetHandler(void)
 {
 	// Disable interrupts
 	__asm volatile ("cpsid i");
+	SCB_MPU_CTRL = 0; // turn off MPU
 
 #if defined(__IMXRT1062__)
 	IOMUXC_GPR_GPR17 = (uint32_t)&_flexram_bank_config;
@@ -595,13 +596,14 @@ FLASHMEM void usb_pll_start()
 	}
 }
 
-FLASHMEM void reset_PFD()
+ void reset_PFD()
 {
 	//Reset PLL2 PFDs, set default frequencies:
+
 	CCM_ANALOG_PFD_528_SET = (1 << 31) | (1 << 23) | (1 << 15) | (1 << 7);
-	CCM_ANALOG_PFD_528 = 0x2018101B; // PFD0:352, PFD1:594, PFD2:396, PFD3:297 MHz 	
+	CCM_ANALOG_PFD_528 = 0x2018101B; // PFD0:352, PFD1:594, PFD2:396, PFD3:297 MHz
 	//PLL3:
-	CCM_ANALOG_PFD_480_SET = (1 << 31) | (1 << 23) | (1 << 15) | (0 << 7);
+	CCM_ANALOG_PFD_480_SET = (1 << 31) | (1 << 23) | (1 << 15) | (1 << 7);
 	CCM_ANALOG_PFD_480 = 0x13110D0C; // PFD0:720, PFD1:664, PFD2:508, PFD3:454 MHz
 }
 
