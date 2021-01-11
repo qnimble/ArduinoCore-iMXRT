@@ -155,6 +155,7 @@ void ResetHandler(void)
 	__libc_init_array();
 	//printf("after C++ constructors\n");
 	//printf("before setup\n");
+
 	main();
 	
 	while (1) ;
@@ -281,8 +282,9 @@ FLASHMEM void configure_pins(void) {
 
 
         GPIO8_GDIR = 0x07; //Set LEDs as outputs
+        GPIO8_DR_CLEAR = 0x07; //Turn off LED
         GPIO7_GDIR = 0xFFFFF; //Set DAC Update pins as outputs
-        GPIO6_GDIR = 0x03; //Set triggers as outputs
+        //GPIO6_GDIR = 0x03; //Set triggers as outputs
 
 }
 
