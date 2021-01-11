@@ -48,6 +48,7 @@ extern unsigned int __bss_section_table;
 extern unsigned int __bss_section_table_end;
 
 
+extern uint32_t* keep_trick;
 
 extern int main (void);
 void startup_default_early_hook(void) {}
@@ -193,6 +194,9 @@ FLASHMEM void init_nvic(void) {
        for (i=0; i < NVIC_NUM_INTERRUPTS + 16; i++) _VectorsRam[i] = &unused_interrupt_vector;
        for (i=0; i < NVIC_NUM_INTERRUPTS; i++) NVIC_SET_PRIORITY(i, 128);
        SCB_VTOR = (uint32_t)_VectorsRam;
+       /* Keep boot related data from being stripped from binary */
+       volatile uint32_t hack;
+       hack = keep_trick;
 }
 
 
