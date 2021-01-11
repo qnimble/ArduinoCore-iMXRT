@@ -235,8 +235,8 @@ static void isr(void)
 
 			if (s.word1==0x00022221) {
 				if (usb_cdc_line_coding[0] == 1200) {
-					printf("Received disconnect at 1200 baud, rebooting\r\n");
-					reboot = 1;
+					//printf("Received disconnect at 1200 baud, rebooting\r\n");
+					//reboot = 1;
 				}
 			}
 
