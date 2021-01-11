@@ -13,7 +13,7 @@ GROUP (
   "libgcc.a"
   "libc_nano.a"
   "libstdc++.a"
- /*  "libcr_newlib_semihost.a"*/
+  "libcr_newlib_semihost.a"
 )
 
 SECTIONS
