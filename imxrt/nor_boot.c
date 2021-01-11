@@ -73,3 +73,6 @@ __attribute__ ((weak, section(".startup"))) void NMI_Handler(void) {
 __attribute__ ((weak, section(".startup"))) void HardFault_Handler(void) {
 	while(1) {}
 }
+
+
+const uint32_t* keep_trick[] = {(uint32_t*)&qspiflash_config, (uint32_t*)&boot_data,(uint32_t*)&image_vector_table,(uint32_t*)&g_pfnVectors};
