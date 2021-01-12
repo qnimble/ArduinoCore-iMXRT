@@ -208,7 +208,6 @@ FLASHMEM void usb_init(void)
 static void isr(void)
 {
 	//printf("*");
-	uint8_t reboot = 0;
 	//  Port control in device mode is only used for
 	//  status port reset, suspend, and current connect status.
 	uint32_t status = USB1_USBSTS;
@@ -232,14 +231,6 @@ static void isr(void)
 			} while (!(USB1_USBCMD & USB_USBCMD_SUTW));
 			USB1_USBCMD &= ~USB_USBCMD_SUTW;
 			//printf("setup %08lX %08lX\n", s.word1, s.word2);
-
-			if (s.word1==0x00022221) {
-				if (usb_cdc_line_coding[0] == 1200) {
-					//printf("Received disconnect at 1200 baud, rebooting\r\n");
-					//reboot = 1;
-				}
-			}
-
 			USB1_ENDPTFLUSH = (1<<16) | (1<<0); // page 3174
 			while (USB1_ENDPTFLUSH & ((1<<16) | (1<<0))) ;
 			endpoint0_notify_mask = 0;
@@ -354,14 +345,6 @@ static void isr(void)
 		#ifdef FLIGHTSIM_INTERFACE
 		usb_flightsim_flush_output();
 		#endif
-	}
-
-	if (reboot) {
-		asm volatile ("dsb");      /* Ensure all outstanding memory accesses included
-		                              buffered write are completed before reset */
-		SCB_AIRCR = 0x05FA0004;
-		asm volatile ("dsb"); 	   /* Ensure completion of memory access */
-		while(1);
 	}
 }
 

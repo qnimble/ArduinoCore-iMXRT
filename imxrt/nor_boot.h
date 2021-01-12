@@ -79,7 +79,6 @@ typedef struct _ivt_ {
 //#define FLASH_BASE ((uint32_t)__FLASH_BASE)
 
 
-#define DCD_ADDRESS 0
 
 
 #define BOOT_DATA_ADDRESS     &boot_data
@@ -100,7 +99,7 @@ typedef struct _boot_data_ {
 
 /* External Variables */
 const BOOT_DATA_T boot_data;
-
+const uint8_t dcd_data[];
 
 
 //#include <stdint.h>
