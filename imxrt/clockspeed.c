@@ -158,6 +158,18 @@ uint32_t set_arm_clock(uint32_t frequency)
 	CCM_CBCDR &= ~CCM_CBCDR_PERIPH_CLK_SEL;
 	while (CCM_CDHIPR & CCM_CDHIPR_PERIPH_CLK_SEL_BUSY) ; // wait
 
+
+	//Set SEMC MUX and DIV for External Ram
+
+	CCM_CBCDR &= ~CCM_CBCDR_SEMC_CLK_SEL; //Set clock source to Periph_clk
+	//CCM_CBCDR |= CCM_CBCDR_SEMC_ALT_CLK_SEL;
+	CCM_CBCDR &= ~CCM_CBCDR_SEMC_PODF(7); // Clear divider values
+	CCM_CBCDR |= CCM_CBCDR_SEMC_PODF(3); //Set divider to 4.
+	//CCM_CCGR3 &= ~CCM_CCGR3_SEMC(3); // Clear pins
+	CCM_CCGR3 |= CCM_CCGR3_SEMC(3); //Set SEMC Clock to enable in all modes.
+
+
+
 	F_CPU_ACTUAL = frequency;
 	F_BUS_ACTUAL = frequency / div_ipg;
 	scale_cpu_cycles_to_microseconds = 0xFFFFFFFFu / (uint32_t)(frequency / 1000000u);

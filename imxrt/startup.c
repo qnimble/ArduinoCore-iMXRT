@@ -374,8 +374,8 @@ FLASHMEM void configure_cache(void)
 	SCB_MPU_RBAR = 0x70000000 | REGION(i++); // FlexSPI2
 	SCB_MPU_RASR = MEM_CACHE_WBWA | READONLY | /*NOEXEC |*/ SIZE_4M;
 
-	//SCB_MPU_RBAR = 0x70000000 | REGION(i++); // FlexSPI2
-	//SCB_MPU_RASR = MEM_CACHE_WBWA | READWRITE | NOEXEC | SIZE_16M;
+    SCB_MPU_RBAR = 0x80000000 | REGION(i++); // External SDRAM
+	SCB_MPU_RASR = MEM_CACHE_WBWA | READWRITE | SIZE_32M;
 
 	// TODO: protect access to power supply config
 
