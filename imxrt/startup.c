@@ -27,6 +27,7 @@ static void configure_systick(void);
 static void reset_PFD();
 extern void systick_isr(void);
 extern void pendablesrvreq_isr(void);
+void quarto_init(void);
 void configure_cache(void);
 void configure_external_ram(void);
 void unused_interrupt_vector(void);
@@ -141,6 +142,8 @@ void ResetHandler(void)
 
 #ifdef ARDUINO_TEENSY41
 	configure_external_ram();
+#elif defined(ARDUINO_QUARTO)
+	quarto_init();
 #endif
 	startup_early_hook();
 	while (millis() < 20) ; // wait at least 20ms before starting USB
@@ -278,13 +281,13 @@ FLASHMEM void configure_pins(void) {
 		IOMUXC_SW_MUX_CTL_PAD_GPIO_AD_B0_03 = 0x15;
 		IOMUXC_SW_MUX_CTL_PAD_GPIO_AD_B0_04 = 0x15;
 		IOMUXC_SW_MUX_CTL_PAD_GPIO_AD_B0_05 = 0x15;
-
+        IOMUXC_SW_MUX_CTL_PAD_GPIO_AD_B0_09 = 0x15;
 
 
         GPIO8_GDIR = 0x07; //Set LEDs as outputs
         GPIO8_DR_CLEAR = 0x07; //Turn off LED
         GPIO7_GDIR = 0xFFFFF; //Set DAC Update pins as outputs
-        //GPIO6_GDIR = 0x03; //Set triggers as outputs
+        GPIO6_GDIR = 0x30; //Set BM as outputs for Read / ADC ACK
 
 }
 
@@ -555,7 +558,42 @@ FLASHMEM void configure_external_ram()
 	}
 }
 
-#endif // ARDUINO_TEENSY41
+#elif defined(ARDUINO_QUARTO)
+FLASHMEM void quarto_init(void) {
+	GPIO7_DR_TOGGLE = 0x00017FFF; //Set DAC1 to 0x7FFF or 0V
+
+	//Clear stale Data if available.
+	GPIO6_DR_TOGGLE = 0x00000020; // Toggle Read Data ACK
+	GPIO6_DR_TOGGLE = 0x00000010; // Tooggle ADC Data ACK
+
+	GPIO7_DR_TOGGLE = 0x00037FFF; //Set DAC2 to 0x7FFF or 0V
+
+
+	GPIO6_DR_TOGGLE = 0x00000020; // Toggle Read Data ACK
+	GPIO6_DR_TOGGLE = 0x00000010; // Tooggle ADC Data ACK
+
+	GPIO7_DR_TOGGLE = 0x00057FFF; //Set DAC3 to 0x7FFF or 0V
+
+	GPIO6_DR_TOGGLE = 0x00000020; // Toggle Read Data ACK
+	GPIO6_DR_TOGGLE = 0x00000010; // Tooggle ADC Data ACK
+
+	GPIO7_DR_TOGGLE = 0x00077FFF; //Set DAC4 to 0x7FFF or 0V
+
+	GPIO6_DR_TOGGLE = 0x00000020; // Toggle Read Data ACK
+	GPIO6_DR_TOGGLE = 0x00000010; // Tooggle ADC Data ACK
+
+	GPIO7_DR_TOGGLE = (0x000B0000 + 0x010); //Set Write address to 0x010 for Enabling Analog
+
+	GPIO6_DR_TOGGLE = 0x00000020; // Toggle Read Data ACK
+	GPIO6_DR_TOGGLE = 0x00000010; // Tooggle ADC Data ACK
+
+	GPIO7_DR_TOGGLE = (0x000D0000 + 0x07); //Enable Analog Clock, Analog, Vref.
+
+	GPIO6_DR_TOGGLE = 0x00000020; // Toggle Read Data ACK
+	GPIO6_DR_TOGGLE = 0x00000010; // Tooggle ADC Data ACK
+
+}
+#endif
 
 
 FLASHMEM void usb_pll_start()
