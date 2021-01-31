@@ -560,34 +560,41 @@ FLASHMEM void configure_external_ram()
 
 #elif defined(ARDUINO_QUARTO)
 FLASHMEM void quarto_init(void) {
-	GPIO7_DR_TOGGLE = 0x00017FFF; //Set DAC1 to 0x7FFF or 0V
-
-	//Clear stale Data if available.
-	GPIO6_DR_TOGGLE = 0x00000020; // Toggle Read Data ACK
-	GPIO6_DR_TOGGLE = 0x00000010; // Tooggle ADC Data ACK
-
-	GPIO7_DR_TOGGLE = 0x00037FFF; //Set DAC2 to 0x7FFF or 0V
-
-
-	GPIO6_DR_TOGGLE = 0x00000020; // Toggle Read Data ACK
-	GPIO6_DR_TOGGLE = 0x00000010; // Tooggle ADC Data ACK
-
-	GPIO7_DR_TOGGLE = 0x00057FFF; //Set DAC3 to 0x7FFF or 0V
-
-	GPIO6_DR_TOGGLE = 0x00000020; // Toggle Read Data ACK
-	GPIO6_DR_TOGGLE = 0x00000010; // Tooggle ADC Data ACK
-
-	GPIO7_DR_TOGGLE = 0x00077FFF; //Set DAC4 to 0x7FFF or 0V
-
-	GPIO6_DR_TOGGLE = 0x00000020; // Toggle Read Data ACK
-	GPIO6_DR_TOGGLE = 0x00000010; // Tooggle ADC Data ACK
 
 	GPIO7_DR_TOGGLE = (0x000B0000 + 0x010); //Set Write address to 0x010 for Enabling Analog
 
 	GPIO6_DR_TOGGLE = 0x00000020; // Toggle Read Data ACK
 	GPIO6_DR_TOGGLE = 0x00000010; // Tooggle ADC Data ACK
 
-	GPIO7_DR_TOGGLE = (0x000D0000 + 0x07); //Enable Analog Clock, Analog, Vref.
+	GPIO7_DR_TOGGLE = (0x000D0000 + 0x03); //Enable Analog Clock, Analog,
+
+	delay(50);
+
+	GPIO7_DR_TOGGLE = 0x00010000; //Set DAC1 to 0x7FFF or 0V
+
+	//Clear stale Data if available.
+	GPIO6_DR_TOGGLE = 0x00000020; // Toggle Read Data ACK
+	GPIO6_DR_TOGGLE = 0x00000010; // Tooggle ADC Data ACK
+
+	GPIO7_DR_TOGGLE = 0x00030000; //Set DAC2 to 0x7FFF or 0V
+
+
+	GPIO6_DR_TOGGLE = 0x00000020; // Toggle Read Data ACK
+	GPIO6_DR_TOGGLE = 0x00000010; // Tooggle ADC Data ACK
+
+	GPIO7_DR_TOGGLE = 0x00050000; //Set DAC3 to 0x7FFF or 0V
+
+	GPIO6_DR_TOGGLE = 0x00000020; // Toggle Read Data ACK
+	GPIO6_DR_TOGGLE = 0x00000010; // Tooggle ADC Data ACK
+
+	GPIO7_DR_TOGGLE = 0x00070000; //Set DAC4 to 0x7FFF or 0V
+
+	GPIO6_DR_TOGGLE = 0x00000020; // Toggle Read Data ACK
+	GPIO6_DR_TOGGLE = 0x00000010; // Tooggle ADC Data ACK
+
+	delay(1);
+
+	GPIO7_DR_TOGGLE = (0x000D0000 + 0x07); //Enable Vref Vref.
 
 	GPIO6_DR_TOGGLE = 0x00000020; // Toggle Read Data ACK
 	GPIO6_DR_TOGGLE = 0x00000010; // Tooggle ADC Data ACK
