@@ -638,10 +638,10 @@ FLASHMEM void quarto_init(void) {
 
 	// Configure ADC Interrupts to basic ISRs that ack data to keep stream going
 
-	NVIC_SET_PRIORITY(ADC1_IRQ, 4);
-	NVIC_SET_PRIORITY(ADC2_IRQ, 5);
-	NVIC_SET_PRIORITY(ADC3_IRQ, 6);
-	NVIC_SET_PRIORITY(ADC4_IRQ, 7);
+	NVIC_SET_PRIORITY(ADC1_IRQ, 8);
+	NVIC_SET_PRIORITY(ADC2_IRQ, 24);
+	NVIC_SET_PRIORITY(ADC3_IRQ, 40);
+	NVIC_SET_PRIORITY(ADC4_IRQ, 56);
 
 	ADC1_IMR |= ADC1_BM; //Enable ADC1 Interrupt Pin
 	ADC2_IMR |= ADC2_BM; //Enable ADC2 Interrupt Pin
