@@ -104,6 +104,40 @@ const static uint8_t SCL = 19;
   #define NUM_ANALOG_INPUTS 14
 #endif
 
+#if defined(ARDUINO_QUARTO)
+	#define ADC1_PIN 2
+	#define ADC2_PIN 3
+	#define ADC3_PIN 4
+	#define ADC4_PIN 31
+
+	#define ADC1_BM (1<<(ADC1_PIN))
+	#define ADC2_BM (1<<(ADC2_PIN))
+	#define ADC3_BM (1<<(ADC3_PIN))
+	#define ADC4_BM (1<<(ADC4_PIN))
+
+	#define ADC1_ISR GPIO1_ISR
+	#define ADC2_ISR GPIO1_ISR
+	#define ADC3_ISR GPIO3_ISR
+	#define ADC4_ISR GPIO2_ISR
+
+	#define ADC1_IMR GPIO1_IMR
+	#define ADC2_IMR GPIO1_IMR
+	#define ADC3_IMR GPIO3_IMR
+	#define ADC4_IMR GPIO2_IMR
+
+	#define ADC1_IRQ IRQ_GPIO1_INT2
+	#define ADC2_IRQ IRQ_GPIO1_INT3
+	#define ADC3_IRQ IRQ_GPIO3_0_15
+	#define ADC4_IRQ IRQ_GPIO2_16_31
+
+	#define ADC_ACK_PIN 0x00000010
+	#define ADC_ACK_BANK GPIO6_DR_TOGGLE
+
+	#define READDATA_ACK_PIN  0x00000020
+	#define READDATA_ACK_BANK GPIO6_DR_TOGGLE
+
+#endif
+
 #define NOT_AN_INTERRUPT -1
 
 

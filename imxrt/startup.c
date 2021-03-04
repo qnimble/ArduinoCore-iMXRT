@@ -4,7 +4,9 @@
 #include "avr/pgmspace.h"
 
 #include "debug/printf.h"
-
+#include "adc.h"
+#include "dac.h"
+#include "gpio.h"
 // from the linker
 extern unsigned long _stextload;
 extern unsigned long _stext;
@@ -27,6 +29,7 @@ static void configure_systick(void);
 static void reset_PFD();
 extern void systick_isr(void);
 extern void pendablesrvreq_isr(void);
+void quarto_init(void);
 void configure_cache(void);
 void configure_external_ram(void);
 void unused_interrupt_vector(void);
@@ -141,6 +144,8 @@ void ResetHandler(void)
 
 #ifdef ARDUINO_TEENSY41
 	configure_external_ram();
+#elif defined(ARDUINO_QUARTO)
+	quarto_init();
 #endif
 	startup_early_hook();
 	while (millis() < 20) ; // wait at least 20ms before starting USB
@@ -155,7 +160,6 @@ void ResetHandler(void)
 	__libc_init_array();
 	//printf("after C++ constructors\n");
 	//printf("before setup\n");
-
 	main();
 	
 	while (1) ;
@@ -196,7 +200,7 @@ FLASHMEM void init_nvic(void) {
        for (i=0; i < NVIC_NUM_INTERRUPTS; i++) NVIC_SET_PRIORITY(i, 128);
        SCB_VTOR = (uint32_t)_VectorsRam;
        /* Keep boot related data from being stripped from binary */
-       volatile uint32_t hack;
+       __attribute__((unused)) volatile uint32_t hack;
        hack = (uint32_t) keep_trick;
 }
 
@@ -284,7 +288,7 @@ FLASHMEM void configure_pins(void) {
         GPIO8_GDIR = 0x07; //Set LEDs as outputs
         GPIO8_DR_CLEAR = 0x07; //Turn off LED
         GPIO7_GDIR = 0xFFFFF; //Set DAC Update pins as outputs
-        //GPIO6_GDIR = 0x03; //Set triggers as outputs
+        GPIO6_GDIR = 0x30; //Set BM as outputs for Read / ADC ACK
 
 }
 
@@ -555,7 +559,117 @@ FLASHMEM void configure_external_ram()
 	}
 }
 
-#endif // ARDUINO_TEENSY41
+#elif defined(ARDUINO_QUARTO)
+
+void adc1_irq_ignoredata(void);
+void adc1_irq_ignoredata(void){
+	ADC1_ISR = ADC1_BM; // Clear Interrupt
+	GPIO6_DR_TOGGLE = 0x100; // Dummy GPIO write - necessary delay to avoid double firing
+	ADC_ACK_BANK = ADC_ACK_PIN; // ACK ADC Data
+	GPIO6_DR_TOGGLE = 0x100; // Dummy GPIO write - necessary delay to avoid double firing
+	return;
+}
+
+void adc2_irq_ignoredata(void) {
+	ADC2_ISR = ADC2_BM; // Clear Interrupt
+	GPIO6_DR_TOGGLE = 0x100; // Dummy GPIO write - necessary delay to avoid double firing
+	ADC_ACK_BANK = ADC_ACK_PIN; // ACK ADC Data
+	GPIO6_DR_TOGGLE = 0x100; // Dummy GPIO write - necessary delay to avoid double firing
+}
+
+void adc3_irq_ignoredata(void) {
+	ADC3_ISR = ADC3_BM; // Clear Interrupt
+	GPIO6_DR_TOGGLE = 0x100; // Dummy GPIO write - necessary delay to avoid double firing
+	ADC_ACK_BANK = ADC_ACK_PIN; // ACK ADC Data
+	GPIO6_DR_TOGGLE = 0x100; // Dummy GPIO write - necessary delay to avoid double firing
+
+}
+
+void adc4_irq_ignoredata(void) {
+	ADC4_ISR = ADC4_BM; // Clear Interrupt
+	GPIO6_DR_TOGGLE = 0x100; // Dummy GPIO write - necessary delay to avoid double firing
+	ADC_ACK_BANK = ADC_ACK_PIN; // ACK ADC Data
+	GPIO6_DR_TOGGLE = 0x100; // Dummy GPIO write - necessary delay to avoid double firing
+
+}
+
+FLASHMEM void quarto_init(void) {
+	GPIO7_DR_TOGGLE = (0x000B0000 + 0x010); //Set Write address to 0x010 for Enabling Analog
+
+	//Clear stale Data if available.
+	READDATA_ACK_BANK = READDATA_ACK_PIN; // Ack Read Data
+	ADC_ACK_BANK = ADC_ACK_PIN; // ACK ADC Data
+
+	GPIO7_DR_TOGGLE = (0x000D0000 + 0x03); //Enable Analog Clock, Analog,
+
+	delay(50);
+
+	GPIO7_DR_TOGGLE = 0x00010000; //Set DAC1 to 0x0000 or 0V
+
+	//Clear stale Data if available.
+	READDATA_ACK_BANK = READDATA_ACK_PIN; // Ack Read Data
+	ADC_ACK_BANK = ADC_ACK_PIN; // ACK ADC Data
+
+	GPIO7_DR_TOGGLE = 0x00030000; //Set DAC2 to 0x0000 or 0V
+
+	//Clear stale Data if available.
+	READDATA_ACK_BANK = READDATA_ACK_PIN; // Ack Read Data
+	ADC_ACK_BANK = ADC_ACK_PIN; // ACK ADC Data
+
+	GPIO7_DR_TOGGLE = 0x00050000; //Set DAC3 to 0x0000 or 0V
+
+	//Clear stale Data if available.
+	READDATA_ACK_BANK = READDATA_ACK_PIN; // Ack Read Data
+	ADC_ACK_BANK = ADC_ACK_PIN; // ACK ADC Data
+
+	GPIO7_DR_TOGGLE = 0x00070000; //Set DAC4 to 0x0000 or 0V
+
+	//Clear stale Data if available.
+	READDATA_ACK_BANK = READDATA_ACK_PIN; // Ack Read Data
+	ADC_ACK_BANK = ADC_ACK_PIN; // ACK ADC DataGPIO6_DR_TOGGLE = 0x00000020; // Toggle Read Data ACK
+
+	delay(1);
+
+	GPIO7_DR_TOGGLE = (0x000D0000 + 0x07); //Enable Vref.
+
+	//Clear stale Data if available.
+	READDATA_ACK_BANK = READDATA_ACK_PIN; // Ack Read Data
+	ADC_ACK_BANK = ADC_ACK_PIN; // ACK ADC Data
+
+	// Configure ADC Interrupts to basic ISRs that ack data to keep stream going
+
+	NVIC_SET_PRIORITY(ADC1_IRQ, 8);
+	NVIC_SET_PRIORITY(ADC2_IRQ, 24);
+	NVIC_SET_PRIORITY(ADC3_IRQ, 40);
+	NVIC_SET_PRIORITY(ADC4_IRQ, 56);
+
+	ADC1_IMR |= ADC1_BM; //Enable ADC1 Interrupt Pin
+	ADC2_IMR |= ADC2_BM; //Enable ADC2 Interrupt Pin
+	ADC3_IMR |= ADC3_BM; //Enable ADC3 Interrupt Pin
+	ADC4_IMR |= ADC4_BM; //Enable ADC4 Interrupt Pin
+
+	GPIO1_ICR1 &= ~ ( (0x2)<<(2*ADC1_PIN) );
+	GPIO1_ICR1 |= ( (0x2)<<(2*ADC1_PIN) );
+	GPIO1_ICR1 &= ~ ( (0x2)<<(2*ADC2_PIN) );
+	GPIO1_ICR1 |= ( (0x2)<<(2*ADC2_PIN) );
+	GPIO3_ICR1 &= ~ ( (0x2)<<(2*ADC3_PIN) );
+	GPIO3_ICR1 |= ( (0x2)<<(2*ADC3_PIN) );
+	GPIO2_ICR2 &= ~ ( (0x2)<<(ADC4_PIN-1) );  //bit shift by 31*2 mod 32 is 30, or 31-1.
+	GPIO2_ICR2 |= ( (0x2)<<(ADC4_PIN-1) );    //bit shift by 31*2 mod 32 is 30, or 31-1.
+
+	attachInterruptVector(ADC1_IRQ, &adc1_irq_ignoredata);
+	attachInterruptVector(ADC2_IRQ, &adc2_irq_ignoredata);
+	attachInterruptVector(ADC3_IRQ, &adc3_irq_ignoredata);
+	attachInterruptVector(ADC4_IRQ, &adc4_irq_ignoredata);
+
+	NVIC_ENABLE_IRQ(ADC1_IRQ);
+	NVIC_ENABLE_IRQ(ADC2_IRQ);
+	NVIC_ENABLE_IRQ(ADC3_IRQ);
+	NVIC_ENABLE_IRQ(ADC4_IRQ);
+
+	GPIO7_DR_TOGGLE = (0x000B0000 + 0x03FFF); //Magic Command to Reset ADC/DAC Data
+}
+#endif
 
 
 FLASHMEM void usb_pll_start()

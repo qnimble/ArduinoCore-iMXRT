@@ -83,6 +83,23 @@ int32_t random(int32_t howsmall, int32_t howbig);
 void randomSeed(uint32_t newseed);
 void srandom(unsigned int newseed);
 
+
+// Inclujde Quarto ADC, DAC Communcation and GPIO libraries if available
+#if __has_include("comm.h")
+#include "comm.h"
+#endif
+#if __has_include("gpio.h")
+#include "gpio.h"
+#endif
+#if __has_include("adc.h")
+#include "adc.h"
+#endif
+#if __has_include("dac.h")
+#include "dac.h"
+#endif
+
+
+
 #include "pins_arduino.h"
 
 #endif // __cplusplus

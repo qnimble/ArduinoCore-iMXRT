@@ -193,7 +193,11 @@ FLASHMEM void usb_init(void)
 		USB_USBINTR_URE | USB_USBINTR_SLE;
 	//_VectorsRam[IRQ_USB1+16] = &isr;
 	attachInterruptVector(IRQ_USB1, &isr);
+	#ifdef ARDUINO_QUARTO
+		NVIC_SET_PRIORITY(IRQ_USB1, 80);
+	#endif
 	NVIC_ENABLE_IRQ(IRQ_USB1);
+
 	//printf("USB1_ENDPTCTRL0=%08lX\n", USB1_ENDPTCTRL0);
 	//printf("USB1_ENDPTCTRL1=%08lX\n", USB1_ENDPTCTRL1);
 	//printf("USB1_ENDPTCTRL2=%08lX\n", USB1_ENDPTCTRL2);
@@ -351,14 +355,18 @@ static void isr(void)
 
 void usb_start_sof_interrupts(int interface)
 {
+#ifndef ARDUINO_QUARTO
 	__disable_irq();
+#endif
 	sof_usage |= (1 << interface);
 	uint32_t intr = USB1_USBINTR;
 	if (!(intr & USB_USBINTR_SRE)) {
 		USB1_USBSTS = USB_USBSTS_SRI; // clear prior SOF before SOF IRQ enable
 		USB1_USBINTR = intr | USB_USBINTR_SRE;
 	}
+#ifndef ARDUINO_QUARTO
 	__enable_irq();
+#endif
 }
 
 void usb_stop_sof_interrupts(int interface)
@@ -867,7 +875,9 @@ static void schedule_transfer(endpoint_t *endpoint, uint32_t epmask, transfer_t 
 	if (endpoint->callback_function) {
 		transfer->status |= (1<<15);
 	}
+#ifndef ARDUINO_QUARTO
 	__disable_irq();
+#endif
 	//digitalWriteFast(1, HIGH);
 	// Executing A Transfer Descriptor, page 2468 (RT1060 manual, Rev 1, 12/2018)
 	transfer_t *last = endpoint->last_transfer;
@@ -892,7 +902,9 @@ static void schedule_transfer(endpoint_t *endpoint, uint32_t epmask, transfer_t 
 	endpoint->first_transfer = transfer;
 end:
 	endpoint->last_transfer = transfer;
+#ifndef ARDUINO_QUARTO
 	__enable_irq();
+#endif
 	//digitalWriteFast(4, LOW);
 	//digitalWriteFast(3, LOW);
 	//digitalWriteFast(2, LOW);
