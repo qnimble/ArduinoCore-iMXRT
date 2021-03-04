@@ -110,7 +110,7 @@ If these instructions are missing steps or could be improved, please
 let me know?  http://forum.pjrc.com/forums/4-Suggestions-amp-Bug-Reports
 */
 
-
+#if defined(ARDUINO_TEENSY41) || defined(ARDUINO_TEENSY40) || defined(ARDUINO_TEENSY_MICROMOD)
 #if defined(USB_SERIAL)
   #define VENDOR_ID		0x16C0
   #define PRODUCT_ID		0x0483
@@ -913,6 +913,49 @@ let me know?  http://forum.pjrc.com/forums/4-Suggestions-amp-Bug-Reports
   #define ENDPOINT15_CONFIG	ENDPOINT_TRANSMIT_ONLY
 
 #endif
+
+#elif defined(ARDUINO_QUARTO)
+#if defined(USB_SERIAL)
+  #define VENDOR_ID		0x1781
+  #define PRODUCT_ID		0x0941
+//  #define DEVICE_CLASS		2	// 2 = Communication Class
+  #define MANUFACTURER_NAME	{'q','N','i','m','b','l','e'}
+  #define MANUFACTURER_NAME_LEN	7
+  #define PRODUCT_NAME		{'Q','u','a','r','t','o'}
+  #define PRODUCT_NAME_LEN	6
+  #define EP0_SIZE		64
+  #define NUM_ENDPOINTS		6 //was 4
+  #define NUM_INTERFACE		3 // was 2
+  #define CDC_IAD_DESCRIPTOR	1 //was not defined
+  #define CDC_STATUS_INTERFACE	0
+  #define CDC_DATA_INTERFACE	1
+  #define CDC_ACM_ENDPOINT	2
+  #define CDC_RX_ENDPOINT       3
+  #define CDC_TX_ENDPOINT       4
+  #define CDC_ACM_SIZE          16
+  #define CDC_RX_SIZE_480       512
+  #define CDC_TX_SIZE_480       512
+  #define CDC_RX_SIZE_12        64
+  #define CDC_TX_SIZE_12        64
+  #define ENDPOINT2_CONFIG	ENDPOINT_RECEIVE_UNUSED + ENDPOINT_TRANSMIT_INTERRUPT
+  #define ENDPOINT3_CONFIG	ENDPOINT_RECEIVE_BULK + ENDPOINT_TRANSMIT_UNUSED
+  #define ENDPOINT4_CONFIG      ENDPOINT_RECEIVE_UNUSED + ENDPOINT_TRANSMIT_BULK
+
+  #define RAWHID_USAGE_PAGE	0xFFAB  // recommended: 0xFF00 to 0xFFFF
+  #define RAWHID_USAGE		0x0200  // recommended: 0x0100 to 0xFFFF
+  #define RAWHID_INTERFACE      3	// RawHID
+  #define RAWHID_TX_ENDPOINT    5
+  #define RAWHID_TX_SIZE        64
+  #define RAWHID_TX_INTERVAL    1	 // TODO: is this ok for 480 Mbit speed
+  #define RAWHID_RX_ENDPOINT    6
+  #define RAWHID_RX_SIZE        64
+  #define RAWHID_RX_INTERVAL    1	 // TODO: is this ok for 480 Mbit speed
+  #define ENDPOINT5_CONFIG	ENDPOINT_RECEIVE_UNUSED + ENDPOINT_TRANSMIT_INTERRUPT
+  #define ENDPOINT6_CONFIG	ENDPOINT_RECEIVE_INTERRUPT + ENDPOINT_TRANSMIT_UNUSED
+
+#endif
+#endif
+
 
 #ifdef USB_DESC_LIST_DEFINE
 #if defined(NUM_ENDPOINTS) && NUM_ENDPOINTS > 0
