@@ -4,9 +4,6 @@
 #include "avr/pgmspace.h"
 
 #include "debug/printf.h"
-#include "adc.h"
-#include "dac.h"
-#include "gpio.h"
 // from the linker
 extern unsigned long _stextload;
 extern unsigned long _stext;
