@@ -97,8 +97,8 @@ void ResetHandler(void)
 
 #if defined(__IMXRT1062__)
 	// Use fast GPIO6, GPIO7, GPIO8, GPIO9
-	IOMUXC_GPR_GPR26 = 0xFFFFFFF3; //Trigger0-1, BM0-1, GPIO5-8 and ADC_DATA pins
-	IOMUXC_GPR_GPR27 = 0xFFFFFFFF; //DAC_DATA, EXTRA and GPIO1-4 only
+	IOMUXC_GPR_GPR26 = 0xFFFFFFFF;
+	IOMUXC_GPR_GPR27 = 0xFFFFFFFF;
 	IOMUXC_GPR_GPR28 = 0xFFFFFFFF;
 	IOMUXC_GPR_GPR29 = 0xFFFFFFFF;
 #endif
@@ -634,16 +634,12 @@ FLASHMEM void quarto_init(void) {
 	ADC_ACK_BANK = ADC_ACK_PIN; // ACK ADC Data
 
 	// Configure ADC Interrupts to basic ISRs that ack data to keep stream going
+	__asm volatile ("cpsid i");
 
 	NVIC_SET_PRIORITY(ADC1_IRQ, 8);
 	NVIC_SET_PRIORITY(ADC2_IRQ, 24);
 	NVIC_SET_PRIORITY(ADC3_IRQ, 40);
 	NVIC_SET_PRIORITY(ADC4_IRQ, 56);
-
-	ADC1_IMR |= ADC1_BM; //Enable ADC1 Interrupt Pin
-	ADC2_IMR |= ADC2_BM; //Enable ADC2 Interrupt Pin
-	ADC3_IMR |= ADC3_BM; //Enable ADC3 Interrupt Pin
-	ADC4_IMR |= ADC4_BM; //Enable ADC4 Interrupt Pin
 
 	GPIO1_ICR1 &= ~ ( (0x2)<<(2*ADC1_PIN) );
 	GPIO1_ICR1 |= ( (0x2)<<(2*ADC1_PIN) );
@@ -653,6 +649,11 @@ FLASHMEM void quarto_init(void) {
 	GPIO3_ICR1 |= ( (0x2)<<(2*ADC3_PIN) );
 	GPIO2_ICR2 &= ~ ( (0x2)<<(ADC4_PIN-1) );  //bit shift by 31*2 mod 32 is 30, or 31-1.
 	GPIO2_ICR2 |= ( (0x2)<<(ADC4_PIN-1) );    //bit shift by 31*2 mod 32 is 30, or 31-1.
+
+	ADC1_IMR |= ADC1_BM; //Enable ADC1 Interrupt Pin
+	ADC2_IMR |= ADC2_BM; //Enable ADC2 Interrupt Pin
+	ADC3_IMR |= ADC3_BM; //Enable ADC3 Interrupt Pin
+	ADC4_IMR |= ADC4_BM; //Enable ADC4 Interrupt Pin
 
 	attachInterruptVector(ADC1_IRQ, &adc1_irq_ignoredata);
 	attachInterruptVector(ADC2_IRQ, &adc2_irq_ignoredata);
@@ -665,6 +666,8 @@ FLASHMEM void quarto_init(void) {
 	NVIC_ENABLE_IRQ(ADC4_IRQ);
 
 	GPIO7_DR_TOGGLE = (0x000B0000 + 0x03FFF); //Magic Command to Reset ADC/DAC Data
+
+	__asm volatile ("cpsie i");
 }
 #endif
 
@@ -1081,3 +1084,4 @@ void abort(void)
 {
 	while (1) asm ("WFI");
 }
+
