@@ -735,6 +735,7 @@ static void endpoint0_receive(void *data, uint32_t len, int notify)
 
 static void endpoint0_complete(void)
 {
+#define USB_REBOOT_BAUD 1200
 	setup_t setup;
 
 	setup.bothwords = endpoint0_setupdata.bothwords;
@@ -745,7 +746,7 @@ static void endpoint0_complete(void)
 		memcpy(usb_cdc_line_coding, endpoint0_buffer, 7);
 		printf("usb_cdc_line_coding, baud=%u\n", usb_cdc_line_coding[0]);
 
-		if (usb_cdc_line_coding[0] == 1200) {
+		if (usb_cdc_line_coding[0] == USB_REBOOT_BAUD) {
 			usb_start_sof_interrupts(NUM_INTERFACE);
 			usb_reboot_timer = 80; // TODO: 10 if only 12 Mbit/sec
 		}
@@ -755,7 +756,7 @@ static void endpoint0_complete(void)
 	if (setup.wRequestAndType == 0x2021 && setup.wIndex == CDC2_STATUS_INTERFACE) {
 		memcpy(usb_cdc2_line_coding, endpoint0_buffer, 7);
 		printf("usb_cdc2_line_coding, baud=%u\n", usb_cdc2_line_coding[0]);
-		if (usb_cdc2_line_coding[0] == 1200) {
+		if (usb_cdc2_line_coding[0] == USB_REBOOT_BAUD) {
 			usb_start_sof_interrupts(NUM_INTERFACE);
 			usb_reboot_timer = 80; // TODO: 10 if only 12 Mbit/sec
 		}
@@ -765,7 +766,7 @@ static void endpoint0_complete(void)
 	if (setup.wRequestAndType == 0x2021 && setup.wIndex == CDC3_STATUS_INTERFACE) {
 		memcpy(usb_cdc3_line_coding, endpoint0_buffer, 7);
 		printf("usb_cdc3_line_coding, baud=%u\n", usb_cdc3_line_coding[0]);
-		if (usb_cdc3_line_coding[0] == 1200) {
+		if (usb_cdc3_line_coding[0] == USB_REBOOT_BAUD) {
 			usb_start_sof_interrupts(NUM_INTERFACE);
 			usb_reboot_timer = 80; // TODO: 10 if only 12 Mbit/sec
 		}
