@@ -86,32 +86,41 @@ size_t Print::println(void)
 
 extern "C" {
 __attribute__((weak))
-int _Printwrite(int file, char *ptr, int len)
+int _writeCausesProblems(int file, char *ptr, int len)
 {
 	((class Print *)file)->write((uint8_t *)ptr, len);
 	return len;
 }
 }
 
-int Print::pprintf(const char *format, ...)
+int Print::printf(const char *format, ...)
 {
 	va_list ap;
 	va_start(ap, format);
 #ifdef __STRICT_ANSI__
 	return 0;  // TODO: make this work with -std=c++0x
 #else
-	return vdprintf((int)this, format, ap);
+	 char buf[PRINTF_BUF];
+	 int temp = vsnprintf(buf, sizeof(buf), format, ap);
+	  write(buf);
+	  va_end(ap);
+	  return temp;
 #endif
 }
 
-int Print::pprintf(const __FlashStringHelper *format, ...)
+int Print::printf(const __FlashStringHelper *format, ...)
 {
 	va_list ap;
 	va_start(ap, format);
 #ifdef __STRICT_ANSI__
 	return 0;
 #else
-	return vdprintf((int)this, (const char *)format, ap);
+
+	char buf[PRINTF_BUF];
+	int temp = vsnprintf(buf, sizeof(buf),(const char *) format, ap);
+	write(buf);
+	va_end(ap);
+	return temp;
 #endif
 }
 

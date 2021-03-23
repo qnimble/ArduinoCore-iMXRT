@@ -19,6 +19,13 @@ extern unsigned long _estack;
 __attribute__ ((used, aligned(1024)))
 void (* _VectorsRam[NVIC_NUM_INTERRUPTS+16])(void);
 
+#ifndef PRINT_DEBUG_STUFF
+void printf(const char *test,...) {
+
+}
+#endif
+
+
 void data_init(unsigned int romstart, unsigned int start, unsigned int len);
 void bss_init(unsigned int start, unsigned int len);
 

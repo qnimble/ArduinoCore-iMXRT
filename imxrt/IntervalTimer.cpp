@@ -40,7 +40,7 @@ uint8_t IntervalTimer::nvic_priorites[4] = {255, 255, 255, 255};
 
 bool IntervalTimer::beginCycles(void (*funct)(), uint32_t cycles)
 {
-	printf("beginCycles %u\n", cycles);
+	//printf("beginCycles %u\n", cycles);
 	if (channel) {
 		channel->TCTRL = 0;
 		channel->TFLG = 1;
