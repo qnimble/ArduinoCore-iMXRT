@@ -30,6 +30,10 @@
 
 #include <Arduino.h>
 
+ __attribute__ ((weak)) void loop(void){ }
+ __attribute__ ((weak)) void setup(void){ }
+
+
 extern "C" int main(void)
 {
 #ifdef USING_MAKEFILE
