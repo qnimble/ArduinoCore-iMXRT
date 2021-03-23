@@ -20,8 +20,8 @@ __attribute__ ((used, aligned(1024)))
 void (* _VectorsRam[NVIC_NUM_INTERRUPTS+16])(void);
 
 #ifndef PRINT_DEBUG_STUFF
-void printf(const char *test,...) {
-
+int printf(const char *test,...) {
+  return 1;
 }
 #endif
 

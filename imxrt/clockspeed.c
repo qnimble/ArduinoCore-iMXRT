@@ -50,7 +50,7 @@ uint32_t set_arm_clock(uint32_t frequency)
 	// if voltage needs to increase, do it before switch clock speed
 	CCM_CCGR6 |= CCM_CCGR6_DCDC(CCM_CCGR_ON);
 	if ((dcdc & DCDC_REG3_TRG_MASK) < DCDC_REG3_TRG((voltage - 800) / 25)) {
-		printf("Increasing voltage to %u mV\n", voltage);
+		printf("Increasing voltage to %lu mV\n", voltage);
 		dcdc &= ~DCDC_REG3_TRG_MASK;
 		dcdc |= DCDC_REG3_TRG((voltage - 800) / 25);
 		DCDC_REG3 = dcdc;
@@ -112,10 +112,10 @@ uint32_t set_arm_clock(uint32_t frequency)
 	uint32_t mult = (frequency * div_arm * div_ahb + 6000000) / 12000000;
 	if (mult > 108) mult = 108;
 	if (mult < 54) mult = 54;
-	printf("Freq: 12 MHz * %u / %u / %u\n", mult, div_arm, div_ahb);
+	printf("Freq: 12 MHz * %lu / %lu / %lu\n", mult, div_arm, div_ahb);
 	frequency = mult * 12000000 / div_arm / div_ahb;
 
-	printf("ARM PLL=%x\n", CCM_ANALOG_PLL_ARM);
+	printf("ARM PLL=%lx\n", CCM_ANALOG_PLL_ARM);
 	const uint32_t arm_pll_mask = CCM_ANALOG_PLL_ARM_LOCK | CCM_ANALOG_PLL_ARM_BYPASS |
 		CCM_ANALOG_PLL_ARM_ENABLE | CCM_ANALOG_PLL_ARM_POWERDOWN |
 		CCM_ANALOG_PLL_ARM_DIV_SELECT_MASK;
@@ -127,7 +127,7 @@ uint32_t set_arm_clock(uint32_t frequency)
 		CCM_ANALOG_PLL_ARM = CCM_ANALOG_PLL_ARM_ENABLE
 			| CCM_ANALOG_PLL_ARM_DIV_SELECT(mult);
 		while (!(CCM_ANALOG_PLL_ARM & CCM_ANALOG_PLL_ARM_LOCK)) ; // wait for lock
-		printf("ARM PLL=%x\n", CCM_ANALOG_PLL_ARM);
+		printf("ARM PLL=%lx\n", CCM_ANALOG_PLL_ARM);
 	} else {
 		printf("ARM PLL already running at required frequency\n");
 	}
@@ -174,11 +174,11 @@ uint32_t set_arm_clock(uint32_t frequency)
 	F_BUS_ACTUAL = frequency / div_ipg;
 	scale_cpu_cycles_to_microseconds = 0xFFFFFFFFu / (uint32_t)(frequency / 1000000u);
 
-	printf("New Frequency: ARM=%u, IPG=%u\n", frequency, frequency / div_ipg);
+	printf("New Frequency: ARM=%lu, IPG=%lu\n", frequency, frequency / div_ipg);
 
 	// if voltage needs to decrease, do it after switch clock speed
 	if ((dcdc & DCDC_REG3_TRG_MASK) > DCDC_REG3_TRG((voltage - 800) / 25)) {
-		printf("Decreasing voltage to %u mV\n", voltage);
+		printf("Decreasing voltage to %lu mV\n", voltage);
 		dcdc &= ~DCDC_REG3_TRG_MASK;
 		dcdc |= DCDC_REG3_TRG((voltage - 800) / 25);
 		DCDC_REG3 = dcdc;

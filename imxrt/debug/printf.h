@@ -1,5 +1,5 @@
 // #define PRINT_DEBUG_STUFF
-
+#include <stdio.h>
 #ifdef PRINT_DEBUG_STUFF
 // defining printf this way breaks things like Serial.printf() in C++ :(
 //#define printf(...) printf_debug(__VA_ARGS__)
