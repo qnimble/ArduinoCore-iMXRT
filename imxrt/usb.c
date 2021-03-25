@@ -194,7 +194,7 @@ FLASHMEM void usb_init(void)
 	//_VectorsRam[IRQ_USB1+16] = &isr;
 	attachInterruptVector(IRQ_USB1, &isr);
 	#ifdef ARDUINO_QUARTO
-		NVIC_SET_PRIORITY(IRQ_USB1, 80);
+		NVIC_SET_PRIORITY(IRQ_USB1, 6<<4); //set to priority 6 (upper nibble only used
 	#endif
 	NVIC_ENABLE_IRQ(IRQ_USB1);
 
