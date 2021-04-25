@@ -569,7 +569,7 @@ void adc1_irq_ignoredata(void);
 void adc1_irq_ignoredata(void){
 	ADC1_ISR = ADC1_BM; // Clear Interrupt
 	GPIO6_DR_TOGGLE = 0x100; // Dummy GPIO write - necessary delay to avoid double firing
-	ADC_ACK_BANK = ADC_ACK_PIN; // ACK ADC Data
+	ADC_ACK_BANK_TOGGLE = ADC_ACK_PIN; // ACK ADC Data
 	GPIO6_DR_TOGGLE = 0x100; // Dummy GPIO write - necessary delay to avoid double firing
 	return;
 }
@@ -577,14 +577,14 @@ void adc1_irq_ignoredata(void){
 void adc2_irq_ignoredata(void) {
 	ADC2_ISR = ADC2_BM; // Clear Interrupt
 	GPIO6_DR_TOGGLE = 0x100; // Dummy GPIO write - necessary delay to avoid double firing
-	ADC_ACK_BANK = ADC_ACK_PIN; // ACK ADC Data
+	ADC_ACK_BANK_TOGGLE = ADC_ACK_PIN; // ACK ADC Data
 	GPIO6_DR_TOGGLE = 0x100; // Dummy GPIO write - necessary delay to avoid double firing
 }
 
 void adc3_irq_ignoredata(void) {
 	ADC3_ISR = ADC3_BM; // Clear Interrupt
 	GPIO6_DR_TOGGLE = 0x100; // Dummy GPIO write - necessary delay to avoid double firing
-	ADC_ACK_BANK = ADC_ACK_PIN; // ACK ADC Data
+	ADC_ACK_BANK_TOGGLE = ADC_ACK_PIN; // ACK ADC Data
 	GPIO6_DR_TOGGLE = 0x100; // Dummy GPIO write - necessary delay to avoid double firing
 
 }
@@ -592,7 +592,7 @@ void adc3_irq_ignoredata(void) {
 void adc4_irq_ignoredata(void) {
 	ADC4_ISR = ADC4_BM; // Clear Interrupt
 	GPIO6_DR_TOGGLE = 0x100; // Dummy GPIO write - necessary delay to avoid double firing
-	ADC_ACK_BANK = ADC_ACK_PIN; // ACK ADC Data
+	ADC_ACK_BANK_TOGGLE = ADC_ACK_PIN; // ACK ADC Data
 	GPIO6_DR_TOGGLE = 0x100; // Dummy GPIO write - necessary delay to avoid double firing
 
 }
@@ -601,8 +601,8 @@ FLASHMEM void quarto_init(void) {
 	GPIO7_DR_TOGGLE = (0x000B0000 + 0x010); //Set Write address to 0x010 for Enabling Analog
 
 	//Clear stale Data if available.
-	READDATA_ACK_BANK = READDATA_ACK_PIN; // Ack Read Data
-	ADC_ACK_BANK = ADC_ACK_PIN; // ACK ADC Data
+	READDATA_ACK_BANK_TOGGLE = READDATA_ACK_PIN; // Ack Read Data
+	ADC_ACK_BANK_TOGGLE = ADC_ACK_PIN; // ACK ADC Data
 
 	GPIO7_DR_TOGGLE = (0x000D0000 + 0x03); //Enable Analog Clock, Analog,
 
@@ -611,34 +611,34 @@ FLASHMEM void quarto_init(void) {
 	GPIO7_DR_TOGGLE = 0x00010000; //Set DAC1 to 0x0000 or 0V
 
 	//Clear stale Data if available.
-	READDATA_ACK_BANK = READDATA_ACK_PIN; // Ack Read Data
-	ADC_ACK_BANK = ADC_ACK_PIN; // ACK ADC Data
+	READDATA_ACK_BANK_TOGGLE = READDATA_ACK_PIN; // Ack Read Data
+	ADC_ACK_BANK_TOGGLE = ADC_ACK_PIN; // ACK ADC Data
 
 	GPIO7_DR_TOGGLE = 0x00030000; //Set DAC2 to 0x0000 or 0V
 
 	//Clear stale Data if available.
-	READDATA_ACK_BANK = READDATA_ACK_PIN; // Ack Read Data
-	ADC_ACK_BANK = ADC_ACK_PIN; // ACK ADC Data
+	READDATA_ACK_BANK_TOGGLE = READDATA_ACK_PIN; // Ack Read Data
+	ADC_ACK_BANK_TOGGLE = ADC_ACK_PIN; // ACK ADC Data
 
 	GPIO7_DR_TOGGLE = 0x00050000; //Set DAC3 to 0x0000 or 0V
 
 	//Clear stale Data if available.
-	READDATA_ACK_BANK = READDATA_ACK_PIN; // Ack Read Data
-	ADC_ACK_BANK = ADC_ACK_PIN; // ACK ADC Data
+	READDATA_ACK_BANK_TOGGLE = READDATA_ACK_PIN; // Ack Read Data
+	ADC_ACK_BANK_TOGGLE = ADC_ACK_PIN; // ACK ADC Data
 
 	GPIO7_DR_TOGGLE = 0x00070000; //Set DAC4 to 0x0000 or 0V
 
 	//Clear stale Data if available.
-	READDATA_ACK_BANK = READDATA_ACK_PIN; // Ack Read Data
-	ADC_ACK_BANK = ADC_ACK_PIN; // ACK ADC DataGPIO6_DR_TOGGLE = 0x00000020; // Toggle Read Data ACK
+	READDATA_ACK_BANK_TOGGLE = READDATA_ACK_PIN; // Ack Read Data
+	ADC_ACK_BANK_TOGGLE = ADC_ACK_PIN; // ACK ADC DataGPIO6_DR_TOGGLE = 0x00000020; // Toggle Read Data ACK
 
 	delay(1);
 
 	GPIO7_DR_TOGGLE = (0x000D0000 + 0x07); //Enable Vref.
 
 	//Clear stale Data if available.
-	READDATA_ACK_BANK = READDATA_ACK_PIN; // Ack Read Data
-	ADC_ACK_BANK = ADC_ACK_PIN; // ACK ADC Data
+	READDATA_ACK_BANK_TOGGLE = READDATA_ACK_PIN; // Ack Read Data
+	ADC_ACK_BANK_TOGGLE = ADC_ACK_PIN; // ACK ADC Data
 
 	// Configure ADC Interrupts to basic ISRs that ack data to keep stream going
 	__asm volatile ("cpsid i");
