@@ -1898,7 +1898,21 @@ extern "C" {
 //#define digitalPinHasPWM(p)
 #define digitalPinToInterrupt(p)  ((p) < NUM_DIGITAL_PINS ? (p) : -1)
 
-void digitalWrite(uint8_t pin, uint8_t val);
+
+#ifdef ARDUINO_QUARTO
+
+#define digitalWrite(x,y) digitalWriteFast(x,y)
+#define digitalRead(x) digitalReadFast(x)
+#define digitalToggle(x) digitalToggleFast(x)
+
+#else
+#define digitalWrite(x,y) digitalWriteSlow(x,y)
+#define digitalRead(x) digitalReadSlow(x)
+#define digitalToggle(x) digitalToggleSlow(x)
+
+#endif //ARDUINO_QUARTO
+
+void digitalWriteSlow(uint8_t pin, uint8_t val);
 static inline void digitalWriteFast(uint8_t pin, uint8_t val) __attribute__((always_inline, unused));
 static inline void digitalWriteFast(uint8_t pin, uint8_t val)
 {
@@ -2146,7 +2160,7 @@ static inline void digitalWriteFast(uint8_t pin, uint8_t val)
 	}
 }
 
-uint8_t digitalRead(uint8_t pin);
+uint8_t digitalReadSlow(uint8_t pin);
 static inline uint8_t digitalReadFast(uint8_t pin) __attribute__((always_inline, unused));
 static inline uint8_t digitalReadFast(uint8_t pin)
 {
@@ -2275,7 +2289,7 @@ static inline uint8_t digitalReadFast(uint8_t pin)
 	}
 }
 
-void digitalToggle(uint8_t pin);
+void digitalToggleSlow(uint8_t pin);
 static inline void digitalToggleFast(uint8_t pin) __attribute__((always_inline, unused));
 static inline void digitalToggleFast(uint8_t pin)
 {
@@ -2398,7 +2412,7 @@ static inline void digitalToggleFast(uint8_t pin)
 #endif
 		}
 	} else {
-		digitalToggle(pin);
+		digitalToggleSlow(pin);
 	}
 }
 

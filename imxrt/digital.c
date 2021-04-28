@@ -85,7 +85,8 @@ const struct digital_pin_bitband_and_config_table_struct digital_pin_to_info_PGM
 #endif
 };
 
-void digitalWrite(uint8_t pin, uint8_t val)
+
+void digitalWriteSlow(uint8_t pin, uint8_t val)
 {
 	const struct digital_pin_bitband_and_config_table_struct *p;
 	uint32_t pinmode, mask;
@@ -112,7 +113,7 @@ void digitalWrite(uint8_t pin, uint8_t val)
 	}
 }
 
-void digitalToggle(uint8_t pin)
+void digitalToggleSlow(uint8_t pin)
 {
 	const struct digital_pin_bitband_and_config_table_struct *p;
 	uint32_t mask;
@@ -123,7 +124,7 @@ void digitalToggle(uint8_t pin)
 	*(p->reg + 0x23) = mask; // toggle register
 }
 
-uint8_t digitalRead(uint8_t pin)
+uint8_t digitalReadSlow(uint8_t pin)
 {
 	const struct digital_pin_bitband_and_config_table_struct *p;
 
@@ -179,24 +180,24 @@ void shiftOut_lsbFirst(uint8_t dataPin, uint8_t clockPin, uint8_t value)
 		uint32_t cycles = (F_CPU_ACTUAL / 2 / maxSpeed);
 		uint32_t t = ARM_DWT_CYCCNT;
 		for (mask = 0x01; mask; mask <<= 1) {
-		    digitalWrite(dataPin, value & mask);
+		    digitalWriteSlow(dataPin, value & mask);
 		    do {;} while(ARM_DWT_CYCCNT - t < cycles);
 		    t += cycles / 2;
 
-		    digitalWrite(clockPin, HIGH);
+		    digitalWriteSlow(clockPin, HIGH);
 		    do {;} while(ARM_DWT_CYCCNT - t < cycles);
 		    t += cycles;
 
-		    digitalWrite(clockPin, LOW);
+		    digitalWriteSlow(clockPin, LOW);
 		    do {;} while(ARM_DWT_CYCCNT - t < cycles);
 		    t += cycles / 2;
 		}
 	}
 	else
 	for (mask=0x01; mask; mask <<= 1) {
-		digitalWrite(dataPin, value & mask);
-		digitalWrite(clockPin, HIGH);
-		digitalWrite(clockPin, LOW);
+		digitalWriteSlow(dataPin, value & mask);
+		digitalWriteSlow(clockPin, HIGH);
+		digitalWriteSlow(clockPin, LOW);
 	}
 }
 
@@ -220,9 +221,9 @@ uint8_t shiftIn_lsbFirst(uint8_t dataPin, uint8_t clockPin)
 {
         uint8_t mask, value=0;
         for (mask=0x01; mask; mask <<= 1) {
-                digitalWrite(clockPin, HIGH);
-                if (digitalRead(dataPin)) value |= mask;
-                digitalWrite(clockPin, LOW);
+                digitalWriteSlow(clockPin, HIGH);
+                if (digitalReadSlow(dataPin)) value |= mask;
+                digitalWriteSlow(clockPin, LOW);
         }
         return value;
 }
@@ -231,9 +232,9 @@ uint8_t shiftIn_msbFirst(uint8_t dataPin, uint8_t clockPin)
 {
         uint8_t mask, value=0;
         for (mask=0x80; mask; mask >>= 1) {
-                digitalWrite(clockPin, HIGH);
-                if (digitalRead(dataPin)) value |= mask;
-                digitalWrite(clockPin, LOW);
+                digitalWriteSlow(clockPin, HIGH);
+                if (digitalReadSlow(dataPin)) value |= mask;
+                digitalWriteSlow(clockPin, LOW);
         }
         return value;
 }
