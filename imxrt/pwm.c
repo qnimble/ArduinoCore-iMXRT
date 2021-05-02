@@ -17,6 +17,20 @@ uint8_t analog_write_res = 8;
 #if defined(__IMXRT1062__)
 
 const struct pwm_pin_info_struct pwm_pin_info[] = {
+#if defined(ARDUINO_QUARTO)
+	{0, M(1, 0), 0, 0},
+	{0, M(1, 0), 0, 0},
+	{0, M(1, 0), 0, 0},
+	{0, M(1, 0), 0, 0},
+	{0, M(1, 0), 0, 0},
+	{1, M(1, 2), 0, 4},  // FlexPWM1_2_X   5  // AD_B0_12
+	{1, M(1, 3), 0, 4},  // FlexPWM1_3_X   6  // AD_B0_13
+	{0, M(1, 0), 0, 0},
+	{0, M(1, 0), 0, 0},
+	{1, M(1, 3), 1, 2},  // FlexPWM1_3_A  20 // LED Red    // SD_B1_00
+	{1, M(1, 3), 2, 2},  // FlexPWM1_3_B  21 // LED Blue   // SD_B1_01
+	{1, M(2, 3), 1, 2},  // FlexPWM2_3_A  22 // LED Green  // SD_B1_02
+#elif
 	{1, M(1, 1), 0, 4},  // FlexPWM1_1_X   0  // AD_B0_03
 	{1, M(1, 0), 0, 4},  // FlexPWM1_0_X   1  // AD_B0_02
 	{1, M(4, 2), 1, 1},  // FlexPWM4_2_A   2  // EMC_04
@@ -95,6 +109,7 @@ const struct pwm_pin_info_struct pwm_pin_info[] = {
 	{0, M(1, 0), 0, 0},  // duplicate QuadTimer3_1
 	{0, M(1, 0), 0, 0},  // duplicate QuadTimer3_2
 	{2, M(4, 0), 0, 1},  // QuadTimer4_0  45  // B0_09
+#endif
 #endif
 };
 
