@@ -295,6 +295,9 @@ FLASHMEM void configure_pins(void) {
 		IOMUXC_SW_MUX_CTL_PAD_GPIO_AD_B0_05 = 0x15;
         IOMUXC_SW_MUX_CTL_PAD_GPIO_AD_B0_09 = 0x15;
 
+        IOMUXC_SW_MUX_CTL_PAD_GPIO_SD_B1_00 = 0x15; //set LED pins as GPIO, in case set to PWM previously
+        IOMUXC_SW_MUX_CTL_PAD_GPIO_SD_B1_01 = 0x15;
+        IOMUXC_SW_MUX_CTL_PAD_GPIO_SD_B1_02 = 0x15;
 
         GPIO8_GDIR = 0x07; //Set LEDs as outputs
         GPIO8_DR_CLEAR = 0x07; //Turn off LED
