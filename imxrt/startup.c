@@ -686,7 +686,7 @@ FLASHMEM void quarto_init(void) {
 
 	__asm volatile ("cpsie i");
 
-	quarto_wdog_init(635); // turn on wdog
+	//quarto_wdog_init(635); // turn on wdog
 }
 #endif
 
