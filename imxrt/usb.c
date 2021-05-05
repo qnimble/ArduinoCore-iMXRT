@@ -194,7 +194,7 @@ FLASHMEM void usb_init(void)
 	//_VectorsRam[IRQ_USB1+16] = &isr;
 	attachInterruptVector(IRQ_USB1, &isr);
 	#ifdef ARDUINO_QUARTO
-		NVIC_SET_PRIORITY(IRQ_USB1, 80);
+		NVIC_SET_PRIORITY(IRQ_USB1, 7<<4); //set to priority 6 (upper nibble only used
 	#endif
 	NVIC_ENABLE_IRQ(IRQ_USB1);
 
@@ -744,7 +744,7 @@ static void endpoint0_complete(void)
 	// 0x2021 is CDC_SET_LINE_CODING
 	if (setup.wRequestAndType == 0x2021 && setup.wIndex == CDC_STATUS_INTERFACE) {
 		memcpy(usb_cdc_line_coding, endpoint0_buffer, 7);
-		printf("usb_cdc_line_coding, baud=%u\n", usb_cdc_line_coding[0]);
+		printf("usb_cdc_line_coding, baud=%lu\n", usb_cdc_line_coding[0]);
 
 		if (usb_cdc_line_coding[0] == USB_REBOOT_BAUD) {
 			usb_start_sof_interrupts(NUM_INTERFACE);
@@ -755,7 +755,7 @@ static void endpoint0_complete(void)
 #ifdef CDC2_STATUS_INTERFACE
 	if (setup.wRequestAndType == 0x2021 && setup.wIndex == CDC2_STATUS_INTERFACE) {
 		memcpy(usb_cdc2_line_coding, endpoint0_buffer, 7);
-		printf("usb_cdc2_line_coding, baud=%u\n", usb_cdc2_line_coding[0]);
+		printf("usb_cdc2_line_coding, baud=%lu\n", usb_cdc2_line_coding[0]);
 		if (usb_cdc2_line_coding[0] == USB_REBOOT_BAUD) {
 			usb_start_sof_interrupts(NUM_INTERFACE);
 			usb_reboot_timer = 80; // TODO: 10 if only 12 Mbit/sec
@@ -765,7 +765,7 @@ static void endpoint0_complete(void)
 #ifdef CDC3_STATUS_INTERFACE
 	if (setup.wRequestAndType == 0x2021 && setup.wIndex == CDC3_STATUS_INTERFACE) {
 		memcpy(usb_cdc3_line_coding, endpoint0_buffer, 7);
-		printf("usb_cdc3_line_coding, baud=%u\n", usb_cdc3_line_coding[0]);
+		printf("usb_cdc3_line_coding, baud=%lu\n", usb_cdc3_line_coding[0]);
 		if (usb_cdc3_line_coding[0] == USB_REBOOT_BAUD) {
 			usb_start_sof_interrupts(NUM_INTERFACE);
 			usb_reboot_timer = 80; // TODO: 10 if only 12 Mbit/sec

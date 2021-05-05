@@ -48,11 +48,18 @@ typedef struct
 
 FLASHMEM void printf_debug_init(void){
 	GPIO8_GDIR = 0x07;
-	GPIO8_DR_CLEAR = 0x7;
+	GPIO8_DR_CLEAR = 0x07;
 	if ((CoreDebug->DHCSR &  CoreDebug_DHCSR_C_DEBUGEN_Msk) != CoreDebug_DHCSR_C_DEBUGEN_Msk) {
 	    //Debugging enabled, but not in debug mode, so halt and prevent crash
-		GPIO8_DR_SET = 0x7;
-	    while(1){}
+		GPIO8_DR_SET = 0x1;
+		volatile int i,j;
+		j=324;
+	    while(1){
+	        GPIO8_DR_TOGGLE = 0x1;
+	        for(i=0;i<350000;i++){
+	            j += j*((j+45)*i);
+	        }
+	    }
 	}
 
 
