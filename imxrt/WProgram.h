@@ -97,6 +97,9 @@ void srandom(unsigned int newseed);
 #if __has_include("dac.h")
 #include "dac.h"
 #endif
+#if __has_include("quarto_wdog.h")
+#include "quarto_wdog.h"
+#endif
 
 
 

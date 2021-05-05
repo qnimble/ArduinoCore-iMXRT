@@ -2,6 +2,9 @@
 #include "wiring.h"
 #include "usb_dev.h"
 #include "avr/pgmspace.h"
+#if defined(ARDUINO_QUARTO)
+#include "quarto_wdog.h"
+#endif
 
 #include "debug/printf.h"
 // from the linker
@@ -86,6 +89,10 @@ void ResetHandler(void)
 	// Initialize memory
 	init_memory();
 	configure_cache();
+
+#if defined(ARDUINO_QUARTO)
+	quarto_wdog_disable(); // turn off wdog
+#endif
 
 	// enable FPU
 	SCB_CPACR = 0x00F00000;
@@ -675,6 +682,8 @@ FLASHMEM void quarto_init(void) {
 	GPIO7_DR_TOGGLE = (0x000B0000 + 0x03FFF); //Magic Command to Reset ADC/DAC Data
 
 	__asm volatile ("cpsie i");
+
+	quarto_wdog_init(635); // turn on wdog
 }
 #endif
 
