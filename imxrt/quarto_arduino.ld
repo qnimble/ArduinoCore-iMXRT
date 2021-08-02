@@ -6,15 +6,6 @@ MEMORY
 	FLASH (rx) : ORIGIN = 0x60040000, LENGTH = 0x800000
 }
 
-GROUP (
-  "libm.a"
-  "libgcc.a"
-  "libc_nano.a"
-  "libstdc++.a"
-  "libcr_newlib_semihost.a"
-)
-
-
 ENTRY(ResetHandler)
 
 SECTIONS
