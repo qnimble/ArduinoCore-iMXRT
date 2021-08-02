@@ -184,9 +184,13 @@ uint32_t set_arm_clock(uint32_t frequency)
 		DCDC_REG3 = dcdc;
 		while (!(DCDC_REG0 & DCDC_REG0_STS_DC_OK)) ; // wait voltage settling
 	}
-
-	CCM_ANALOG_MISC1 = 0x00000412; //Set LVDS Output Clock to enable at XTAL 24 MHz
-
+#ifdef ARDUINO_QUARTO
+	#ifdef QUARTO_PROTOTYPE
+		CCM_ANALOG_MISC1 = 0x00000412; //Set LVDS Output Clock to enable at XTAL 24 MHz
+	#else
+		CCM_ANALOG_MISC1 = 0x00001012; //Set LVDS Input Clock for 24 MHZ XTAL
+	#endif
+#endif
 	return frequency;
 }
 
