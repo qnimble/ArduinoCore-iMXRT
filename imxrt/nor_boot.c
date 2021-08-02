@@ -17,7 +17,7 @@ void (* const g_pfnVectors[])(void) = {
     ResetHandler,                      // The reset handler (boot startup)
     NMI_Handler,                       // The NMI handler
     HardFault_Handler,                 // The hard fault handler
-	APPLICATION_BOOT_HEADER,           // Header to know we have legit application code
+	(void*) APPLICATION_BOOT_HEADER,           // Header to know we have legit application code
 };
 
 __attribute__((section(".boot_hdr.dcd_data")))
