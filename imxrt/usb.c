@@ -735,7 +735,6 @@ static void endpoint0_receive(void *data, uint32_t len, int notify)
 
 static void endpoint0_complete(void)
 {
-#define USB_REBOOT_BAUD 134
 	setup_t setup;
 
 	setup.bothwords = endpoint0_setupdata.bothwords;

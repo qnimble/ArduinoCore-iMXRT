@@ -17,6 +17,12 @@ struct transfer_struct {
 extern "C" {
 #endif
 
+#ifdef USB_REBOOT_DISABLE
+	#define USB_REBOOT_BAUD 134
+#else
+	#define USB_REBOOT_BAUD 1200
+#endif
+
 void usb_init(void);
 void usb_init_serialnumber(void);
 
