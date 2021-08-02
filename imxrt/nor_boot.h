@@ -15,6 +15,8 @@
 
 #ifdef ARDUINO_QUARTO
 #define BOARD_FLASH_SIZE   0x800000
+#define APPLICATION_BOOT_HEADER 0x89D3E1AB
+
 #else
 #error Must define size of board flash
 #endif
@@ -98,8 +100,8 @@ typedef struct _boot_data_ {
 #define PLUGIN_FLAG           (uint32_t)0
 
 /* External Variables */
-const BOOT_DATA_T boot_data;
-const uint8_t dcd_data[];
+//const BOOT_DATA_T boot_data;
+//const uint8_t dcd_data[];
 
 
 //#include <stdint.h>

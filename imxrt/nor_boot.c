@@ -17,18 +17,7 @@ void (* const g_pfnVectors[])(void) = {
     ResetHandler,                      // The reset handler (boot startup)
     NMI_Handler,                       // The NMI handler
     HardFault_Handler,                 // The hard fault handler
-};
-
-__attribute__((section(".boot_hdr.ivt")))
-const ivt image_vector_table = {
-  IVT_HEADER,                         /* IVT Header */
-  IMAGE_ENTRY_ADDRESS,                /* Image Entry Function */
-  IVT_RSVD,                           /* Reserved = 0 */
-  (uint32_t)dcd_data,              /* Address where DCD information is stored */
-  (uint32_t)BOOT_DATA_ADDRESS,        /* Address where BOOT Data Structure is stored */
-  (uint32_t)&image_vector_table,      /* Pointer to IVT Self (absolute address */
-  (uint32_t)CSF_ADDRESS,              /* Address where CSF file is stored */
-  IVT_RSVD                            /* Reserved = 0 */
+	APPLICATION_BOOT_HEADER,           // Header to know we have legit application code
 };
 
 __attribute__((section(".boot_hdr.dcd_data")))
@@ -320,6 +309,21 @@ const BOOT_DATA_T boot_data = {
   PLUGIN_FLAG,                /* Plugin flag*/
   0xFFFFFFFF  				  /* empty - extra data word */
 };
+
+
+__attribute__((section(".boot_hdr.ivt")))
+const ivt image_vector_table = {
+  IVT_HEADER,                         /* IVT Header */
+  IMAGE_ENTRY_ADDRESS,                /* Image Entry Function */
+  IVT_RSVD,                           /* Reserved = 0 */
+  (uint32_t)dcd_data,              /* Address where DCD information is stored */
+  (uint32_t)BOOT_DATA_ADDRESS,        /* Address where BOOT Data Structure is stored */
+  (uint32_t)&image_vector_table,      /* Pointer to IVT Self (absolute address */
+  (uint32_t)CSF_ADDRESS,              /* Address where CSF file is stored */
+  IVT_RSVD                            /* Reserved = 0 */
+};
+
+
 
 __attribute__((section(".boot_hdr.conf")))
 const flexspi_nor_config_t qspiflash_config = {
