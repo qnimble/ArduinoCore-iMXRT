@@ -302,8 +302,9 @@ FLASHMEM void configure_pins(void) {
         GPIO8_GDIR = 0x07; //Set LEDs as outputs
         GPIO8_DR_CLEAR = 0x07; //Turn off LED
         GPIO7_GDIR = 0xFFFFF; //Set DAC Update pins as outputs
-        GPIO6_GDIR = 0x30; //Set BM as outputs for Read / ADC ACK
-
+        //GPIO6_GDIR = 0x30; //Set BM as outputs for Read / ADC ACK
+        GPIO6_GDIR |= ADC_ACK_PIN;
+        GPIO6_GDIR |= READDATA_ACK_PIN;
 }
 
 
@@ -575,7 +576,6 @@ FLASHMEM void configure_external_ram()
 
 #elif defined(ARDUINO_QUARTO)
 
-void adc1_irq_ignoredata(void);
 void adc1_irq_ignoredata(void){
 	ADC1_ISR = ADC1_BM; // Clear Interrupt
 	GPIO6_DR_TOGGLE = 0x100; // Dummy GPIO write - necessary delay to avoid double firing
@@ -604,7 +604,6 @@ void adc4_irq_ignoredata(void) {
 	GPIO6_DR_TOGGLE = 0x100; // Dummy GPIO write - necessary delay to avoid double firing
 	ADC_ACK_BANK_TOGGLE = ADC_ACK_PIN; // ACK ADC Data
 	GPIO6_DR_TOGGLE = 0x100; // Dummy GPIO write - necessary delay to avoid double firing
-
 }
 
 FLASHMEM void quarto_init(void) {
@@ -658,14 +657,19 @@ FLASHMEM void quarto_init(void) {
 	NVIC_SET_PRIORITY(ADC3_IRQ, 40);
 	NVIC_SET_PRIORITY(ADC4_IRQ, 56);
 
-	GPIO1_ICR1 &= ~ ( (0x2)<<(2*ADC1_PIN) );
-	GPIO1_ICR1 |= ( (0x2)<<(2*ADC1_PIN) );
-	GPIO1_ICR1 &= ~ ( (0x2)<<(2*ADC2_PIN) );
-	GPIO1_ICR1 |= ( (0x2)<<(2*ADC2_PIN) );
-	GPIO3_ICR1 &= ~ ( (0x2)<<(2*ADC3_PIN) );
-	GPIO3_ICR1 |= ( (0x2)<<(2*ADC3_PIN) );
-	GPIO2_ICR2 &= ~ ( (0x2)<<(ADC4_PIN-1) );  //bit shift by 31*2 mod 32 is 30, or 31-1.
-	GPIO2_ICR2 |= ( (0x2)<<(ADC4_PIN-1) );    //bit shift by 31*2 mod 32 is 30, or 31-1.
+	ADC1_ICR1 &= ~ ( (0x2)<<(2*ADC1_PIN) );
+	ADC1_ICR1 |= ( (0x2)<<(2*ADC1_PIN) );
+	ADC2_ICR1 &= ~ ( (0x2)<<(2*ADC2_PIN) );
+	ADC2_ICR1 |= ( (0x2)<<(2*ADC2_PIN) );
+	ADC3_ICR1 &= ~ ( (0x2)<<(2*ADC3_PIN) );
+	ADC3_ICR1 |= ( (0x2)<<(2*ADC3_PIN) );
+#if (ADC4_PIN < 16)
+	ADC4_ICR1 &= ~ ( (0x2)<<(2*(ADC4_PIN)) );
+	ADC4_ICR1 |= ( (0x2)<<(2*(ADC4_PIN)) );
+#else
+	ADC4_ICR2 &= ~ ( (0x2)<<(2*(ADC4_PIN-16)) );  //Use ICR2 if PIN 16 or greater
+	ADC4_ICR2 |= ( (0x2)<<(2*(ADC4_PIN-16)) );
+#endif
 
 	ADC1_IMR |= ADC1_BM; //Enable ADC1 Interrupt Pin
 	ADC2_IMR |= ADC2_BM; //Enable ADC2 Interrupt Pin
