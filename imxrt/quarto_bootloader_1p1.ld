@@ -3,9 +3,9 @@ MEMORY
 	ITCM (rwx) : ORIGIN = 0x0, LENGTH = 0x80000      
 	DTCM (rwx) : ORIGIN = 0x20000000, LENGTH = 0x80000
 	RAM (rwx) : ORIGIN = 0x20200000, LENGTH = 0x20000
-	FLASH (rx) : ORIGIN = 0x60000000, LENGTH = 0x400000
+	FLASH (rx) : ORIGIN = 0x60000000, LENGTH = 0x40000
 }
-
+/* 
 GROUP (
   "libm.a"
   "libgcc.a"
@@ -13,7 +13,7 @@ GROUP (
   "libstdc++.a"
   "libcr_newlib_semihost.a"
 )
-
+*/
 
 ENTRY(ResetHandler)
 
