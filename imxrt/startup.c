@@ -92,6 +92,14 @@ void ResetHandler(void)
 
 #if defined(ARDUINO_QUARTO)
 	quarto_wdog_disable(); // turn off wdog
+#ifndef QUARTO_PROTOTYPE
+	//Use Wakeup pin as reset to FPGA and set low (reset)
+	IOMUXC_SNVS_SW_PAD_CTL_PAD_WAKEUP = 0xB888u;
+	IOMUXC_SNVS_SW_MUX_CTL_PAD_WAKEUP = 0x15;
+	GPIO5_GDIR |= 0x01;
+	GPIO5_DR_CLEAR = 0x01;
+
+#endif
 #endif
 
 	// enable FPU
@@ -116,6 +124,13 @@ void ResetHandler(void)
 	IOMUXC_GPR_GPR28 = 0xFFFFFFFF;
 	IOMUXC_GPR_GPR29 = 0xFFFFFFFF;
 #endif
+#if defined(ARDUINO_QUARTO)
+#ifndef QUARTO_PROTOTYPE
+	//Set Wakeup pin high to enable FPGA
+	GPIO5_DR_SET = 0x01;
+#endif
+#endif
+
 
 	// must enable PRINT_DEBUG_STUFF in debug/print.h
 	printf_debug_init();
