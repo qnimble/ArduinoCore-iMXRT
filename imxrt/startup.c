@@ -170,20 +170,6 @@ void ResetHandler(void)
 #elif defined(ARDUINO_QUARTO)
 	quarto_init();
 #endif
-#if defined(ARDUINO_QUARTO)
-	//quarto_wdog_disable(); // turn off wdog
-
-	ADC_ACK_BANK_TOGGLE = ADC_ACK_PIN; // Tooggle bootmode 0 as ACK
-	disableADC1();
-	ADC_ACK_BANK_TOGGLE = ADC_ACK_PIN; // Tooggle bootmode 0 as ACK
-	disableADC2();
-	ADC_ACK_BANK_TOGGLE = ADC_ACK_PIN; // Tooggle bootmode 0 as ACK
-	disableADC3();
-	ADC_ACK_BANK_TOGGLE = ADC_ACK_PIN; // Tooggle bootmode 0 as ACK
-	disableADC4();
-	ADC_ACK_BANK_TOGGLE = ADC_ACK_PIN; // Tooggle bootmode 0 as ACK
-
-#endif
 
 
 
