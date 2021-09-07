@@ -7,7 +7,6 @@
 #endif
 
 #include "debug/printf.h"
-#include "adc.h"
 // from the linker
 extern unsigned long _stextload;
 extern unsigned long _stext;
@@ -94,14 +93,12 @@ void ResetHandler(void)
 
 #if defined(ARDUINO_QUARTO)
 	quarto_wdog_disable(); // turn off wdog
-#ifndef QUARTO_PROTOTYPE
 	//Use Wakeup pin as reset to FPGA and set low (reset)
 	IOMUXC_SNVS_SW_PAD_CTL_PAD_WAKEUP = 0xB888u;
 	IOMUXC_SNVS_SW_MUX_CTL_PAD_WAKEUP = 0x15;
 	GPIO5_GDIR |= 0x01;
 	GPIO5_DR_CLEAR = 0x01;
 
-#endif
 #endif
 
 	// enable FPU
@@ -127,10 +124,8 @@ void ResetHandler(void)
 	IOMUXC_GPR_GPR29 = 0xFFFFFFFF;
 #endif
 #if defined(ARDUINO_QUARTO)
-#ifndef QUARTO_PROTOTYPE
 	//Set Wakeup pin high to enable FPGA
 	GPIO5_DR_SET = 0x01;
-#endif
 #endif
 
 
@@ -648,6 +643,7 @@ void adc4_irq_ignoredata(void) {
 }
 
 FLASHMEM void quarto_init(void) {
+	#include "adc.h"
 	GPIO7_DR_TOGGLE = (0x000B0000 + 0x010); //Set Write address to 0x010 for Enabling Analog
 
 	//Clear stale Data if available.
@@ -693,39 +689,11 @@ FLASHMEM void quarto_init(void) {
 	// Configure ADC Interrupts to basic ISRs that ack data to keep stream going
 	__asm volatile ("cpsid i");
 
-	NVIC_SET_PRIORITY(ADC1_IRQ, 8);
-	NVIC_SET_PRIORITY(ADC2_IRQ, 24);
-	NVIC_SET_PRIORITY(ADC3_IRQ, 40);
-	NVIC_SET_PRIORITY(ADC4_IRQ, 56);
+	configureADC1(0,0,BIPOLAR_10V,&adc1_irq_ignoredata);
+	configureADC2(0,0,BIPOLAR_10V,&adc2_irq_ignoredata);
+	configureADC3(0,0,BIPOLAR_10V,&adc3_irq_ignoredata);
+	configureADC4(0,0,BIPOLAR_10V,&adc4_irq_ignoredata);
 
-	ADC1_ICR1 &= ~ ( (0x2)<<(2*ADC1_PIN) );
-	ADC1_ICR1 |= ( (0x2)<<(2*ADC1_PIN) );
-	ADC2_ICR1 &= ~ ( (0x2)<<(2*ADC2_PIN) );
-	ADC2_ICR1 |= ( (0x2)<<(2*ADC2_PIN) );
-	ADC3_ICR1 &= ~ ( (0x2)<<(2*ADC3_PIN) );
-	ADC3_ICR1 |= ( (0x2)<<(2*ADC3_PIN) );
-#if (ADC4_PIN < 16)
-	ADC4_ICR1 &= ~ ( (0x2)<<(2*(ADC4_PIN)) );
-	ADC4_ICR1 |= ( (0x2)<<(2*(ADC4_PIN)) );
-#else
-	ADC4_ICR2 &= ~ ( (0x2)<<(2*(ADC4_PIN-16)) );  //Use ICR2 if PIN 16 or greater
-	ADC4_ICR2 |= ( (0x2)<<(2*(ADC4_PIN-16)) );
-#endif
-
-	ADC1_IMR |= ADC1_BM; //Enable ADC1 Interrupt Pin
-	ADC2_IMR |= ADC2_BM; //Enable ADC2 Interrupt Pin
-	ADC3_IMR |= ADC3_BM; //Enable ADC3 Interrupt Pin
-	ADC4_IMR |= ADC4_BM; //Enable ADC4 Interrupt Pin
-
-	attachInterruptVector(ADC1_IRQ, &adc1_irq_ignoredata);
-	attachInterruptVector(ADC2_IRQ, &adc2_irq_ignoredata);
-	attachInterruptVector(ADC3_IRQ, &adc3_irq_ignoredata);
-	attachInterruptVector(ADC4_IRQ, &adc4_irq_ignoredata);
-
-	NVIC_ENABLE_IRQ(ADC1_IRQ);
-	NVIC_ENABLE_IRQ(ADC2_IRQ);
-	NVIC_ENABLE_IRQ(ADC3_IRQ);
-	NVIC_ENABLE_IRQ(ADC4_IRQ);
 
 	GPIO7_DR_TOGGLE = (0x000B0000 + 0x03FFF); //Magic Command to Reset ADC/DAC Data
 
