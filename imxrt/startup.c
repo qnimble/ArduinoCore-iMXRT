@@ -7,6 +7,7 @@
 #endif
 
 #include "debug/printf.h"
+#include "adc.h"
 // from the linker
 extern unsigned long _stextload;
 extern unsigned long _stext;
@@ -71,6 +72,7 @@ void ResetHandler(void)
 	// Disable interrupts
 	__asm volatile ("cpsid i");
 	SCB_MPU_CTRL = 0; // turn off MPU
+	WDOG3_CNT = 0xB480A602; //Feed wdog3
 
 #if defined(__IMXRT1062__)
 	IOMUXC_GPR_GPR17 = (uint32_t)&_flexram_bank_config;
@@ -173,6 +175,24 @@ void ResetHandler(void)
 #elif defined(ARDUINO_QUARTO)
 	quarto_init();
 #endif
+#if defined(ARDUINO_QUARTO)
+	//quarto_wdog_disable(); // turn off wdog
+
+	ADC_ACK_BANK_TOGGLE = ADC_ACK_PIN; // Tooggle bootmode 0 as ACK
+	disableADC1();
+	ADC_ACK_BANK_TOGGLE = ADC_ACK_PIN; // Tooggle bootmode 0 as ACK
+	disableADC2();
+	ADC_ACK_BANK_TOGGLE = ADC_ACK_PIN; // Tooggle bootmode 0 as ACK
+	disableADC3();
+	ADC_ACK_BANK_TOGGLE = ADC_ACK_PIN; // Tooggle bootmode 0 as ACK
+	disableADC4();
+	ADC_ACK_BANK_TOGGLE = ADC_ACK_PIN; // Tooggle bootmode 0 as ACK
+
+#endif
+
+
+
+
 	startup_early_hook();
 	while (millis() < 20) ; // wait at least 20ms before starting USB
 	usb_init();
@@ -223,11 +243,15 @@ FLASHMEM void init_nvic(void) {
        unsigned int i;
        // set up blank interrupt & exception vector table
        for (i=0; i < NVIC_NUM_INTERRUPTS + 16; i++) _VectorsRam[i] = &unused_interrupt_vector;
-       for (i=0; i < NVIC_NUM_INTERRUPTS; i++) NVIC_SET_PRIORITY(i, 128);
+       for (i=0; i < NVIC_NUM_INTERRUPTS; i++) {
+    	   NVIC_SET_PRIORITY(i, 128);
+    	   NVIC_DISABLE_IRQ(i);
+       }
        SCB_VTOR = (uint32_t)_VectorsRam;
        /* Keep boot related data from being stripped from binary */
        __attribute__((unused)) volatile uint32_t hack;
        hack = (uint32_t) keep_trick;
+
 }
 
 
@@ -313,6 +337,8 @@ FLASHMEM void configure_pins(void) {
         IOMUXC_SW_MUX_CTL_PAD_GPIO_SD_B1_00 = 0x15; //set LED pins as GPIO, in case set to PWM previously
         IOMUXC_SW_MUX_CTL_PAD_GPIO_SD_B1_01 = 0x15;
         IOMUXC_SW_MUX_CTL_PAD_GPIO_SD_B1_02 = 0x15;
+
+        IOMUXC_SW_MUX_CTL_PAD_GPIO_EMC_40 = 0x15;
 
         GPIO8_GDIR = 0x07; //Set LEDs as outputs
         GPIO8_DR_CLEAR = 0x07; //Turn off LED
@@ -705,7 +731,7 @@ FLASHMEM void quarto_init(void) {
 
 	__asm volatile ("cpsie i");
 
-	//quarto_wdog_init(635); // turn on wdog
+	quarto_wdog_init(635); // turn on wdog
 }
 #endif
 
