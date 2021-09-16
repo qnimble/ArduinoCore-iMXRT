@@ -38,9 +38,19 @@
 extern "C" {
 #endif
 
+#ifdef ARDUINO_QUARTO
+	#ifdef QUARTO_PROTOTYPE
+		#define PIT_CLOCK_FREQ 24000000
+	#else
+		#define PIT_CLOCK_FREQ 66000000
+	#endif
+#else
+	#define PIT_CLOCK_FREQ 24000000
+#endif
+
 class IntervalTimer {
 private:
-	static const uint32_t MAX_PERIOD = UINT32_MAX / (24000000 / 1000000);
+	static const uint32_t MAX_PERIOD = UINT32_MAX / (PIT_CLOCK_FREQ / 1000000);
 public:
 	constexpr IntervalTimer() {
 	}
@@ -49,7 +59,7 @@ public:
 	}
 	bool begin(void (*funct)(), unsigned int microseconds) {
 		if (microseconds == 0 || microseconds > MAX_PERIOD) return false;
-		uint32_t cycles = (24000000 / 1000000) * microseconds - 1;
+		uint32_t cycles = (PIT_CLOCK_FREQ / 1000000) * microseconds - 1;
 		if (cycles < 17) return false;
 		return beginCycles(funct, cycles);
 	}
@@ -65,7 +75,7 @@ public:
 	}
 	bool begin(void (*funct)(), float microseconds) {
 		if (microseconds <= 0 || microseconds > MAX_PERIOD) return false;
-		uint32_t cycles = (float)(24000000 / 1000000) * microseconds - 0.5f;
+		uint32_t cycles = (float)(PIT_CLOCK_FREQ / 1000000) * microseconds - 0.5f;
 		if (cycles < 17) return false;
 		return beginCycles(funct, cycles);
 	}
@@ -74,7 +84,7 @@ public:
 	}
 	void update(unsigned int microseconds) {
 		if (microseconds == 0 || microseconds > MAX_PERIOD) return;
-		uint32_t cycles = (24000000 / 1000000) * microseconds - 1;
+		uint32_t cycles = (PIT_CLOCK_FREQ / 1000000) * microseconds - 1;
 		if (cycles < 17) return;
 		if (channel) channel->LDVAL = cycles;
 	}
@@ -90,7 +100,7 @@ public:
 	}
 	void update(float microseconds) {
 		if (microseconds <= 0 || microseconds > MAX_PERIOD) return;
-		uint32_t cycles = (float)(24000000 / 1000000) * microseconds - 0.5f;
+		uint32_t cycles = (float)(PIT_CLOCK_FREQ / 1000000) * microseconds - 0.5f;
 		if (cycles < 17) return;
 		if (channel) channel->LDVAL = cycles;
 	}

@@ -91,7 +91,23 @@ void ResetHandler(void)
 	init_memory();
 	configure_cache();
 
-#if defined(ARDUINO_QUARTO)
+#ifdef ARDUINO_QUARTO
+	#ifdef QUARTO_PROTOTYPE
+		#define PERCLK_SOURCE CCM_CSCMR1_PERCLK_CLK_SEL
+		#define PLL_BYPASS_TO_EXTERNAL_LVDS 0
+		#define PERCLK_DIVIDER 0
+		CCM_ANALOG_MISC1 &= ~CCM_ANALOG_MISC1_LVDSCLK1_IBEN; //Turn off LVDS input
+		CCM_ANALOG_MISC1 |= CCM_ANALOG_MISC1_LVDSCLK1_OBEN; //Turn on LVDS output
+	#else
+		#define PLL_BYPASS_TO_EXTERNAL_LVDS (1<<14)
+		#define PERCLK_SOURCE 0
+		#define PERCLK_DIVIDER 1
+		CCM_ANALOG_MISC1 &= ~CCM_ANALOG_MISC1_LVDSCLK1_OBEN; //Turn off LVDS output
+		CCM_ANALOG_MISC1 |= CCM_ANALOG_MISC1_LVDSCLK1_IBEN; //Turn on LVDS input
+
+		CCM_CCR &= ~(CCM_CCR_COSC_EN); //Turn off on-chip oscillator since we will use FPGA clock instead
+	#endif
+
 	quarto_wdog_disable(); // turn off wdog
 	//Use Wakeup pin as reset to FPGA and set low (reset)
 	IOMUXC_SNVS_SW_PAD_CTL_PAD_WAKEUP = 0xB888u;
@@ -99,6 +115,10 @@ void ResetHandler(void)
 	GPIO5_GDIR |= 0x01;
 	GPIO5_DR_CLEAR = 0x01;
 
+#else
+	#define PLL_BYPASS_TO_EXTERNAL_LVDS 0
+	#define PERCLK_SOURCE CCM_CSCMR1_PERCLK_CLK_SEL
+	#define PERCLK_DIVIDER 0
 #endif
 
 	// enable FPU
@@ -112,7 +132,11 @@ void ResetHandler(void)
 	// Configure clocks
 	// TODO: make sure all affected peripherals are turned off!
 	// PIT & GPT timers to run from 24 MHz clock (independent of CPU speed)
-	CCM_CSCMR1 = (CCM_CSCMR1 & ~CCM_CSCMR1_PERCLK_PODF(0x3F)) | CCM_CSCMR1_PERCLK_CLK_SEL;
+	CCM_CSCMR1 &= ~ ( CCM_CSCMR1_PERCLK_CLK_SEL | CCM_CSCMR1_PERCLK_PODF(0x3F)); //Clear PERCLK_CLK_SEL bit and PODF divider
+	CCM_CSCMR1 |= PERCLK_SOURCE | CCM_CSCMR1_PERCLK_PODF(PERCLK_DIVIDER); //Set PERCLK_SOURCE and PERCLK_CLK_SEL based on Hardware
+	//CCM_CSCMR1 &= ~CCM_CSCMR1_PERCLK_PODF(0x3F); //Clear PERCLK_PODF dividers
+	//CCM_CSCMR1 |=
+
 	// UARTs run from 24 MHz clock (works if PLL3 off or bypassed)
 	CCM_CSCDR1 = (CCM_CSCDR1 & ~CCM_CSCDR1_UART_CLK_PODF(0x3F)) | CCM_CSCDR1_UART_CLK_SEL;
 
@@ -698,8 +722,8 @@ FLASHMEM void usb_pll_start()
 		if (n & CCM_ANALOG_PLL_USB1_DIV_SELECT) {
 			printf("  ERROR, 528 MHz mode!\n"); // never supposed to use this mode!
 			CCM_ANALOG_PLL_USB1_CLR = 0xC000;			// bypass 24 MHz
-			CCM_ANALOG_PLL_USB1_SET = CCM_ANALOG_PLL_USB1_BYPASS;	// bypass
-			CCM_ANALOG_PLL_USB1_CLR = CCM_ANALOG_PLL_USB1_POWER |	// power down
+			CCM_ANALOG_PLL_USB1_SET = CCM_ANALOG_PLL_USB1_BYPASS | PLL_BYPASS_TO_EXTERNAL_LVDS;	// bypass
+			CCM_ANALOG_PLL_USB1_CLR = CCM_ANALOG_PLL_USB1_POWER |   // power down
 				CCM_ANALOG_PLL_USB1_DIV_SELECT |		// use 480 MHz
 				CCM_ANALOG_PLL_USB1_ENABLE |			// disable
 				CCM_ANALOG_PLL_USB1_EN_USB_CLKS;		// disable usb
@@ -708,7 +732,7 @@ FLASHMEM void usb_pll_start()
 		if (!(n & CCM_ANALOG_PLL_USB1_ENABLE)) {
 			printf("  enable PLL\n");
 			// TODO: should this be done so early, or later??
-			CCM_ANALOG_PLL_USB1_SET = CCM_ANALOG_PLL_USB1_ENABLE;
+			CCM_ANALOG_PLL_USB1_SET = CCM_ANALOG_PLL_USB1_ENABLE | PLL_BYPASS_TO_EXTERNAL_LVDS;
 			continue;
 		}
 		if (!(n & CCM_ANALOG_PLL_USB1_POWER)) {

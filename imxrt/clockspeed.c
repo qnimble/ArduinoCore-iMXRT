@@ -19,6 +19,16 @@ volatile uint32_t F_BUS_ACTUAL = 132000000;
 
 uint32_t set_arm_clock(uint32_t frequency);
 
+#define LVDS_CLK_ENABLE_BIT (1<<14)
+#ifdef ARDUINO_QUARTO
+	#ifdef QUARTO_PROTOTYPE
+		#define PLL_BYPASS_TO_EXTERNAL_LVDS 0
+	#else
+		#define PLL_BYPASS_TO_EXTERNAL_LVDS (1<<14)
+	#endif
+#else
+	#define PLL_BYPASS_TO_EXTERNAL_LVDS 0
+#endif
 
 // stuff needing wait handshake:
 //  CCM_CACRR  ARM_PODF
@@ -116,15 +126,15 @@ uint32_t set_arm_clock(uint32_t frequency)
 	frequency = mult * 12000000 / div_arm / div_ahb;
 
 	printf("ARM PLL=%lx\n", CCM_ANALOG_PLL_ARM);
-	const uint32_t arm_pll_mask = CCM_ANALOG_PLL_ARM_LOCK | CCM_ANALOG_PLL_ARM_BYPASS |
+	const uint32_t arm_pll_mask = CCM_ANALOG_PLL_ARM_LOCK | CCM_ANALOG_PLL_ARM_BYPASS | PLL_BYPASS_TO_EXTERNAL_LVDS |
 		CCM_ANALOG_PLL_ARM_ENABLE | CCM_ANALOG_PLL_ARM_POWERDOWN |
 		CCM_ANALOG_PLL_ARM_DIV_SELECT_MASK;
-	if ((CCM_ANALOG_PLL_ARM & arm_pll_mask) != (CCM_ANALOG_PLL_ARM_LOCK
+	if ((CCM_ANALOG_PLL_ARM & arm_pll_mask) != (CCM_ANALOG_PLL_ARM_LOCK | PLL_BYPASS_TO_EXTERNAL_LVDS
 	  | CCM_ANALOG_PLL_ARM_ENABLE | CCM_ANALOG_PLL_ARM_DIV_SELECT(mult))) {
 		printf("ARM PLL needs reconfigure\n");
 		CCM_ANALOG_PLL_ARM = CCM_ANALOG_PLL_ARM_POWERDOWN;
 		// TODO: delay needed?
-		CCM_ANALOG_PLL_ARM = CCM_ANALOG_PLL_ARM_ENABLE
+		CCM_ANALOG_PLL_ARM = CCM_ANALOG_PLL_ARM_ENABLE | PLL_BYPASS_TO_EXTERNAL_LVDS
 			| CCM_ANALOG_PLL_ARM_DIV_SELECT(mult);
 		while (!(CCM_ANALOG_PLL_ARM & CCM_ANALOG_PLL_ARM_LOCK)) ; // wait for lock
 		printf("ARM PLL=%lx\n", CCM_ANALOG_PLL_ARM);
@@ -184,13 +194,6 @@ uint32_t set_arm_clock(uint32_t frequency)
 		DCDC_REG3 = dcdc;
 		while (!(DCDC_REG0 & DCDC_REG0_STS_DC_OK)) ; // wait voltage settling
 	}
-#ifdef ARDUINO_QUARTO
-	#ifdef QUARTO_PROTOTYPE
-		CCM_ANALOG_MISC1 = 0x00000412; //Set LVDS Output Clock to enable at XTAL 24 MHz
-	#else
-		CCM_ANALOG_MISC1 = 0x00001012; //Set LVDS Input Clock for 24 MHZ XTAL
-	#endif
-#endif
 	return frequency;
 }
 
