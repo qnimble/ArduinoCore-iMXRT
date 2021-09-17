@@ -92,6 +92,13 @@ void ResetHandler(void)
 	configure_cache();
 
 #ifdef ARDUINO_QUARTO
+	quarto_wdog_disable(); // turn off wdog
+		//Use Wakeup pin as reset to FPGA and set low (reset)
+		IOMUXC_SNVS_SW_PAD_CTL_PAD_WAKEUP = 0xB888u;
+		IOMUXC_SNVS_SW_MUX_CTL_PAD_WAKEUP = 0x15;
+		GPIO5_GDIR |= 0x01;
+		GPIO5_DR_CLEAR = 0x01;
+
 	#ifdef QUARTO_PROTOTYPE
 		#define PERCLK_SOURCE CCM_CSCMR1_PERCLK_CLK_SEL
 		#define PLL_BYPASS_TO_EXTERNAL_LVDS 0
@@ -107,14 +114,6 @@ void ResetHandler(void)
 
 		CCM_CCR &= ~(CCM_CCR_COSC_EN); //Turn off on-chip oscillator since we will use FPGA clock instead
 	#endif
-
-	quarto_wdog_disable(); // turn off wdog
-	//Use Wakeup pin as reset to FPGA and set low (reset)
-	IOMUXC_SNVS_SW_PAD_CTL_PAD_WAKEUP = 0xB888u;
-	IOMUXC_SNVS_SW_MUX_CTL_PAD_WAKEUP = 0x15;
-	GPIO5_GDIR |= 0x01;
-	GPIO5_DR_CLEAR = 0x01;
-
 #else
 	#define PLL_BYPASS_TO_EXTERNAL_LVDS 0
 	#define PERCLK_SOURCE CCM_CSCMR1_PERCLK_CLK_SEL
@@ -165,6 +164,15 @@ void ResetHandler(void)
 #ifdef F_CPU
 	set_arm_clock(F_CPU);
 #endif
+
+	if ((CCM_ANALOG_PLL_SYS & (1<<14) ) != PLL_BYPASS_TO_EXTERNAL_LVDS) {
+		//CCM_ANALOG_PLL_SYS |= CCM_ANALOG_PLL_SYS_POWERDOWN;
+		CCM_ANALOG_PLL_SYS &= ~(1<<14); //14bit is bypass source, clear it
+		CCM_ANALOG_PLL_SYS |= PLL_BYPASS_TO_EXTERNAL_LVDS;
+		//CCM_ANALOG_PLL_SYS &= ~CCM_ANALOG_PLL_SYS_POWERDOWN; //power back up
+		while (!(CCM_ANALOG_PLL_SYS & CCM_ANALOG_PLL_SYS_LOCK)) ; // wait for lock
+  }
+
 
 	asm volatile("nop\n nop\n nop\n nop": : :"memory"); // why oh why?
 
@@ -729,6 +737,14 @@ FLASHMEM void usb_pll_start()
 				CCM_ANALOG_PLL_USB1_EN_USB_CLKS;		// disable usb
 			continue;
 		}
+
+		if ((n & 0xC000) != PLL_BYPASS_TO_EXTERNAL_LVDS) {
+			CCM_ANALOG_PLL_USB1_CLR = (0xC000); //14bit is bypass source, clear it
+			CCM_ANALOG_PLL_USB1_SET = CCM_ANALOG_PLL_USB1_BYPASS | PLL_BYPASS_TO_EXTERNAL_LVDS;
+			CCM_ANALOG_PLL_USB1_CLR = CCM_ANALOG_PLL_USB1_POWER | CCM_ANALOG_PLL_USB1_ENABLE |  CCM_ANALOG_PLL_USB1_EN_USB_CLKS;
+			continue;
+		}
+
 		if (!(n & CCM_ANALOG_PLL_USB1_ENABLE)) {
 			printf("  enable PLL\n");
 			// TODO: should this be done so early, or later??
