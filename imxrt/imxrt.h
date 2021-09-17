@@ -7932,13 +7932,16 @@ typedef struct
 #define SRC_SBMR1			(IMXRT_SRC.offset004)
 #define SRC_SRSR			(IMXRT_SRC.offset008)
 #define SRC_SBMR2			(IMXRT_SRC.offset01C)
+
+
+#define SRC_GPR5			(IMXRT_SRC.offset030) //useful for determining reason of reboot
 /* 
 These register are used by the ROM code and should not be used by application software 
 #define SRC_GPR1			(IMXRT_SRC.offset020) 
 #define SRC_GPR2			(IMXRT_SRC.offset024)
 #define SRC_GPR3			(IMXRT_SRC.offset028)
 #define SRC_GPR4			(IMXRT_SRC.offset02C)
-#define SRC_GPR5			(IMXRT_SRC.offset030)
+//#define SRC_GPR5			(IMXRT_SRC.offset030)
 #define SRC_GPR6			(IMXRT_SRC.offset034)
 #define SRC_GPR7			(IMXRT_SRC.offset038)
 #define SRC_GPR8			(IMXRT_SRC.offset03C)

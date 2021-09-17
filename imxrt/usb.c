@@ -335,6 +335,7 @@ static void isr(void)
 		if (usb_reboot_timer) {
 			if (--usb_reboot_timer == 0) {
 				usb_stop_sof_interrupts(NUM_INTERFACE);
+				SRC_GPR5 = 0x1234ABCD; //set to value so we know on reboot/crash
 				asm volatile ("dsb");        /* Ensure all outstanding memory accesses included
 						                        buffered write are completed before reset */
 				SCB_AIRCR = 0x05FA0004;

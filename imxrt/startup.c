@@ -74,6 +74,10 @@ void ResetHandler(void)
 	SYST_CSR = 0; // Disable SysTick at boot
 	WDOG3_CNT = 0xB480A602; //Feed wdog3
 
+	#ifndef USB_REBOOT_DISABLE //Skip if bootloader ie no reboot on USB
+		SRC_GPR5 = 0xFFFFEEEE; //Reset register on boot so registered on USB reboot can be detected
+	#endif
+
 #if defined(__IMXRT1062__)
 	IOMUXC_GPR_GPR17 = (uint32_t)&_flexram_bank_config;
 	IOMUXC_GPR_GPR14 = 0x00AA0000;
