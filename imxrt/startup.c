@@ -71,6 +71,7 @@ void ResetHandler(void)
 	// Disable interrupts
 	__asm volatile ("cpsid i");
 	SCB_MPU_CTRL = 0; // turn off MPU
+	SYST_CSR = 0; // Disable SysTick at boot
 	WDOG3_CNT = 0xB480A602; //Feed wdog3
 
 #if defined(__IMXRT1062__)
