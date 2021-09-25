@@ -58,8 +58,6 @@ extern unsigned int __bss_section_table;
 extern unsigned int __bss_section_table_end;
 
 
-extern uint32_t* keep_trick;
-
 extern int main (void);
 void startup_default_early_hook(void) {}
 void startup_early_hook(void)		__attribute__ ((weak, alias("startup_default_early_hook")));
@@ -267,9 +265,6 @@ FLASHMEM void init_nvic(void) {
        }
        SCB_VTOR = (uint32_t)_VectorsRam;
        /* Keep boot related data from being stripped from binary */
-       __attribute__((unused)) volatile uint32_t hack;
-       hack = (uint32_t) keep_trick;
-
 }
 
 
