@@ -93,16 +93,20 @@ void ResetHandler(void)
 	configure_cache();
 
 #ifdef ARDUINO_QUARTO
-	#ifndef USB_REBOOT_DISABLE //Skip if bootloader ie no reboot on USB
+	#ifdef USB_REBOOT_DISABLE //if bootloader, then reset wdog
+		quarto_wdog_disable(); // turn off wdog
+		quarto_wdog_init(635); // turn on wdog
+	#else  //Skip if not bootloader
 		SRC_GPR5 = 0xFFFFEEEE; //Reset register on boot so registered on USB reboot can be detected
 	#endif
 
-	quarto_wdog_disable(); // turn off wdog
-		//Use Wakeup pin as reset to FPGA and set low (reset)
-		IOMUXC_SNVS_SW_PAD_CTL_PAD_WAKEUP = 0xB888u;
-		IOMUXC_SNVS_SW_MUX_CTL_PAD_WAKEUP = 0x15;
-		GPIO5_GDIR |= 0x01;
-		GPIO5_DR_CLEAR = 0x01;
+	//Use Wakeup pin as reset to FPGA and set low (reset)
+	IOMUXC_SNVS_SW_PAD_CTL_PAD_WAKEUP = 0xB888u;
+	IOMUXC_SNVS_SW_MUX_CTL_PAD_WAKEUP = 0x15;
+	GPIO5_GDIR |= 0x01;
+	GPIO5_DR_CLEAR = 0x01;
+
+
 
 	#ifdef QUARTO_PROTOTYPE
 		#define PERCLK_SOURCE CCM_CSCMR1_PERCLK_CLK_SEL
@@ -132,7 +136,7 @@ void ResetHandler(void)
 	init_nvic();
 
 	reset_PFD();
-	
+
 	// Configure clocks
 	// TODO: make sure all affected peripherals are turned off!
 	// PIT & GPT timers to run from 24 MHz clock (independent of CPU speed)
@@ -154,6 +158,7 @@ void ResetHandler(void)
 #if defined(ARDUINO_QUARTO)
 	//Set Wakeup pin high to enable FPGA
 	GPIO5_DR_SET = 0x01;
+	delayNanoseconds(5000); //wait 5ms for clock to start after FPGA reset
 #endif
 
 
@@ -164,7 +169,7 @@ void ResetHandler(void)
 
 	//configure_cache();
 	configure_systick();
-	usb_pll_start();	
+	usb_pll_start();
 	reset_PFD(); //TODO: is this really needed?
 #ifdef F_CPU
 	set_arm_clock(F_CPU);
@@ -220,8 +225,6 @@ void ResetHandler(void)
 #if defined(ARDUINO_QUARTO)
 	quarto_init();
 #endif
-
-
 	startup_late_hook();
 	while (millis() < 300) ; // wait at least 300ms before calling user code
 	//printf("before C++ constructors\n");
@@ -365,6 +368,9 @@ FLASHMEM void configure_pins(void) {
         GPIO8_GDIR = 0x07; //Set LEDs as outputs
         GPIO8_DR_CLEAR = 0x07; //Turn off LED
         GPIO7_GDIR = 0xFFFFF; //Set DAC Update pins as outputs
+        GPIO6_GDIR &= ~(0x03); //Set triggers as inputs
+        GPIO6_DR_CLEAR = 0x03; //Set trigger to low.
+
         //GPIO6_GDIR = 0x30; //Set BM as outputs for Read / ADC ACK
         GPIO6_GDIR |= ADC_ACK_PIN;
         GPIO6_GDIR |= READDATA_ACK_PIN;
@@ -726,7 +732,6 @@ FLASHMEM void quarto_init(void) {
 
 	__asm volatile ("cpsie i");
 
-	quarto_wdog_init(635); // turn on wdog
 }
 #endif
 
