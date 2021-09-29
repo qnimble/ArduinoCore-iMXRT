@@ -12,7 +12,7 @@ SECTIONS
 {
      /* Image Vector Table and Boot Data for booting from external flash */
      
-    /DISCARD/ : ALIGN(4)
+    "/DISCARD/" : ALIGN(4)
     {
         *(.boot_hdr.conf)
         *(.boot_hdr.ivt)
