@@ -94,8 +94,7 @@ void ResetHandler(void)
 
 #ifdef ARDUINO_QUARTO
 	#ifdef USB_REBOOT_DISABLE //if bootloader, then reset wdog
-		quarto_wdog_disable(); // turn off wdog
-		quarto_wdog_init(635); // turn on wdog
+
 	#else  //Skip if not bootloader
 		SRC_GPR5 = 0xFFFFEEEE; //Reset register on boot so registered on USB reboot can be detected
 	#endif
@@ -159,6 +158,8 @@ void ResetHandler(void)
 	//Set Wakeup pin high to enable FPGA
 	GPIO5_DR_SET = 0x01;
 	delayNanoseconds(5000); //wait 5ms for clock to start after FPGA reset
+	quarto_wdog_disable(); // turn off wdog to reinit with new values
+	quarto_wdog_init(635); // turn on wdog
 #endif
 
 
