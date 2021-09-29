@@ -204,8 +204,6 @@ void ResetHandler(void)
 
 #ifdef ARDUINO_TEENSY41
 	configure_external_ram();
-#elif defined(ARDUINO_QUARTO)
-	quarto_init();
 #endif
 
 
@@ -218,6 +216,12 @@ void ResetHandler(void)
 	pwm_init();
 	tempmon_init();
 	configure_pins();
+
+#if defined(ARDUINO_QUARTO)
+	quarto_init();
+#endif
+
+
 	startup_late_hook();
 	while (millis() < 300) ; // wait at least 300ms before calling user code
 	//printf("before C++ constructors\n");
