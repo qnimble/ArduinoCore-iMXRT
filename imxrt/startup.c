@@ -129,7 +129,6 @@ void ResetHandler(void)
 	#define PERCLK_SOURCE CCM_CSCMR1_PERCLK_CLK_SEL
 	#define PERCLK_DIVIDER 0
 #endif
-
 	// enable FPU
 	SCB_CPACR = 0x00F00000;
 
@@ -812,20 +811,32 @@ FLASHMEM void approxMSdelay(unsigned int ms) {
 }
 
 
-
+#define PFDX_STABLE_MASK 0x40404040
 FLASHMEM  void reset_PFD()
 {
-	//Reset PLL2 PFDs, set default frequencies:
+	uint32_t pins;
 
-	CCM_ANALOG_PFD_528_SET = (1 << 31) | (1 << 23) | (1 << 15) | (1 << 7);
-	approxMSdelay(1);
-	CCM_ANALOG_PFD_528 = 0x2018101B; // PFD0:352, PFD1:594, PFD2:396, PFD3:297 MHz
-	approxMSdelay(1);
+	//Reset PLL2 PFDs, set default frequencies:
+	if ( (CCM_ANALOG_PFD_528 & ~PFDX_STABLE_MASK)  != 0x2018101B ) {
+		//PFD_528 not configured right, must change
+		pins = CCM_ANALOG_PFD_528 & PFDX_STABLE_MASK; //read PFDX_STABLE pins
+		//CCM_ANALOG_PFD_528_SET = (1 << 31) | (1 << 23) | (1 << 15) | (1 << 7); //turn off PLL
+		//approxMSdelay(1);
+		CCM_ANALOG_PFD_528 = 0x2018101B; // PFD0:352, PFD1:594, PFD2:396, PFD3:297 MHz
+		while ( (CCM_ANALOG_PFD_528 & PFDX_STABLE_MASK) != ((~pins) & PFDX_STABLE_MASK)){
+			approxMSdelay(1);
+		}
+	}
 	//PLL3:
-	CCM_ANALOG_PFD_480_SET = (1 << 31) | (1 << 23) | (1 << 15) | (1 << 7);
-	approxMSdelay(1);
-	CCM_ANALOG_PFD_480 = 0x13110D0C; // PFD0:720, PFD1:664, PFD2:508, PFD3:454 MHz
-	approxMSdelay(1);
+	if (( CCM_ANALOG_PFD_480 & ~PFDX_STABLE_MASK ) != 0x13110D0C) {
+		//CCM_ANALOG_PFD_480_SET = (1 << 31) | (1 << 23) | (1 << 15) | (1 << 7);
+		//approxMSdelay(1);
+		pins = CCM_ANALOG_PFD_480 & PFDX_STABLE_MASK; //read PFDX_STABLE pins
+		CCM_ANALOG_PFD_480 = 0x13110D0C; // PFD0:720, PFD1:664, PFD2:508, PFD3:454 MHz
+		while ( (CCM_ANALOG_PFD_480 & PFDX_STABLE_MASK) != ((~pins) & PFDX_STABLE_MASK)){
+			approxMSdelay(1);
+		}
+	}
 }
 
 // Stack frame
