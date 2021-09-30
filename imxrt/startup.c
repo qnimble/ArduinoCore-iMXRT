@@ -812,30 +812,52 @@ FLASHMEM void approxMSdelay(unsigned int ms) {
 
 
 #define PFDX_STABLE_MASK 0x40404040
+FLASHMEM uint32_t generateMask(uint32_t current_setting, uint32_t target_setting) {
+	target_setting &= ~PFDX_STABLE_MASK; //mask off stable bits
+	uint32_t pins = 0;
+	uint8_t current_pll;
+	uint8_t target_pll;
+	if ( (current_setting & ~PFDX_STABLE_MASK) != target_setting ) {
+		//PFD not configured right, must change
+		for(int i=0; i<4; i++) {
+			current_pll = current_setting>>(8*i);
+			target_pll = target_setting>>(8*i);
+			if ((current_pll & ~0x40 ) != target_pll) {
+				//will make change, expect stable mask to toggle
+				if ( (current_pll & 0x40) == 0) {
+					//starts low, so now high
+					pins |= (0x40)<<(8*i);
+				}
+			} else {
+				// no change, pin should stay the same
+				pins |= (current_pll  & 0x40)<<(8*i);
+			}
+		}
+	} else {
+		//no change,
+		pins = current_setting & PFDX_STABLE_MASK;
+	}
+	return pins;
+}
+
+
+
 FLASHMEM  void reset_PFD()
 {
-	uint32_t pins;
+	uint32_t pins = 0;
 
-	//Reset PLL2 PFDs, set default frequencies:
-	if ( (CCM_ANALOG_PFD_528 & ~PFDX_STABLE_MASK)  != 0x2018101B ) {
-		//PFD_528 not configured right, must change
-		pins = CCM_ANALOG_PFD_528 & PFDX_STABLE_MASK; //read PFDX_STABLE pins
-		//CCM_ANALOG_PFD_528_SET = (1 << 31) | (1 << 23) | (1 << 15) | (1 << 7); //turn off PLL
-		//approxMSdelay(1);
-		CCM_ANALOG_PFD_528 = 0x2018101B; // PFD0:352, PFD1:594, PFD2:396, PFD3:297 MHz
-		while ( (CCM_ANALOG_PFD_528 & PFDX_STABLE_MASK) != ((~pins) & PFDX_STABLE_MASK)){
-			approxMSdelay(1);
-		}
+	//PLL2 PFDs:
+	pins = generateMask(CCM_ANALOG_PFD_528,0x2018101B);
+	CCM_ANALOG_PFD_528 = 0x2018101B;
+	while ( (CCM_ANALOG_PFD_528 & PFDX_STABLE_MASK) != pins){
+		approxMSdelay(1);
 	}
+
 	//PLL3:
-	if (( CCM_ANALOG_PFD_480 & ~PFDX_STABLE_MASK ) != 0x13110D0C) {
-		//CCM_ANALOG_PFD_480_SET = (1 << 31) | (1 << 23) | (1 << 15) | (1 << 7);
-		//approxMSdelay(1);
-		pins = CCM_ANALOG_PFD_480 & PFDX_STABLE_MASK; //read PFDX_STABLE pins
-		CCM_ANALOG_PFD_480 = 0x13110D0C; // PFD0:720, PFD1:664, PFD2:508, PFD3:454 MHz
-		while ( (CCM_ANALOG_PFD_480 & PFDX_STABLE_MASK) != ((~pins) & PFDX_STABLE_MASK)){
-			approxMSdelay(1);
-		}
+	pins = generateMask(CCM_ANALOG_PFD_480,0x13110D0C);
+	CCM_ANALOG_PFD_480 = 0x13110D0C; // PFD0:720, PFD1:664, PFD2:508, PFD3:454 MHz
+	while ( (CCM_ANALOG_PFD_480 & PFDX_STABLE_MASK) != pins) {
+		approxMSdelay(1);
 	}
 }
 
