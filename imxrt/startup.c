@@ -31,6 +31,8 @@ int printf(const char *test,...) {
 
 void data_init(unsigned int romstart, unsigned int start, unsigned int len);
 void bss_init(unsigned int start, unsigned int len);
+void approxMSdelay(unsigned int ms);
+void foreverLoopAndToggle(void);
 
 static void configure_systick(void);
 static void reset_PFD();
@@ -133,9 +135,7 @@ void ResetHandler(void)
 
 	// set up blank interrupt & exception vector table
 	init_nvic();
-
 	reset_PFD();
-
 	// Configure clocks
 	// TODO: make sure all affected peripherals are turned off!
 	// PIT & GPT timers to run from 24 MHz clock (independent of CPU speed)
@@ -157,11 +157,10 @@ void ResetHandler(void)
 #if defined(ARDUINO_QUARTO)
 	//Set Wakeup pin high to enable FPGA
 	GPIO5_DR_SET = 0x01;
-	delayNanoseconds(5000); //wait 5ms for clock to start after FPGA reset
+	approxMSdelay(5);
 	quarto_wdog_disable(); // turn off wdog to reinit with new values
 	quarto_wdog_init(635); // turn on wdog
 #endif
-
 
 	// must enable PRINT_DEBUG_STUFF in debug/print.h
 	printf_debug_init();
@@ -175,7 +174,6 @@ void ResetHandler(void)
 #ifdef F_CPU
 	set_arm_clock(F_CPU);
 #endif
-
 	if ((CCM_ANALOG_PLL_SYS & (1<<14) ) != PLL_BYPASS_TO_EXTERNAL_LVDS) {
 		//CCM_ANALOG_PLL_SYS |= CCM_ANALOG_PLL_SYS_POWERDOWN;
 		CCM_ANALOG_PLL_SYS &= ~(1<<14); //14bit is bypass source, clear it
@@ -190,7 +188,6 @@ void ResetHandler(void)
 	//Reenable interrupts
 	__asm volatile ("cpsie i");
 
-
 	// Undo PIT timer usage by ROM startup
 	CCM_CCGR1 |= CCM_CCGR1_PIT(CCM_CCGR_ON);
 	PIT_MCR = 0;
@@ -198,7 +195,6 @@ void ResetHandler(void)
 	PIT_TCTRL1 = 0;
 	PIT_TCTRL2 = 0;
 	PIT_TCTRL3 = 0;
-
 	// initialize RTC
 	if (!(SNVS_LPCR & SNVS_LPCR_SRTC_ENV)) {
 		// if SRTC isn't running, start it with default Jan 1, 2019
@@ -222,7 +218,6 @@ void ResetHandler(void)
 	pwm_init();
 	tempmon_init();
 	configure_pins();
-
 #if defined(ARDUINO_QUARTO)
 	quarto_init();
 #endif
@@ -791,15 +786,46 @@ FLASHMEM void usb_pll_start()
 	}
 }
 
- void reset_PFD()
+
+
+
+FLASHMEM void foreverLoopAndToggle(void) {
+	GPIO6_GDIR = 0x03;
+	GPIO1_GDIR = 0x03;
+	while(1) {
+		GPIO6_DR_SET = 0x03;
+		GPIO1_DR_SET = 0x03;
+		asm volatile("nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;");
+		asm volatile("nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;");
+		GPIO6_DR_CLEAR = 0x03;
+		GPIO1_DR_CLEAR = 0x03;
+		asm volatile("nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;");
+		asm volatile("nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;");
+	}
+}
+
+
+FLASHMEM void approxMSdelay(unsigned int ms) {
+	volatile unsigned int i;
+	unsigned int loops = ms*12500;
+	for(i=0;i<loops;i++);
+}
+
+
+
+FLASHMEM  void reset_PFD()
 {
 	//Reset PLL2 PFDs, set default frequencies:
 
 	CCM_ANALOG_PFD_528_SET = (1 << 31) | (1 << 23) | (1 << 15) | (1 << 7);
+	approxMSdelay(1);
 	CCM_ANALOG_PFD_528 = 0x2018101B; // PFD0:352, PFD1:594, PFD2:396, PFD3:297 MHz
+	approxMSdelay(1);
 	//PLL3:
 	CCM_ANALOG_PFD_480_SET = (1 << 31) | (1 << 23) | (1 << 15) | (1 << 7);
+	approxMSdelay(1);
 	CCM_ANALOG_PFD_480 = 0x13110D0C; // PFD0:720, PFD1:664, PFD2:508, PFD3:454 MHz
+	approxMSdelay(1);
 }
 
 // Stack frame
