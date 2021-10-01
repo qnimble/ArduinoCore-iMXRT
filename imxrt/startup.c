@@ -272,10 +272,6 @@ FLASHMEM void init_nvic(void) {
     	   NVIC_DISABLE_IRQ(i);
        }
        SCB_VTOR = (uint32_t)_VectorsRam;
-       /* Keep boot related data from being stripped from binary */
-       __attribute__((unused)) volatile uint32_t hack;
-       hack = (uint32_t) keep_trick;
-
 }
 
 
@@ -373,6 +369,12 @@ FLASHMEM void configure_pins(void) {
         //GPIO6_GDIR = 0x30; //Set BM as outputs for Read / ADC ACK
         GPIO6_GDIR |= ADC_ACK_PIN;
         GPIO6_GDIR |= READDATA_ACK_PIN;
+
+
+	/* Keep boot related data from being stripped from binary */
+	GPIO6_PSR = (uint32_t) keep_trick; //PSR is read only, this does nothing
+
+
 }
 
 
