@@ -107,8 +107,6 @@ void ResetHandler(void)
 	GPIO5_GDIR |= 0x01;
 	GPIO5_DR_CLEAR = 0x01;
 
-
-
 	#ifdef QUARTO_PROTOTYPE
 		#define PERCLK_SOURCE CCM_CSCMR1_PERCLK_CLK_SEL
 		#define PLL_BYPASS_TO_EXTERNAL_LVDS 0
@@ -149,12 +147,18 @@ void ResetHandler(void)
 #if defined(__IMXRT1062__)
 	// Use fast GPIO6, GPIO7, GPIO8, GPIO9
 	IOMUXC_GPR_GPR26 = 0xFFFFFFFF;
-	IOMUXC_GPR_GPR27 = 0xFFFFFFFF;
+	#if defined(ARDUINO_QUARTO)
+		IOMUXC_GPR_GPR27 = 0xFFF00000; //keep DATA lines on slow GPIO
+	#else
+		IOMUXC_GPR_GPR27 = 0xFFFFFFFF;
+	#endif
 	IOMUXC_GPR_GPR28 = 0xFFFFFFFF;
 	IOMUXC_GPR_GPR29 = 0xFFFFFFFF;
 #endif
 #if defined(ARDUINO_QUARTO)
 	//Set Wakeup pin high to enable FPGA
+	GPIO2_DR = 0; //clear all the write pins
+	GPIO2_GDIR = 0xFFFFF; //set GPIO2 as output
 	GPIO5_DR_SET = 0x01;
 	approxMSdelay(5);
 	quarto_wdog_disable(); // turn off wdog to reinit with new values
@@ -362,7 +366,7 @@ FLASHMEM void configure_pins(void) {
 
         GPIO8_GDIR = 0x07; //Set LEDs as outputs
         GPIO8_DR_CLEAR = 0x07; //Turn off LED
-        GPIO7_GDIR = 0xFFFFF; //Set DAC Update pins as outputs
+        GPIO2_GDIR = 0xFFFFF; //Set DAC Update pins as outputs
         GPIO6_GDIR &= ~(0x03); //Set triggers as inputs
         GPIO6_DR_CLEAR = 0x03; //Set trigger to low.
 
@@ -672,35 +676,35 @@ void adc4_irq_ignoredata(void) {
 
 FLASHMEM void quarto_init(void) {
 	#include "adc.h"
-	GPIO7_DR_TOGGLE = (0x000B0000 + 0x010); //Set Write address to 0x010 for Enabling Analog
+	GPIO2_DR_TOGGLE = (0x000B0000 + 0x010); //Set Write address to 0x010 for Enabling Analog
 
 	//Clear stale Data if available.
 	READDATA_ACK_BANK_TOGGLE = READDATA_ACK_PIN; // Ack Read Data
 	ADC_ACK_BANK_TOGGLE = ADC_ACK_PIN; // ACK ADC Data
 
-	GPIO7_DR_TOGGLE = (0x000D0000 + 0x03); //Enable Analog Clock, Analog,
+	GPIO2_DR_TOGGLE = (0x000D0000 + 0x03); //Enable Analog Clock, Analog,
 
 	delay(50);
 
-	GPIO7_DR_TOGGLE = 0x00010000; //Set DAC1 to 0x0000 or 0V
+	GPIO2_DR_TOGGLE = 0x00010000; //Set DAC1 to 0x0000 or 0V
 
 	//Clear stale Data if available.
 	READDATA_ACK_BANK_TOGGLE = READDATA_ACK_PIN; // Ack Read Data
 	ADC_ACK_BANK_TOGGLE = ADC_ACK_PIN; // ACK ADC Data
 
-	GPIO7_DR_TOGGLE = 0x00030000; //Set DAC2 to 0x0000 or 0V
+	GPIO2_DR_TOGGLE = 0x00030000; //Set DAC2 to 0x0000 or 0V
 
 	//Clear stale Data if available.
 	READDATA_ACK_BANK_TOGGLE = READDATA_ACK_PIN; // Ack Read Data
 	ADC_ACK_BANK_TOGGLE = ADC_ACK_PIN; // ACK ADC Data
 
-	GPIO7_DR_TOGGLE = 0x00050000; //Set DAC3 to 0x0000 or 0V
+	GPIO2_DR_TOGGLE = 0x00050000; //Set DAC3 to 0x0000 or 0V
 
 	//Clear stale Data if available.
 	READDATA_ACK_BANK_TOGGLE = READDATA_ACK_PIN; // Ack Read Data
 	ADC_ACK_BANK_TOGGLE = ADC_ACK_PIN; // ACK ADC Data
 
-	GPIO7_DR_TOGGLE = 0x00070000; //Set DAC4 to 0x0000 or 0V
+	GPIO2_DR_TOGGLE = 0x00070000; //Set DAC4 to 0x0000 or 0V
 
 	//Clear stale Data if available.
 	READDATA_ACK_BANK_TOGGLE = READDATA_ACK_PIN; // Ack Read Data
@@ -708,7 +712,7 @@ FLASHMEM void quarto_init(void) {
 
 	delay(1);
 
-	GPIO7_DR_TOGGLE = (0x000D0000 + 0x07); //Enable Vref.
+	GPIO2_DR_TOGGLE = (0x000D0000 + 0x07); //Enable Vref.
 
 	//Clear stale Data if available.
 	READDATA_ACK_BANK_TOGGLE = READDATA_ACK_PIN; // Ack Read Data
@@ -723,7 +727,7 @@ FLASHMEM void quarto_init(void) {
 	configureADC4(0,0,BIPOLAR_10V,&adc4_irq_ignoredata);
 
 
-	GPIO7_DR_TOGGLE = (0x000B0000 + 0x03FFF); //Magic Command to Reset ADC/DAC Data
+	GPIO2_DR_TOGGLE = (0x000B0000 + 0x03FFF); //Magic Command to Reset ADC/DAC Data
 
 	__asm volatile ("cpsie i");
 

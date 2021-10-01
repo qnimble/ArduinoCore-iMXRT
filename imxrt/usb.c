@@ -336,6 +336,15 @@ static void isr(void)
 			if (--usb_reboot_timer == 0) {
 				usb_stop_sof_interrupts(NUM_INTERFACE);
 				SRC_GPR5 = 0x1234ABCD; //set to value so we know on reboot/crash
+#ifdef ARDUINO_QUARTO
+				if ( GPIO2_DR & 0x10000) {
+					//DATA GO pin is high
+					GPIO2_DR = 0x90000; //No command, but preps for command 4
+					GPIO2_DR = 0x0000; // Issue Cmd4 with no args to reset GPIO2 to 0.
+				} else {
+					GPIO2_DR = 0;
+				}
+#endif
 				asm volatile ("dsb");        /* Ensure all outstanding memory accesses included
 						                        buffered write are completed before reset */
 				SCB_AIRCR = 0x05FA0004;
