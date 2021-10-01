@@ -39,17 +39,17 @@ SECTIONS
         LONG(LOADADDR(.data.ITCM));
         LONG(    ADDR(.data.ITCM));
         LONG(  SIZEOF(.data.ITCM));
-        LONG(LOADADDR(.data.ram));
-        LONG(    ADDR(.data.ram));
-        LONG(  SIZEOF(.data.ram));
+        LONG(LOADADDR(.data.RAM));
+        LONG(    ADDR(.data.RAM));
+        LONG(  SIZEOF(.data.RAM));
         __data_section_table_end = .;
         __bss_section_table = .;
         LONG(    ADDR(.bss.DTCM));
         LONG(  SIZEOF(.bss.DTCM));
         LONG(    ADDR(.bss.ITCM));
         LONG(  SIZEOF(.bss.ITCM));
-        LONG(   ADDR(.bss.ram));
-        LONG(  SIZEOF(.bss.ram));
+        LONG(   ADDR(.bss.RAM));
+        LONG(  SIZEOF(.bss.RAM));
          __bss_section_table_end = .;
         __section_table_end = . ;
         /* End of Global Section Table */
@@ -80,7 +80,7 @@ SECTIONS
      * with C++ and STDC++) use this.
      */
      
-    .bss.ram (NOLOAD) : {
+    .bss.RAM (NOLOAD) : {
        PROVIDE(__start_bss_OC = .) ;
      	PROVIDE(__start_bss_RAM3 = .) ;
        PROVIDE(__start_bss_SRAM_OC = .) ;
@@ -145,7 +145,7 @@ SECTIONS
  	
 
 
-    .data.ram : ALIGN(4)
+    .data.RAM : ALIGN(4)
     {
         FILL(0xff)
         PROVIDE(__start_data_RAM3 = .) ;
@@ -231,7 +231,7 @@ SECTIONS
 	_flexram_bank_config = 0xAAAAAAAA | ((1 << (_itcm_block_count * 2)) - 1);
 	_estack = ORIGIN(DTCM) + ((16 - _itcm_block_count) << 15) - 32;
     _vStackTop = 0x2001f000; /* Initial Stack pointer */
-     _heap_start = ADDR(.data.ram) + SIZEOF(.data.ram);
+     _heap_start = ADDR(.data.RAM) + SIZEOF(.data.RAM);
     _heap_end = ORIGIN(RAM) + LENGTH(RAM);
     
     
