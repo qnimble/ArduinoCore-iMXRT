@@ -91,6 +91,7 @@ void ResetHandler(void)
 	//GPIO7_DR_SET = (1<<3); // digitalWrite(13, HIGH);
 
 	// Initialize memory
+
 	init_memory();
 	configure_cache();
 
@@ -460,9 +461,10 @@ FLASHMEM void configure_cache(void)
 	SCB_MPU_RBAR = 0x60000000 | REGION(i++); // QSPI Flash
 	SCB_MPU_RASR = MEM_CACHE_WBWA | READONLY | SIZE_8M;
 
-	//SCB_MPU_RBAR = 0x70000000 | REGION(i++); // FlexSPI2
-	//SCB_MPU_RASR = MEM_CACHE_WBWA | READONLY | /*NOEXEC |*/ SIZE_4M;
-
+#ifdef QUARTO_PROTOTYPE
+	SCB_MPU_RBAR = 0x70000000 | REGION(i++); // FlexSPI2
+	SCB_MPU_RASR = MEM_CACHE_WBWA | READONLY | /*NOEXEC |*/ SIZE_4M;
+#endif
 	SCB_MPU_RBAR = 0x80000000 | REGION(i++); // External SDRAM
 	SCB_MPU_RASR = MEM_CACHE_WBWA | READWRITE | SIZE_32M;
 
