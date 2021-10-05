@@ -67,7 +67,7 @@ void startup_default_early_hook(void) {}
 void startup_early_hook(void)		__attribute__ ((weak, alias("startup_default_early_hook")));
 void startup_default_late_hook(void) {}
 void startup_late_hook(void)		__attribute__ ((weak, alias("startup_default_late_hook")));
-__attribute__((section(".startup"), optimize("no-tree-loop-distribute-patterns"), naked))
+__attribute__((section(".startup"), optimize("no-tree-loop-distribute-patterns")))
 void ResetHandler(void)
 {
 	// Disable interrupts
@@ -188,8 +188,6 @@ void ResetHandler(void)
 		while (!(CCM_ANALOG_PLL_SYS & CCM_ANALOG_PLL_SYS_LOCK)) ; // wait for lock
   }
 
-
-	asm volatile("nop\n nop\n nop\n nop": : :"memory"); // why oh why?
 
 	//Reenable interrupts
 	__asm volatile ("cpsie i");
