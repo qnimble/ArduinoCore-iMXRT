@@ -3,6 +3,8 @@
 #include "usb_dev.h"
 #include "avr/pgmspace.h"
 #include "smalloc.h"
+#include <string.h>
+
 #if defined(ARDUINO_QUARTO)
 #include "quarto_wdog.h"
 #endif
