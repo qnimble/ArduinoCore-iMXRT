@@ -36,6 +36,7 @@
 
 #define FILE_READ  0
 #define FILE_WRITE 1
+#define FILE_WRITE_BEGIN 2
 
 enum SeekMode {
 	SeekSet = 0,
@@ -101,13 +102,16 @@ public:
 	virtual void flush() {
 		if (f) f->flush();
 	}
-	virtual bool seek(uint32_t pos, int mode) {
+	virtual bool truncate(uint64_t size=0) {
+		return (f) ? f->truncate(size) : false;
+	}
+	virtual bool seek(uint64_t pos, int mode) {
 		return (f) ? f->seek(pos, mode) : false;
 	}
-	virtual uint32_t position() {
+	virtual uint64_t position() {
 		return (f) ? f->position() : 0;
 	}
-	virtual uint32_t size() {
+	virtual uint64_t size() {
 		return (f) ? f->size() : 0;
 	}
 	virtual void close() {
@@ -128,7 +132,7 @@ public:
 	virtual void rewindDirectory(void) {
 		if (f) f->rewindDirectory();
 	}
-	bool seek(uint32_t pos) {
+	bool seek(uint64_t pos) {
 		return seek(pos, SeekSet);
 	}
 	int read() {
@@ -164,14 +168,14 @@ class FS
 {
 public:
 	FS() {}
-	virtual File open(const char *filename, uint8_t mode = FILE_READ);
-	virtual bool exists(const char *filepath);
-	virtual bool mkdir(const char *filepath);
-	virtual bool rename(const char *oldfilepath, const char *newfilepath);
-	virtual bool remove(const char *filepath);
-	virtual bool rmdir(const char *filepath);
-	virtual uint64_t usedSize();
-	virtual uint64_t totalSize();
+	virtual File open(const char *filename, uint8_t mode = FILE_READ) = 0;
+	virtual bool exists(const char *filepath) = 0;
+	virtual bool mkdir(const char *filepath) = 0;
+	virtual bool rename(const char *oldfilepath, const char *newfilepath) = 0;
+	virtual bool remove(const char *filepath) = 0;
+	virtual bool rmdir(const char *filepath) = 0;
+	virtual uint64_t usedSize() = 0;
+	virtual uint64_t totalSize() = 0;
 };
 
 
