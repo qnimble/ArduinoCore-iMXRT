@@ -89,6 +89,7 @@ void ResetHandler(void)
 	IOMUXC_GPR_GPR14 = 0x00AA0000;
 	IOMUXC_GPR_GPR16 = 0x00200007;
 	__asm__ volatile("mov sp, %0" : : "r" ((uint32_t)&_estack) : );
+	__asm__ volatile("dsb":::"memory");
 #endif
 	PMU_MISC0_SET = 1<<3; //Use bandgap-based bias currents for best performance (Page 1175)
 	// pin 13 - if startup crashes, use this to turn on the LED early for troubleshooting
@@ -466,15 +467,26 @@ FLASHMEM void configure_cache(void)
 	SCB_MPU_RBAR = 0x40000000 | REGION(i++); // Peripherals
 	SCB_MPU_RASR = DEV_NOCACHE | READWRITE | NOEXEC | SIZE_64M;
 
+
+#ifdef ARDUINO_QUARTO
 	SCB_MPU_RBAR = 0x60000000 | REGION(i++); // QSPI Flash
 	SCB_MPU_RASR = MEM_CACHE_WBWA | READONLY | SIZE_8M;
 
-#ifdef QUARTO_PROTOTYPE
+	#ifdef QUARTO_PROTOTYPE
 	SCB_MPU_RBAR = 0x70000000 | REGION(i++); // FlexSPI2
 	SCB_MPU_RASR = MEM_CACHE_WBWA | READONLY | /*NOEXEC |*/ SIZE_4M;
-#endif
+	#endif
+
 	SCB_MPU_RBAR = 0x80000000 | REGION(i++); // External SDRAM
 	SCB_MPU_RASR = MEM_CACHE_WBWA | READWRITE | SIZE_32M;
+
+#else
+	SCB_MPU_RBAR = 0x60000000 | REGION(i++); // QSPI Flash
+	SCB_MPU_RASR = MEM_CACHE_WBWA | READONLY | SIZE_16M;
+
+	SCB_MPU_RBAR = 0x70000000 | REGION(i++); // FlexSPI2
+	SCB_MPU_RASR = MEM_CACHE_WBWA | READWRITE | NOEXEC | SIZE_16M;
+#endif
 
 	// TODO: protect access to power supply config
 
