@@ -113,7 +113,9 @@ void ResetHandler(void)
 		#define PLL_BYPASS_TO_EXTERNAL_LVDS 0
 		#define PERCLK_DIVIDER 0
 		CCM_ANALOG_MISC1 &= ~CCM_ANALOG_MISC1_LVDSCLK1_IBEN; //Turn off LVDS input
-		CCM_ANALOG_MISC1 |= CCM_ANALOG_MISC1_LVDSCLK1_OBEN; //Turn on LVDS output
+		CCM_ANALOG_MISC1 &= ~0x01F; //clear LVDS CLK_SEL bits (0-4)
+		CCM_ANALOG_MISC1 |= 0x12 | CCM_ANALOG_MISC1_LVDSCLK1_OBEN; //Turn on LVDS output, select XTAL as source
+
 	#else
 		#define PLL_BYPASS_TO_EXTERNAL_LVDS (1<<14)
 		#define PERCLK_SOURCE 0
