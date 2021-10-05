@@ -4,6 +4,7 @@ MEMORY
 	DTCM (rwx) : ORIGIN = 0x20000000, LENGTH = 512k
 	RAM (rwx) : ORIGIN = 0x20200000, LENGTH = 512k
 	FLASH (rx) : ORIGIN = 0x60040000, LENGTH = 0x780000
+	ERAM (rwx) : ORIGIN = 0x80000000, LENGTH = 32M
 }
 
 ENTRY(ResetHandler)
@@ -50,6 +51,8 @@ SECTIONS
         LONG(  SIZEOF(.bss.ITCM));
         LONG(   ADDR(.bss.RAM));
         LONG(  SIZEOF(.bss.RAM));
+        LONG(   ADDR(.bss.ERAM));
+        LONG(  SIZEOF(.bss.ERAM));
          __bss_section_table_end = .;
         __section_table_end = . ;
         /* End of Global Section Table */
@@ -98,7 +101,10 @@ SECTIONS
      	
      } > RAM AT >RAM
      
-     
+     .bss.ERAM (NOLOAD) : {
+        *(.externalram)
+     	. = ALIGN(32);
+     } > ERAM
      
     .ARM.extab : ALIGN(4)
     {
