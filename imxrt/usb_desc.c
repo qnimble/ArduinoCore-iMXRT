@@ -121,6 +121,8 @@ static uint8_t device_descriptor[] = {
         0x80, 0x02, // Teensy 4.1
   #elif defined(__IMXRT1062__) && defined(ARDUINO_TEENSY_MICROMOD)
         0x81, 0x02, // Teensy MicroMod
+  #elif defined(__IMXRT1062__) && defined(ARDUINO_QUARTO)
+        0x22, 0x23, // qNimble Quarto, Rev1
   #else
         0x00, 0x02,
   #endif
@@ -2744,7 +2746,12 @@ void usb_init_serialnumber(void)
 	char buf[11];
 	uint32_t i, num;
 
+#if ARDUINO_QUARTO
+	num = HW_OCOTP_CFG0 & 0xFFFFFF;
+#else
 	num = HW_OCOTP_MAC0 & 0xFFFFFF;
+#endif
+
 	// add extra zero to work around OS-X CDC-ACM driver bug
 	if (num < 10000000) num = num * 10;
 	ultoa(num, buf, 10);
