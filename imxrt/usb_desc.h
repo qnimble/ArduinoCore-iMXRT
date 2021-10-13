@@ -924,8 +924,8 @@ let me know?  http://forum.pjrc.com/forums/4-Suggestions-amp-Bug-Reports
   #define PRODUCT_NAME		{'Q','u','a','r','t','o'}
   #define PRODUCT_NAME_LEN	6
   #define EP0_SIZE		64
-  #define NUM_ENDPOINTS		7 //was 4
-  #define NUM_INTERFACE		5 // was 2
+  #define NUM_ENDPOINTS		9 //was 4
+  #define NUM_INTERFACE		6 // was 2
   #define CDC_IAD_DESCRIPTOR	1 //was not defined
   #define CDC_STATUS_INTERFACE	0
   #define CDC_DATA_INTERFACE	1
@@ -962,6 +962,21 @@ let me know?  http://forum.pjrc.com/forums/4-Suggestions-amp-Bug-Reports
   #define RAWHID_RX_SIZE        64
   #define RAWHID_RX_INTERVAL    1	 // TODO: is this ok for 480 Mbit speed
   #define ENDPOINT6_CONFIG	ENDPOINT_RECEIVE_INTERRUPT + ENDPOINT_TRANSMIT_INTERRUPT
+
+  #define MTP_INTERFACE		5	// MTP Disk
+  #define MTP_TX_ENDPOINT	7
+  #define MTP_TX_SIZE_12	64
+  #define MTP_TX_SIZE_480	512
+  #define MTP_RX_ENDPOINT	7
+  #define MTP_RX_SIZE_12	64
+  #define MTP_RX_SIZE_480	512
+  #define MTP_EVENT_ENDPOINT	8
+  #define MTP_EVENT_SIZE	32
+  #define MTP_EVENT_INTERVAL_12	10	// 10 = 10 ms
+  #define MTP_EVENT_INTERVAL_480 7	// 7 = 8 ms
+
+  #define ENDPOINT7_CONFIG	ENDPOINT_RECEIVE_BULK + ENDPOINT_TRANSMIT_BULK
+  #define ENDPOINT8_CONFIG  ENDPOINT_RECEIVE_UNUSED + ENDPOINT_TRANSMIT_INTERRUPT
 
 
 
