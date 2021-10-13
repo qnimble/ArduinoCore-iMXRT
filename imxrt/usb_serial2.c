@@ -317,7 +317,7 @@ int usb_serial2_write(const void *buffer, uint32_t size)
 			if (!(status & 0x80)) {
 				if (status & 0x68) {
 					// TODO: what if status has errors???
-					printf("ERROR status = %x, i=%d, ms=%u\n",
+					printf("ERROR status = %lx, i=%d, ms=%lu\n",
 						status, tx_head, systick_millis_count);
 				}
 				tx_available = TX_SIZE;
