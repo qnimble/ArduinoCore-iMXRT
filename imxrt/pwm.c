@@ -30,7 +30,7 @@ const struct pwm_pin_info_struct pwm_pin_info[] = {
 	{1, M(1, 3), 1, 2},  // FlexPWM1_3_A  20 // LED Red    // SD_B1_00
 	{1, M(1, 3), 2, 2},  // FlexPWM1_3_B  21 // LED Blue   // SD_B1_01
 	{1, M(2, 3), 1, 2},  // FlexPWM2_3_A  22 // LED Green  // SD_B1_02
-#elif
+#else
 	{1, M(1, 1), 0, 4},  // FlexPWM1_1_X   0  // AD_B0_03
 	{1, M(1, 0), 0, 4},  // FlexPWM1_0_X   1  // AD_B0_02
 	{1, M(4, 2), 1, 1},  // FlexPWM4_2_A   2  // EMC_04
