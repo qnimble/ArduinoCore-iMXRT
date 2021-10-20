@@ -924,8 +924,8 @@ let me know?  http://forum.pjrc.com/forums/4-Suggestions-amp-Bug-Reports
   #define PRODUCT_NAME		{'Q','u','a','r','t','o'}
   #define PRODUCT_NAME_LEN	6
   #define EP0_SIZE		64
-  #define NUM_ENDPOINTS		5 //was 4
-  #define NUM_INTERFACE		3 // was 2
+  #define NUM_ENDPOINTS		7 //was 4
+  #define NUM_INTERFACE		5 // was 2
   #define CDC_IAD_DESCRIPTOR	1 //was not defined
   #define CDC_STATUS_INTERFACE	0
   #define CDC_DATA_INTERFACE	1
@@ -940,7 +940,7 @@ let me know?  http://forum.pjrc.com/forums/4-Suggestions-amp-Bug-Reports
   #define ENDPOINT2_CONFIG	ENDPOINT_RECEIVE_UNUSED + ENDPOINT_TRANSMIT_INTERRUPT
   #define ENDPOINT3_CONFIG	ENDPOINT_RECEIVE_BULK + ENDPOINT_TRANSMIT_BULK
 
-/*
+
   #define CDC2_STATUS_INTERFACE 2       // SerialUSB1
   #define CDC2_DATA_INTERFACE   3
   #define CDC2_ACM_ENDPOINT     4
@@ -948,18 +948,18 @@ let me know?  http://forum.pjrc.com/forums/4-Suggestions-amp-Bug-Reports
   #define CDC2_TX_ENDPOINT      5
   #define ENDPOINT4_CONFIG	ENDPOINT_RECEIVE_UNUSED + ENDPOINT_TRANSMIT_INTERRUPT
   #define ENDPOINT5_CONFIG	ENDPOINT_RECEIVE_BULK + ENDPOINT_TRANSMIT_BULK
-*/
+
 
   #define RAWHID_USAGE_PAGE	0xFFAB  // recommended: 0xFF00 to 0xFFFF
   #define RAWHID_USAGE		0x0200  // recommended: 0x0100 to 0xFFFF
-  #define RAWHID_INTERFACE      2	// RawHID
-  #define RAWHID_TX_ENDPOINT    4
+  #define RAWHID_INTERFACE      4	// RawHID
+  #define RAWHID_TX_ENDPOINT    6
   #define RAWHID_TX_SIZE        64
   #define RAWHID_TX_INTERVAL    1	 // TODO: is this ok for 480 Mbit speed
-  #define RAWHID_RX_ENDPOINT    4
+  #define RAWHID_RX_ENDPOINT    6
   #define RAWHID_RX_SIZE        64
   #define RAWHID_RX_INTERVAL    1	 // TODO: is this ok for 480 Mbit speed
-  #define ENDPOINT4_CONFIG	ENDPOINT_RECEIVE_INTERRUPT + ENDPOINT_TRANSMIT_INTERRUPT
+  #define ENDPOINT6_CONFIG	ENDPOINT_RECEIVE_INTERRUPT + ENDPOINT_TRANSMIT_INTERRUPT
 /*
   #define MTP_INTERFACE		5	// MTP Disk
   #define MTP_TX_ENDPOINT	7
