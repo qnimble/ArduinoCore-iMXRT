@@ -372,6 +372,7 @@ FLASHMEM void configure_pins(void) {
 		IOMUXC_SW_MUX_CTL_PAD_GPIO_AD_B0_05 = 0x15;
         IOMUXC_SW_MUX_CTL_PAD_GPIO_AD_B0_09 = 0x15;
 
+#ifdef ARDUINO_QUARTO
         IOMUXC_SW_MUX_CTL_PAD_GPIO_SD_B1_00 = 0x15; //set LED pins as GPIO, in case set to PWM previously
         IOMUXC_SW_MUX_CTL_PAD_GPIO_SD_B1_01 = 0x15;
         IOMUXC_SW_MUX_CTL_PAD_GPIO_SD_B1_02 = 0x15;
@@ -388,12 +389,13 @@ FLASHMEM void configure_pins(void) {
         GPIO6_GDIR |= ADC_ACK_PIN;
         GPIO6_GDIR |= READDATA_ACK_PIN;
 
-
+#endif
 	/* Keep boot related data from being stripped from binary */
 	GPIO6_PSR = (uint32_t) keep_trick; //PSR is read only, this does nothing
 
 
 }
+
 
 
 

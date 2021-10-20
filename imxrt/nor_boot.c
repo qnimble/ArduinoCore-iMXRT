@@ -11,6 +11,9 @@
 extern void _vStackTop(void);
 extern void ResetHandler(void);
 
+#ifdef ARDUINO_QUARTO
+
+
 __attribute__ ((used, section(".isr_vector")))
 void (* const g_pfnVectors[])(void) = {
     &_vStackTop,                       // The initial stack pointer
@@ -362,3 +365,5 @@ __attribute__ ((weak, section(".startup"))) void HardFault_Handler(void) {
 
 //const uint32_t* keep_trick[] = {(uint32_t*)&qspiflash_config, (uint32_t*)&boot_data,(uint32_t*)&image_vector_table,(uint32_t*)&g_pfnVectors};
 const uint32_t* keep_trick[] = {(uint32_t*) &g_pfnVectors};
+
+#endif //ARDUINO_QUARTO

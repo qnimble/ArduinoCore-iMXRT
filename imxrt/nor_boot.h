@@ -12,13 +12,10 @@
 #include <imxrt.h>
 #include <stdbool.h>
 
-
-#ifdef ARDUINO_QUARTO
+#if defined(ARDUINO_QUARTO) || defined(ARDUINO_QUARTONO)
 #define BOARD_FLASH_SIZE   0x800000
 #define APPLICATION_BOOT_HEADER 0x89D3E1AB
 
-#else
-#error Must define size of board flash
 #endif
 
 #ifdef __cplusplus
