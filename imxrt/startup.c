@@ -714,11 +714,21 @@ void adc4_irq_ignoredata(void) {
 
 FLASHMEM void quarto_init(void) {
 	#include "adc.h"
+	#include "comm.h"
 	GPIO2_DR_TOGGLE = (0x000B0000 + 0x010); //Set Write address to 0x010 for Enabling Analog
 
 	//Clear stale Data if available.
 	READDATA_ACK_BANK_TOGGLE = READDATA_ACK_PIN; // Ack Read Data
 	ADC_ACK_BANK_TOGGLE = ADC_ACK_PIN; // ACK ADC Data
+
+	uint16_t cal_data; // Load DAC calibration data
+	for(int i =0; i<4; i++) {
+		setWriteAddress(0x50 + i);
+		cal_data = readNVM(769*128 + i*2);
+		writeData(cal_data);
+	}
+
+
 
 	GPIO2_DR_TOGGLE = (0x000D0000 + 0x03); //Enable Analog Clock, Analog,
 
