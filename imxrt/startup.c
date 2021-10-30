@@ -7,6 +7,8 @@
 
 #if defined(ARDUINO_QUARTO)
 #include "quarto_wdog.h"
+#include "comm.h"
+#include "adc.h"
 #endif
 
 #include "debug/printf.h"
@@ -713,24 +715,19 @@ void adc4_irq_ignoredata(void) {
 }
 
 FLASHMEM void quarto_init(void) {
-	#include "adc.h"
-	#include "comm.h"
-	GPIO2_DR_TOGGLE = (0x000B0000 + 0x010); //Set Write address to 0x010 for Enabling Analog
-
 	//Clear stale Data if available.
 	READDATA_ACK_BANK_TOGGLE = READDATA_ACK_PIN; // Ack Read Data
 	ADC_ACK_BANK_TOGGLE = ADC_ACK_PIN; // ACK ADC Data
 
 	uint16_t cal_data; // Load DAC calibration data
 	for(int i =0; i<4; i++) {
-		setWriteAddress(0x50 + i);
 		cal_data = readNVM(769*128 + i*2);
+		setWriteAddress(0x50 + i);
 		writeData(cal_data);
 	}
 
-
-
-	GPIO2_DR_TOGGLE = (0x000D0000 + 0x03); //Enable Analog Clock, Analog,
+	setWriteAddress(0x010); //Set Write address to 0x010 for Enabling Analog
+	writeData(0x03); //Enable Analog Clock, Analog,
 
 	delay(50);
 
@@ -760,7 +757,8 @@ FLASHMEM void quarto_init(void) {
 
 	delay(1);
 
-	GPIO2_DR_TOGGLE = (0x000D0000 + 0x07); //Enable Vref.
+	setWriteAddress(0x010); //Set Write address to 0x010 for Enabling Analog
+	writeData(0x07); //Enable Vref.
 
 	//Clear stale Data if available.
 	READDATA_ACK_BANK_TOGGLE = READDATA_ACK_PIN; // Ack Read Data
@@ -773,9 +771,6 @@ FLASHMEM void quarto_init(void) {
 	configureADC2(0,0,BIPOLAR_10V,&adc2_irq_ignoredata);
 	configureADC3(0,0,BIPOLAR_10V,&adc3_irq_ignoredata);
 	configureADC4(0,0,BIPOLAR_10V,&adc4_irq_ignoredata);
-
-
-	GPIO2_DR_TOGGLE = (0x000B0000 + 0x03FFF); //Magic Command to Reset ADC/DAC Data
 
 	__asm volatile ("cpsie i");
 
