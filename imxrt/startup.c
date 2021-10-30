@@ -726,8 +726,10 @@ FLASHMEM void quarto_init(void) {
 		writeData(cal_data);
 	}
 
+	cal_data = readData(0x010) ; //read current analog settings
+	cal_data |= 0x03; //enable Analog Power if not already on
 	setWriteAddress(0x010); //Set Write address to 0x010 for Enabling Analog
-	writeData(0x03); //Enable Analog Clock, Analog,
+	writeData(cal_data); //Enable Analog Clock, Analog,
 
 	delay(50);
 
