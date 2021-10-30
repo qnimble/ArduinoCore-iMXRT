@@ -73,6 +73,7 @@ class usb_serial_class : public Stream
 public:
 	constexpr usb_serial_class() {}
         void begin(long) {
+#ifndef ARDUINO_QUARTO
 		uint32_t millis_begin = systick_millis_count;
 		while (!(*this)) {
 			uint32_t elapsed = systick_millis_count - millis_begin;
@@ -85,6 +86,7 @@ public:
 				if (elapsed > 750) break;
 			}
 		}
+#endif
 	}
         void end() { /* TODO: flush output and shut down USB port */ };
         virtual int available() { return usb_serial_available(); }
