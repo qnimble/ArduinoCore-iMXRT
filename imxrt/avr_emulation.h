@@ -692,7 +692,8 @@ public:
 		digitalWriteFast(11, (val & (1<<3)));
 		if (!(CORE_PIN11_DDRREG & CORE_PIN11_BITMASK))
 			CORE_PIN11_PADCONFIG = ((val & (1<<3)) ? CONFIG_PULLUP : CONFIG_NOPULLUP);
-#elif CORE_NUM_DIGITAL > 12
+#endif
+#if CORE_NUM_DIGITAL > 12
 		digitalWriteFast(12, (val & (1<<4)));
 		if (!(CORE_PIN12_DDRREG & CORE_PIN12_BITMASK))
 			CORE_PIN12_PADCONFIG = ((val & (1<<4)) ? CONFIG_PULLUP : CONFIG_NOPULLUP);
@@ -720,7 +721,8 @@ public:
 			digitalWriteFast(11, HIGH);
 			if (!(CORE_PIN11_DDRREG & CORE_PIN11_BITMASK)) CORE_PIN11_CONFIG = CONFIG_PULLUP;
 		}
-#elif CORE_NUM_DIGITAL > 12
+#endif
+#if CORE_NUM_DIGITAL > 12
 		if (val & (1<<4)) {
 			digitalWriteFast(12, HIGH);
 			if (!(CORE_PIN12_DDRREG & CORE_PIN12_BITMASK)) CORE_PIN12_CONFIG = CONFIG_PULLUP;
@@ -750,7 +752,8 @@ public:
 			digitalWriteFast(11, LOW);
 			if (!(CORE_PIN11_DDRREG & CORE_PIN11_BITMASK)) CORE_PIN11_CONFIG = CONFIG_NOPULLUP;
 		}
-#elif CORE_NUM_DIGITAL > 12
+#endif
+#if CORE_NUM_DIGITAL > 12
 		if (!(val & (1<<4))) {
 			digitalWriteFast(12, LOW);
 			if (!(CORE_PIN12_DDRREG & CORE_PIN12_BITMASK)) CORE_PIN12_CONFIG = CONFIG_NOPULLUP;

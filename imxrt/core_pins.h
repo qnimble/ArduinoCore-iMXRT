@@ -49,9 +49,8 @@
 
 
 #if defined(__IMXRT1062__) && defined(ARDUINO_QUARTO)
-#define CORE_NUM_TOTAL_PINS	12
-#define CORE_NUM_DIGITAL	12
-#define CORE_NUM_INTERRUPT	11
+#define CORE_NUM_TOTAL_PINS	14
+#define CORE_NUM_DIGITAL	14
 #define CORE_NUM_ANALOG		0
 #define CORE_NUM_PWM		3
 
@@ -67,6 +66,8 @@
 #define CORE_PIN9_BIT		0
 #define CORE_PIN10_BIT		1
 #define CORE_PIN11_BIT		2
+#define CORE_PIN12_BIT		1
+#define CORE_PIN13_BIT		0
 
 #define CORE_PIN0_BITMASK	(1<<(CORE_PIN0_BIT))
 #define CORE_PIN1_BITMASK	(1<<(CORE_PIN1_BIT))
@@ -80,6 +81,10 @@
 #define CORE_PIN9_BITMASK	(1<<(CORE_PIN9_BIT))
 #define CORE_PIN10_BITMASK	(1<<(CORE_PIN10_BIT))
 #define CORE_PIN11_BITMASK	(1<<(CORE_PIN11_BIT))
+#define CORE_PIN10_BITMASK	(1<<(CORE_PIN10_BIT))
+#define CORE_PIN11_BITMASK	(1<<(CORE_PIN11_BIT))
+#define CORE_PIN12_BITMASK	(1<<(CORE_PIN12_BIT))
+#define CORE_PIN13_BITMASK	(1<<(CORE_PIN13_BIT))
 
 // Fast GPIO
 #define CORE_PIN0_PORTREG	GPIO7_DR
@@ -94,6 +99,8 @@
 #define CORE_PIN9_PORTREG	GPIO8_DR
 #define CORE_PIN10_PORTREG	GPIO8_DR
 #define CORE_PIN11_PORTREG	GPIO8_DR
+#define CORE_PIN12_PORTREG	GPIO6_DR
+#define CORE_PIN13_PORTREG	GPIO6_DR
 
 #define CORE_PIN0_PORTSET	GPIO7_DR_SET
 #define CORE_PIN1_PORTSET	GPIO7_DR_SET
@@ -107,6 +114,8 @@
 #define CORE_PIN9_PORTSET	GPIO8_DR_SET
 #define CORE_PIN10_PORTSET	GPIO8_DR_SET
 #define CORE_PIN11_PORTSET	GPIO8_DR_SET
+#define CORE_PIN12_PORTSET	GPIO6_DR_SET
+#define CORE_PIN13_PORTSET	GPIO6_DR_SET
 
 #define CORE_PIN0_PORTCLEAR	GPIO7_DR_CLEAR
 #define CORE_PIN1_PORTCLEAR	GPIO7_DR_CLEAR
@@ -120,6 +129,10 @@
 #define CORE_PIN9_PORTCLEAR	GPIO8_DR_CLEAR
 #define CORE_PIN10_PORTCLEAR	GPIO8_DR_CLEAR
 #define CORE_PIN11_PORTCLEAR	GPIO8_DR_CLEAR
+#define CORE_PIN12_PORTCLEAR	GPIO6_DR_CLEAR
+#define CORE_PIN13_PORTCLEAR	GPIO6_DR_CLEAR
+
+
 
 #define CORE_PIN0_PORTTOGGLE	GPIO7_DR_TOGGLE
 #define CORE_PIN1_PORTTOGGLE	GPIO7_DR_TOGGLE
@@ -133,6 +146,8 @@
 #define CORE_PIN9_PORTTOGGLE	GPIO8_DR_TOGGLE
 #define CORE_PIN10_PORTTOGGLE	GPIO8_DR_TOGGLE
 #define CORE_PIN11_PORTTOGGLE	GPIO8_DR_TOGGLE
+#define CORE_PIN12_PORTTOGGLE	GPIO6_DR_TOGGLE
+#define CORE_PIN13_PORTTOGGLE	GPIO6_DR_TOGGLE
 
 #define CORE_PIN0_DDRREG	GPIO7_GDIR
 #define CORE_PIN1_DDRREG	GPIO7_GDIR
@@ -146,6 +161,9 @@
 #define CORE_PIN9_DDRREG	GPIO8_GDIR
 #define CORE_PIN10_DDRREG	GPIO8_GDIR
 #define CORE_PIN11_DDRREG	GPIO8_GDIR
+#define CORE_PIN12_DDRREG	GPIO6_GDIR
+#define CORE_PIN13_DDRREG	GPIO6_GDIR
+
 
 #define CORE_PIN0_PINREG	GPIO7_PSR
 #define CORE_PIN1_PINREG	GPIO7_PSR
@@ -159,6 +177,9 @@
 #define CORE_PIN9_PINREG	GPIO8_PSR
 #define CORE_PIN10_PINREG	GPIO8_PSR
 #define CORE_PIN11_PINREG	GPIO8_PSR
+#define CORE_PIN12_PINREG	GPIO6_PSR
+#define CORE_PIN13_PINREG	GPIO6_PSR
+
 
 // mux config registers control which peripheral uses the pin
 #define CORE_PIN0_CONFIG	IOMUXC_SW_MUX_CTL_PAD_GPIO_B1_04
@@ -173,6 +194,8 @@
 #define CORE_PIN9_CONFIG	IOMUXC_SW_MUX_CTL_PAD_GPIO_SD_B1_00
 #define CORE_PIN10_CONFIG	IOMUXC_SW_MUX_CTL_PAD_GPIO_SD_B1_01
 #define CORE_PIN11_CONFIG	IOMUXC_SW_MUX_CTL_PAD_GPIO_SD_B1_02
+#define CORE_PIN12_CONFIG	IOMUXC_SW_MUX_CTL_PAD_GPIO_AD_B0_01
+#define CORE_PIN13_CONFIG	IOMUXC_SW_MUX_CTL_PAD_GPIO_AD_B0_00
 
 // pad config registers control pullup/pulldown/keeper, drive strength, etc
 #define CORE_PIN0_PADCONFIG	IOMUXC_SW_PAD_CTL_PAD_GPIO_B1_04
@@ -187,6 +210,8 @@
 #define CORE_PIN9_PADCONFIG	IOMUXC_SW_PAD_CTL_PAD_GPIO_SD_B1_00
 #define CORE_PIN10_PADCONFIG	IOMUXC_SW_PAD_CTL_PAD_GPIO_SD_B1_01
 #define CORE_PIN11_PADCONFIG	IOMUXC_SW_PAD_CTL_PAD_GPIO_SD_B1_02
+#define CORE_PIN12_PADCONFIG	IOMUXC_SW_PAD_CTL_PAD_GPIO_AD_B0_01
+#define CORE_PIN13_PADCONFIG	IOMUXC_SW_PAD_CTL_PAD_GPIO_AD_B0_00
 
 #endif
 
@@ -1973,11 +1998,14 @@ static inline void digitalWriteFast(uint8_t pin, uint8_t val)
 				CORE_PIN10_PORTSET = CORE_PIN10_BITMASK;
 			} else if (pin == 11) {
 				CORE_PIN11_PORTSET = CORE_PIN11_BITMASK;
-#elif CORE_NUM_DIGITAL > 12
+#endif
+#if CORE_NUM_DIGITAL > 12
 			} else if (pin == 12) {
 				CORE_PIN12_PORTSET = CORE_PIN12_BITMASK;
 			} else if (pin == 13) {
 				CORE_PIN13_PORTSET = CORE_PIN13_BITMASK;
+#endif
+#if CORE_NUM_DIGITAL > 14
 			} else if (pin == 14) {
 				CORE_PIN14_PORTSET = CORE_PIN14_BITMASK;
 			} else if (pin == 15) {
@@ -2030,7 +2058,8 @@ static inline void digitalWriteFast(uint8_t pin, uint8_t val)
 				CORE_PIN38_PORTSET = CORE_PIN38_BITMASK;
 			} else if (pin == 39) {
 				CORE_PIN39_PORTSET = CORE_PIN39_BITMASK;
-#elif CORE_NUM_DIGITAL > 40
+#endif
+#if CORE_NUM_DIGITAL > 40
 			} else if (pin == 40) {
 				CORE_PIN40_PORTSET = CORE_PIN40_BITMASK;
 			} else if (pin == 41) {
@@ -2043,7 +2072,8 @@ static inline void digitalWriteFast(uint8_t pin, uint8_t val)
 				CORE_PIN44_PORTSET = CORE_PIN44_BITMASK;
 			} else if (pin == 45) {
 				CORE_PIN45_PORTSET = CORE_PIN45_BITMASK;
-#elif CORE_NUM_DIGITAL > 46
+#endif
+#if CORE_NUM_DIGITAL > 46
 			} else if (pin == 46) {
 				CORE_PIN46_PORTSET = CORE_PIN46_BITMASK;
 			} else if (pin == 47) {
@@ -2090,11 +2120,14 @@ static inline void digitalWriteFast(uint8_t pin, uint8_t val)
 				CORE_PIN10_PORTCLEAR = CORE_PIN10_BITMASK;
 			} else if (pin == 11) {
 				CORE_PIN11_PORTCLEAR = CORE_PIN11_BITMASK;
-#elif CORE_NUM_DIGITAL > 12
+#endif
+#if CORE_NUM_DIGITAL > 12
 			} else if (pin == 12) {
 				CORE_PIN12_PORTCLEAR = CORE_PIN12_BITMASK;
 			} else if (pin == 13) {
 				CORE_PIN13_PORTCLEAR = CORE_PIN13_BITMASK;
+#endif
+#if CORE_NUM_DIGITAL > 14
 			} else if (pin == 14) {
 				CORE_PIN14_PORTCLEAR = CORE_PIN14_BITMASK;
 			} else if (pin == 15) {
@@ -2147,7 +2180,8 @@ static inline void digitalWriteFast(uint8_t pin, uint8_t val)
 				CORE_PIN38_PORTCLEAR = CORE_PIN38_BITMASK;
 			} else if (pin == 39) {
 				CORE_PIN39_PORTCLEAR = CORE_PIN39_BITMASK;
-#elif CORE_NUM_DIGITAL > 40
+#endif
+#if CORE_NUM_DIGITAL > 40
 			} else if (pin == 40) {
 				CORE_PIN40_PORTCLEAR = CORE_PIN40_BITMASK;
 			} else if (pin == 41) {
@@ -2218,12 +2252,14 @@ static inline uint8_t digitalReadFast(uint8_t pin)
 			return (CORE_PIN10_PINREG & CORE_PIN10_BITMASK) ? 1 : 0;
 		} else if (pin == 11) {
 			return (CORE_PIN11_PINREG & CORE_PIN11_BITMASK) ? 1 : 0;
-#elif CORE_NUM_DIGITAL > 12
-
+#endif
+#if CORE_NUM_DIGITAL > 12
 		} else if (pin == 12) {
 			return (CORE_PIN12_PINREG & CORE_PIN12_BITMASK) ? 1 : 0;
 		} else if (pin == 13) {
 			return (CORE_PIN13_PINREG & CORE_PIN13_BITMASK) ? 1 : 0;
+#endif
+#if CORE_NUM_DIGITAL > 14
 		} else if (pin == 14) {
 			return (CORE_PIN14_PINREG & CORE_PIN14_BITMASK) ? 1 : 0;
 		} else if (pin == 15) {
@@ -2349,11 +2385,14 @@ static inline void digitalToggleFast(uint8_t pin)
 			CORE_PIN10_PORTTOGGLE = CORE_PIN10_BITMASK;
 		} else if (pin == 11) {
 			CORE_PIN11_PORTTOGGLE = CORE_PIN11_BITMASK;
-#elif CORE_NUM_DIGITAL > 12
+#endif
+#if CORE_NUM_DIGITAL > 12
 		} else if (pin == 12) {
 			CORE_PIN12_PORTTOGGLE = CORE_PIN12_BITMASK;
 		} else if (pin == 13) {
 			CORE_PIN13_PORTTOGGLE = CORE_PIN13_BITMASK;
+#endif
+#if CORE_NUM_DIGITAL > 14
 		} else if (pin == 14) {
 			CORE_PIN14_PORTTOGGLE = CORE_PIN14_BITMASK;
 		} else if (pin == 15) {
