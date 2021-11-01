@@ -183,7 +183,8 @@ SECTIONS
        *(RamFunction)
        *(NonCacheable.init)       
        *(.data*)
-       *(.rodata .rodata.* .constdata .constdata.*)       
+       *(.rodata .rodata.* .constdata .constdata.*)     
+       *(.endpoint_queue)
        . = ALIGN(4) ;
        _edata = . ;
        PROVIDE(__end_data_RAM = .) ;
