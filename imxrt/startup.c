@@ -375,6 +375,7 @@ FLASHMEM void configure_pins(void) {
         IOMUXC_SW_MUX_CTL_PAD_GPIO_AD_B0_09 = 0x15;
 
 #ifdef ARDUINO_QUARTO
+        IOMUXC_SW_MUX_CTL_PAD_GPIO_AD_B0_10 = 0x15; // I2C Pullup pin
         IOMUXC_SW_MUX_CTL_PAD_GPIO_SD_B1_00 = 0x15; //set LED pins as GPIO, in case set to PWM previously
         IOMUXC_SW_MUX_CTL_PAD_GPIO_SD_B1_01 = 0x15;
         IOMUXC_SW_MUX_CTL_PAD_GPIO_SD_B1_02 = 0x15;
@@ -386,6 +387,9 @@ FLASHMEM void configure_pins(void) {
         GPIO2_GDIR = 0xFFFFF; //Set DAC Update pins as outputs
         GPIO6_GDIR &= ~(0x03); //Set triggers as inputs
         GPIO6_DR_CLEAR = 0x03; //Set trigger to low.
+
+        GPIO6_GDIR |= 0x400; //Set pull up enable pin as output
+        GPIO6_DR_SET = 0x400; //Set pull up enable pin high to disable pullups
 
         //GPIO6_GDIR = 0x30; //Set BM as outputs for Read / ADC ACK
         GPIO6_GDIR |= ADC_ACK_PIN;
