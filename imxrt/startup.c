@@ -122,6 +122,7 @@ void ResetHandler(void)
 	//Use Wakeup pin as reset to FPGA and set low (reset)
 	IOMUXC_SNVS_SW_PAD_CTL_PAD_WAKEUP = 0xB888u;
 	IOMUXC_SNVS_SW_MUX_CTL_PAD_WAKEUP = 0x15;
+
 	GPIO5_GDIR |= 0x01;
 	GPIO5_DR_CLEAR = 0x01;
 
@@ -380,7 +381,8 @@ FLASHMEM void configure_pins(void) {
         IOMUXC_SW_MUX_CTL_PAD_GPIO_SD_B1_01 = 0x15;
         IOMUXC_SW_MUX_CTL_PAD_GPIO_SD_B1_02 = 0x15;
 
-        IOMUXC_SW_MUX_CTL_PAD_GPIO_EMC_40 = 0x15;
+        IOMUXC_SW_MUX_CTL_PAD_GPIO_EMC_40 = 0x15; // Set EMC40 / ADC3 IRQ as GPIO
+        IOMUXC_SW_MUX_CTL_PAD_GPIO_EMC_41 = 0x15; // Set EMC41 / MCU_E0 as input
 
         GPIO8_GDIR = 0x07; //Set LEDs as outputs
         GPIO8_DR_CLEAR = 0x07; //Turn off LED
