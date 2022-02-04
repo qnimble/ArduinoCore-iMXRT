@@ -918,6 +918,8 @@ public:
 		digitalWriteFast(14, (val & (1<<0)));
 		if (!(CORE_PIN14_DDRREG & CORE_PIN14_BITMASK))
 			CORE_PIN14_PADCONFIG = ((val & (1<<0)) ? CONFIG_PULLUP : CONFIG_NOPULLUP);
+#endif
+#if CORE_NUM_DIGITAL > 15
 		digitalWriteFast(15, (val & (1<<1)));
 		if (!(CORE_PIN15_DDRREG & CORE_PIN15_BITMASK))
 			CORE_PIN15_PADCONFIG = ((val & (1<<1)) ? CONFIG_PULLUP : CONFIG_NOPULLUP);
@@ -942,6 +944,8 @@ public:
 			digitalWriteFast(14, HIGH);
 			if (!(CORE_PIN14_DDRREG & CORE_PIN14_BITMASK)) CORE_PIN14_CONFIG = CONFIG_PULLUP;
 		}
+#endif
+#if CORE_NUM_DIGITAL > 15
 		if (val & (1<<1)) {
 			digitalWriteFast(15, HIGH);
 			if (!(CORE_PIN15_DDRREG & CORE_PIN15_BITMASK)) CORE_PIN15_CONFIG = CONFIG_PULLUP;
@@ -971,6 +975,8 @@ public:
 			digitalWriteFast(14, LOW);
 			if (!(CORE_PIN14_DDRREG & CORE_PIN14_BITMASK)) CORE_PIN14_CONFIG = CONFIG_NOPULLUP;
 		}
+#endif
+#if CORE_NUM_DIGITAL > 15
 		if (!(val & (1<<1))) {
 			digitalWriteFast(15, LOW);
 			if (!(CORE_PIN15_DDRREG & CORE_PIN15_BITMASK)) CORE_PIN15_CONFIG = CONFIG_NOPULLUP;
@@ -1027,7 +1033,7 @@ class DDRCemulation
 {
 public:
 	inline DDRCemulation & operator = (int val) __attribute__((always_inline)) {
-#if CORE_NUM_DIGITAL > 14
+#if CORE_NUM_DIGITAL > 25
 		if (val & (1<<0)) set0(); else clr0();
 		if (val & (1<<1)) set1(); else clr1();
 		if (val & (1<<2)) set2(); else clr2();
@@ -1038,7 +1044,7 @@ public:
 		return *this;
 	}
 	inline DDRCemulation & operator |= (int val) __attribute__((always_inline)) {
-#if CORE_NUM_DIGITAL > 14
+#if CORE_NUM_DIGITAL > 25
 		if (val & (1<<0)) set0();
 		if (val & (1<<1)) set1();
 		if (val & (1<<2)) set2();
@@ -1049,7 +1055,7 @@ public:
 		return *this;
 	}
 	inline DDRCemulation & operator &= (int val) __attribute__((always_inline)) {
-#if CORE_NUM_DIGITAL > 14
+#if CORE_NUM_DIGITAL > 25
 		if (!(val & (1<<0))) clr0();
 		if (!(val & (1<<1))) clr1();
 		if (!(val & (1<<2))) clr2();
@@ -1066,6 +1072,8 @@ private:
 		CORE_PIN14_CONFIG = 5 | 0x10;
 		CORE_PIN14_PADCONFIG = CONFIG_PULLUP;
 	}
+#endif
+#if CORE_NUM_DIGITAL > 15
 	inline void set1() __attribute__((always_inline)) {
 		GPIO_SETBIT_ATOMIC(&CORE_PIN15_DDRREG, CORE_PIN15_BITMASK);
 		CORE_PIN15_CONFIG = 5 | 0x10;
