@@ -380,6 +380,8 @@ FLASHMEM void configure_pins(void) {
         IOMUXC_SW_MUX_CTL_PAD_GPIO_SD_B1_00 = 0x15; //set LED pins as GPIO, in case set to PWM previously
         IOMUXC_SW_MUX_CTL_PAD_GPIO_SD_B1_01 = 0x15;
         IOMUXC_SW_MUX_CTL_PAD_GPIO_SD_B1_02 = 0x15;
+        IOMUXC_SW_MUX_CTL_PAD_GPIO_SD_B1_05 = 0x15; // set SD Card power enable pin as GPIO
+        IOMUXC_SW_MUX_CTL_PAD_GPIO_B1_13 = 0x15; //set SD Card detect pin as GPIO
 
         IOMUXC_SW_MUX_CTL_PAD_GPIO_EMC_40 = 0x15; // Set EMC40 / ADC3 IRQ as GPIO
         IOMUXC_SW_MUX_CTL_PAD_GPIO_EMC_41 = 0x15; // Set EMC41 / MCU_E0 as input
@@ -396,6 +398,12 @@ FLASHMEM void configure_pins(void) {
         //GPIO6_GDIR = 0x30; //Set BM as outputs for Read / ADC ACK
         GPIO6_GDIR |= ADC_ACK_PIN;
         GPIO6_GDIR |= READDATA_ACK_PIN;
+
+        //turn on power to SD Card
+        GPIO8_GDIR |= 0x20; //set SD Card power enable as output
+        GPIO8_DR_SET = 0x20; //turn on SD Card power
+
+        GPIO7_GDIR &= ~0x20000000; //set SD Card detect as input
 
 #endif
 	/* Keep boot related data from being stripped from binary */
@@ -779,6 +787,8 @@ FLASHMEM void quarto_init(void) {
 	configureADC2(0,0,BIPOLAR_10V,&adc2_irq_ignoredata);
 	configureADC3(0,0,BIPOLAR_10V,&adc3_irq_ignoredata);
 	configureADC4(0,0,BIPOLAR_10V,&adc4_irq_ignoredata);
+
+
 
 	__asm volatile ("cpsie i");
 
