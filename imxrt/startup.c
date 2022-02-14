@@ -381,6 +381,15 @@ FLASHMEM void configure_pins(void) {
         IOMUXC_SW_MUX_CTL_PAD_GPIO_SD_B1_01 = 0x15;
         IOMUXC_SW_MUX_CTL_PAD_GPIO_SD_B1_02 = 0x15;
 
+        //FLEXSPI_MCR0 &= ~FLEXSPI_MCR0_RXCLKSRC_MASK; //Set FLEXSPI_MCRO's RXCLKSRC to 00 internal loopback
+        //IOMUXC_SW_MUX_CTL_PAD_GPIO_SD_B1_05 = 0x15; //on HW 2.1, enable SD power enable pin as GPIO
+        //On HW 2.1, turn on power to SD Card
+        //GPIO8_GDIR |= 0x20; //set SD Card power enable as output
+        //GPIO8_DR_SET = 0x20; //turn on SD Card power
+
+        IOMUXC_SW_MUX_CTL_PAD_GPIO_B1_13 = 0x15; //set SD Card detect pin as GPIO
+        GPIO7_GDIR &= ~0x20000000; //set SD Card detect as input
+
         IOMUXC_SW_MUX_CTL_PAD_GPIO_EMC_40 = 0x15; // Set EMC40 / ADC3 IRQ as GPIO
         IOMUXC_SW_MUX_CTL_PAD_GPIO_EMC_41 = 0x15; // Set EMC41 / MCU_E0 as input
 
