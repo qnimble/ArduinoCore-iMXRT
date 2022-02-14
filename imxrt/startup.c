@@ -89,16 +89,19 @@ void ResetHandler(void)
 	SCB_MPU_CTRL = 0; // turn off MPU
 	SYST_CSR = 0; // Disable SysTick at boot
 	WDOG3_CNT = 0xB480A602; //Feed wdog3
-
+/*
 #if defined(__IMXRT1062__)
-	IOMUXC_GPR_GPR17 = (uint32_t)&_flexram_bank_config;
 	IOMUXC_GPR_GPR14 = 0x00AA0000;
+	//IOMUXC_GPR_GPR17 = (uint32_t)&_flexram_bank_config;
+	IOMUXC_GPR_GPR17 = 0xaaaaaaFF;
 	IOMUXC_GPR_GPR16 = 0x00200007;
+	_estack = 0x2003dd00;
 	__asm__ volatile("mov sp, %0" : : "r" ((uint32_t)&_estack) : );
-	__asm__ volatile("dsb":::"memory");
-	__asm__ volatile("isb":::"memory");
+	//__asm__ volatile("dsb":::"memory");
+	//__asm__ volatile("isb":::"memory");
 #endif
-	startup_early_hook(); // must be in FLASHMEM, as ITCM is not yet initialized!
+*/
+	//startup_early_hook(); // must be in FLASHMEM, as ITCM is not yet initialized!
 	PMU_MISC0_SET = 1<<3; //Use bandgap-based bias currents for best performance (Page 1175)
 	// pin 13 - if startup crashes, use this to turn on the LED early for troubleshooting
 	//IOMUXC_SW_MUX_CTL_PAD_GPIO_B0_03 = 5;
@@ -474,7 +477,7 @@ FLASHMEM void configure_cache(void)
 	SCB_MPU_RASR = MEM_CACHE_WT | READONLY | SIZE_128K;
 
 	SCB_MPU_RBAR = 0x20000000 | REGION(i++); // DTCM
-	SCB_MPU_RASR = MEM_NOCACHE | READWRITE | NOEXEC | SIZE_512K;
+	SCB_MPU_RASR = MEM_NOCACHE | READWRITE | SIZE_512K;
 	
 	//SCB_MPU_RBAR = ((uint32_t)&_ebss) | REGION(i++); // trap stack overflow
 	//SCB_MPU_RASR = SCB_MPU_RASR_TEX(0) | NOACCESS | NOEXEC | SIZE_32B;
@@ -490,10 +493,10 @@ FLASHMEM void configure_cache(void)
 	SCB_MPU_RBAR = 0x60000000 | REGION(i++); // QSPI Flash
 	SCB_MPU_RASR = MEM_CACHE_WBWA | READONLY | SIZE_8M;
 
-	#ifdef QUARTO_PROTOTYPE
+	//#ifdef QUARTO_PROTOTYPE
 	SCB_MPU_RBAR = 0x70000000 | REGION(i++); // FlexSPI2
 	SCB_MPU_RASR = MEM_CACHE_WBWA | READONLY | /*NOEXEC |*/ SIZE_4M;
-	#endif
+	//#endif
 
 	SCB_MPU_RBAR = 0x80000000 | REGION(i++); // External SDRAM
 	SCB_MPU_RASR = MEM_CACHE_WBWA | READWRITE | SIZE_32M;

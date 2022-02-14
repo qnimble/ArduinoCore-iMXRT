@@ -3,8 +3,9 @@ MEMORY
 	ITCM (rwx) : ORIGIN = 0x0, LENGTH = 0x80000      
 	DTCM (rwx) : ORIGIN = 0x20000000, LENGTH = 0x80000
 	RAM (rwx) : ORIGIN = 0x20200000, LENGTH = 0x20000
-	FLASH (rx) : ORIGIN = 0x60000000, LENGTH = 0x40000
+	
 }
+/*FLASH (rx) : ORIGIN = 0x60000000, LENGTH = 0x40000*/
 /* 
 GROUP (
   "libm.a"
@@ -20,6 +21,7 @@ ENTRY(ResetHandler)
 SECTIONS
 {
      /* Image Vector Table and Boot Data for booting from external flash */
+/* 
     .boot_hdr : ALIGN(4)
     {
         FILL(0xff)
@@ -32,8 +34,8 @@ SECTIONS
         . = 0x1030 ;
         KEEP(*(.boot_hdr.dcd_data))
         __boot_hdr_end__ = ABSOLUTE(.) ;
-    } >FLASH
-
+    } >DTCM
+*/
     /* MAIN TEXT SECTION */
     .text.bootinfo : ALIGN(4)
     {
@@ -46,9 +48,12 @@ SECTIONS
         __data_section_table = .;
         
         
+      /*
         LONG(LOADADDR(.data));
         LONG(    ADDR(.data));
         LONG(  SIZEOF(.data));
+      
+        */
         LONG(LOADADDR(.data_RAM2));
         LONG(    ADDR(.data_RAM2));
         LONG(  SIZEOF(.data_RAM2));
@@ -70,7 +75,7 @@ SECTIONS
         *(.after_vectors*)
         *(.startup*)
 
-    } > FLASH
+    } > DTCM
 
     .text.flash : ALIGN(4)
     {       
@@ -87,7 +92,7 @@ SECTIONS
         __init_array_end = .;
         . = ALIGN(16);
               
-    } > FLASH
+    } > DTCM
     /*
      * for exception handling/unwind - some Newlib functions (in common
      * with C++ and STDC++) use this.
@@ -103,7 +108,7 @@ SECTIONS
     .ARM.extab : ALIGN(4)
     {
         *(.ARM.extab* .gnu.linkonce.armextab.*)
-    } > DTCM AT >FLASH 
+    } > DTCM
     
     
      .ARM : ALIGN(4)
@@ -111,7 +116,7 @@ SECTIONS
         __exidx_start = .;
         *(.ARM.exidx* .gnu.linkonce.armexidx.*)
         __exidx_end = .;
-     } > DTCM AT >FLASH 
+     } > DTCM  
  	
      
     _etext = .;
@@ -134,7 +139,7 @@ SECTIONS
         . = ALIGN(4) ;        
         PROVIDE(__end_data_RAM2 = .) ;
         PROVIDE(__end_data_SRAM_ITC = .) ;
-      } > ITCM AT>FLASH 
+      } > ITCM AT>DTCM 
      
 
     /* DATA section for SRAM_OC */
@@ -159,7 +164,7 @@ SECTIONS
         . = ALIGN(4) ;
         PROVIDE(__end_data_RAM3 = .) ;
         PROVIDE(__end_data_SRAM_OC = .) ;
-     } > RAM AT>FLASH
+     } > RAM AT>DTCM
 
     /* MAIN DATA SECTION */
     .uninit_RESERVED (NOLOAD) : ALIGN(4)
@@ -191,7 +196,7 @@ SECTIONS
        PROVIDE(__end_data_RAM = .) ;
        PROVIDE(__end_data_SRAM_DTC = .) ;       	
        PROVIDE(__end_data_SRAM_DTC_PADDING = .) ;
-    } > DTCM AT>FLASH
+    } > DTCM
 
     /* BSS section for SRAM_ITC */
     .bss_RAM2 : ALIGN(4)
@@ -237,7 +242,7 @@ SECTIONS
         PROVIDE(__end_bss_RAM = .) ;
         PROVIDE(__end_bss_SRAM_DTC = .) ;
         PROVIDE(end = .);
-        . +=  _itcm_block_count*0x8000; /* inrease by ITCM size since DTCM smaller by this amount */
+        /* . +=  _itcm_block_count*0x8000; *//* inrease by ITCM size since DTCM smaller by this amount */
         PROVIDE(__end_bss_SRAM_DTC_plusCutout = .) ;
     } > DTCM AT> DTCM
 
