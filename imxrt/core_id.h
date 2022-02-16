@@ -1,5 +1,5 @@
 // This header file is in the public domain.
 
-#ifndef CORE_TEENSY
-#define CORE_TEENSY
+#ifndef CORE_QNIMBLE
+#define CORE_QNIMBLE
 #endif
