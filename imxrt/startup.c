@@ -423,6 +423,12 @@ FLASHMEM void configure_pins(void) {
         GPIO6_GDIR |= ADC_ACK_PIN;
         GPIO6_GDIR |= READDATA_ACK_PIN;
 
+
+        //Set USB & SD Power Enable pin to GPIO and set high
+        IOMUXC_SNVS_SW_MUX_CTL_PAD_PMIC_STBY_REQ = 0x05;
+        GPIO5_GDIR |= 0x04;
+        GPIO5_DR_SET = 0x04;
+
 #endif
 	/* Keep boot related data from being stripped from binary */
 	GPIO6_PSR = (uint32_t) keep_trick; //PSR is read only, this does nothing
