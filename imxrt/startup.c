@@ -113,11 +113,22 @@ void ResetHandler(void)
 	configure_cache();
 
 #ifdef ARDUINO_QUARTO
-	#ifdef USB_REBOOT_DISABLE //if bootloader, then reset wdog
+	#ifdef USB_REBOOT_DISABLE //if bootloader, sync clocks
+	  // stop the RTC
+	  SNVS_HPCR &= ~(SNVS_HPCR_RTC_EN | SNVS_HPCR_HP_TS);
+	  while (SNVS_HPCR & SNVS_HPCR_RTC_EN) ; // wait
+	  // start the RTC and sync it to the SRTC
+	  SNVS_HPCR |= SNVS_HPCR_RTC_EN | SNVS_HPCR_HP_TS;
 
-	#else  //Skip if not bootloader
+	#else  //Set if not bootloader (app)
 		SRC_GPR5 = 0xFFFFEEEE; //Reset register on boot so registered on USB reboot can be detected
 	#endif
+
+	//Disable LPSPI if previously used
+	LPSPI1_CR = 0;
+	LPSPI2_CR = 0;
+	LPSPI3_CR = 0;
+	LPSPI4_CR = 0;
 
 	//Use Wakeup pin as reset to FPGA and set low (reset)
 	IOMUXC_SNVS_SW_PAD_CTL_PAD_WAKEUP = 0xB888u;
@@ -376,6 +387,12 @@ FLASHMEM void configure_pins(void) {
         IOMUXC_SW_MUX_CTL_PAD_GPIO_AD_B0_09 = 0x15;
 
 #ifdef ARDUINO_QUARTO
+        //Configure GPIO pins as GPIO with default speed, etc
+        for(uint i=1; i<9;i++) {
+            *digital_pin_to_info_PGM[i].pad = 0x10b0;
+            *digital_pin_to_info_PGM[i].mux = 0x05;
+        }
+
         IOMUXC_SW_MUX_CTL_PAD_GPIO_AD_B0_10 = 0x15; // I2C Pullup pin
         IOMUXC_SW_MUX_CTL_PAD_GPIO_SD_B1_00 = 0x15; //set LED pins as GPIO, in case set to PWM previously
         IOMUXC_SW_MUX_CTL_PAD_GPIO_SD_B1_01 = 0x15;
