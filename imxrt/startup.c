@@ -424,10 +424,16 @@ FLASHMEM void configure_pins(void) {
         GPIO6_GDIR |= READDATA_ACK_PIN;
 
 
-        //Set USB & SD Power Enable pin to GPIO and set high
+        //Set USB & SD Power Enable pin to GPIO and set high if application, low if bootloader
         IOMUXC_SNVS_SW_MUX_CTL_PAD_PMIC_STBY_REQ = 0x05;
         GPIO5_GDIR |= 0x04;
-        GPIO5_DR_SET = 0x04;
+
+		#ifdef USB_REBOOT_DISABLE //if bootloader, set low (off)
+            GPIO5_DR_CLEAR = 0x04;
+		#else
+            GPIO5_DR_SET = 0x04; //turn on in application
+		#endif
+
 
 #endif
 	/* Keep boot related data from being stripped from binary */
