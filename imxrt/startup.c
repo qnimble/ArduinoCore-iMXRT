@@ -46,6 +46,7 @@ static void reset_PFD();
 extern void systick_isr(void);
 extern void pendablesrvreq_isr(void);
 void quarto_init(void);
+FLASHMEM void USB_SD_PowerOff(void);
 void configure_cache(void);
 void configure_external_ram(void);
 void unused_interrupt_vector(void);
@@ -434,6 +435,11 @@ FLASHMEM void configure_pins(void) {
             GPIO5_DR_SET = 0x04; //turn on in application
 		#endif
 
+		//Fire interrupt on power loss to turn off USB/SD power
+		 attachInterruptVector(IRQ_BROWNOUT0, USB_SD_PowerOff);
+		 NVIC_SET_PRIORITY(IRQ_BROWNOUT0, 0);
+		 NVIC_ENABLE_IRQ(IRQ_BROWNOUT0);
+
 
 #endif
 	/* Keep boot related data from being stripped from binary */
@@ -821,6 +827,15 @@ FLASHMEM void quarto_init(void) {
 	__asm volatile ("cpsie i");
 
 }
+
+
+FLASHMEM void USB_SD_PowerOff(void) { //Turn on Volt regs to USB and SD
+	IOMUXC_SNVS_SW_MUX_CTL_PAD_PMIC_STBY_REQ = 0x05;
+	GPIO5_GDIR |= 0x04;
+	GPIO5_DR_CLEAR = 0x04;
+}
+
+
 #endif
 
 
