@@ -24,7 +24,7 @@ uint32_t set_arm_clock(uint32_t frequency);
 	#ifdef QUARTO_PROTOTYPE
 		#define PLL_BYPASS_TO_EXTERNAL_LVDS 0
 	#else
-		#define PLL_BYPASS_TO_EXTERNAL_LVDS (1<<14)
+		#define PLL_BYPASS_TO_EXTERNAL_LVDS 0
 	#endif
 #else
 	#define PLL_BYPASS_TO_EXTERNAL_LVDS 0

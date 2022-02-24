@@ -21,7 +21,7 @@ ENTRY(ResetHandler)
 SECTIONS
 {
      /* Image Vector Table and Boot Data for booting from external flash */
-/* 
+ 
     .boot_hdr : ALIGN(4)
     {
         FILL(0xff)
@@ -35,7 +35,7 @@ SECTIONS
         KEEP(*(.boot_hdr.dcd_data))
         __boot_hdr_end__ = ABSOLUTE(.) ;
     } >DTCM
-*/
+
     /* MAIN TEXT SECTION */
     .text.bootinfo : ALIGN(4)
     {
