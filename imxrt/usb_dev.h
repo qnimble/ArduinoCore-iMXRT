@@ -19,7 +19,7 @@ struct transfer_struct {
 extern "C" {
 #endif
 
-#ifdef USB_REBOOT_DISABLE
+#ifdef PROG_BOOTLOADER
 	#define USB_REBOOT_BAUD 134
 #else
 	#define USB_REBOOT_BAUD 1200
