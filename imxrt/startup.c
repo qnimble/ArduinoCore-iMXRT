@@ -1049,6 +1049,19 @@ void unused_interrupt_vector(void)
 	// the Arduino Serial Monitor, and we remain responsive to Upload
 	// without requiring manual press of Teensy's pushbutton
 	count = 0;
+
+#ifdef ARDUINO_QUARTO
+	#ifdef PROG_BOOTLOADER //if bootloader
+		SRC_GPR5 = 0xBADB0000; // crash in bootloader
+	#else
+		SRC_GPR5 = 0xBADA0000; //crash in application
+	#endif
+
+	SRC_GPR5 |= (0xFF & ipsr); // store IPSR lower 8 bits for exception number (https://developer.arm.com/documentation/dui0552/a/the-cortex-m3-processor/programmers-model/core-registers?lang=en)
+	SCB_AIRCR = 0x05FA0004; //reboot device
+	while (1) ;
+#else
+
 	while (1) {
 		if (PIT_TFLG0) {
 			//GPIO7_DR_TOGGLE = (1 << 3); // blink LED
@@ -1066,19 +1079,7 @@ void unused_interrupt_vector(void)
 	USBPHY1_CTRL_SET = USBPHY_CTRL_SFTRST;
 	while (PIT_TFLG0 == 0) /* wait 0.1 second for PC to know USB unplugged */
 	// reboot
-#ifdef ARDUINO_QUARTO
-	#ifdef PROG_BOOTLOADER //if bootloader
-		SRC_GPR5 = 0xBADB0000; // crash in bootloader
-	#else
-		SRC_GPR5 = 0xBADA0000; //crash in application
-	#endif
-
-	SRC_GPR5 |= (0xFF & ipsr); // store IPSR lower 8 bits for exception number (https://developer.arm.com/documentation/dui0552/a/the-cortex-m3-processor/programmers-model/core-registers?lang=en)
-#else
-	SRC_GPR5 = 0x0BAD00F1; // default
 #endif
-	SCB_AIRCR = 0x05FA0004; //reboot device
-	while (1) ;
 }
 
 __attribute__((section(".startup"), optimize("O1")))

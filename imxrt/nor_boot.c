@@ -355,10 +355,13 @@ const flexspi_nor_config_t qspiflash_config = {
 
 
 __attribute__ ((weak, section(".startup"))) void NMI_Handler(void) {
+	SRC_GPR5 = 0xBADC0000;
 	while(1) {}
+
 }
 
 __attribute__ ((weak, section(".startup"))) void HardFault_Handler(void) {
+    SRC_GPR5 = 0xBADD0000;
 	while(1) {}
 }
 
