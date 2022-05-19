@@ -28,19 +28,19 @@ size_t CrashReportClass::printTo(Print& p) const
   struct arm_fault_info_struct *info = (struct arm_fault_info_struct *)0x2027FF80;
 
   if (isvalid(info)) {
-    p.println("CrashReport:");
+    //p.println("CrashReport:");
     uint8_t ss = info->time % 60;
     info->time /= 60;
     uint8_t mm = info->time % 60;
     info->time /= 60;
     uint8_t hh = info->time % 24;
-    p.print("  A problem occurred at (system time) ");
+    p.print("A problem occurred at (system time) ");
     p.print(hh);
     p.print(":");
     p.print(mm);
     p.print(":");
     p.println(ss);
-    p.print("  Code was executing from address 0x");
+    p.print("Code was executing from address 0x");
     p.println(info->ret, HEX);
     //p.print("  length: ");
     //p.println(info->len);
@@ -49,7 +49,7 @@ size_t CrashReportClass::printTo(Print& p) const
 
     uint32_t _CFSR = info->cfsr;
     if (_CFSR > 0) {
-      p.print("  CFSR: ");
+      p.print("Fault Status Register (CFSR): ");
       p.println(info->cfsr, HEX);
       //Memory Management Faults
       if ((_CFSR & 1) == 1) {
@@ -128,14 +128,14 @@ size_t CrashReportClass::printTo(Print& p) const
       }
     }
 
-    p.print("  Temperature inside the chip was ");
-    p.print(info->temp);
-    p.print(" °C\n");
+    //p.print("  Temperature inside the chip was ");
+    //p.print(info->temp);
+    //p.print(" °C\n");
 
     // TODO: fault handler should read the CCM & PLL registers to log actual speed at crash
-    p.print("  Startup CPU clock speed is ");
-    p.print( F_CPU_ACTUAL/1000000);
-    p.print( "MHz\n");
+    //p.print("  Startup CPU clock speed is ");
+    //p.print( F_CPU_ACTUAL/1000000);
+    //p.print( "MHz\n");
 
 
     //p.print("  MMFAR: ");
@@ -150,43 +150,53 @@ size_t CrashReportClass::printTo(Print& p) const
     //p.println(info->crc, HEX);
   } else {
     p.println("No Crash Data To Report");
-    p.println("  Hopefully all is well, but certain types of crashes can't be reported:");
-    p.println("\tstuck in an infinite loop (technically, hardware still running properly)");
-    p.println("\tremaining in a low power sleep mode");
-    p.println("\taccess to certain peripherals without their clock enabled (eg, FlexIO)");
-    p.println("\tchange of CPU or bus clock speed without use of glitchless mux");
+    //p.println("  Hopefully all is well, but certain types of crashes can't be reported:");
+    //p.println("\tstuck in an infinite loop (technically, hardware still running properly)");
+    //p.println("\tremaining in a low power sleep mode");
+    //p.println("\taccess to certain peripherals without their clock enabled (eg, FlexIO)");
+    //p.println("\tchange of CPU or bus clock speed without use of glitchless mux");
   }
   uint32_t SRSR = SRC_SRSR;
   if (SRSR & SRC_SRSR_LOCKUP_SYSRESETREQ) {
     // use SRC_GPR5 to distinguish cases.  See pages 1290 & 1294 in ref manual
     uint32_t gpr5 = SRC_GPR5;
+
+#ifdef ARDUINO_QUARTO
+    if (gpr5 == CRASHREPORT_USB_REBOOT_SELECTED) {
+        p.println("Reboot was caused by computer request for reboot over USB");
+#else
     if (gpr5 == 0x0BAD00F1) {
-      p.println("  Reboot was caused by auto reboot after fault or bad interrupt detected");
+      p.println("Reboot was caused by auto reboot after fault or bad interrupt detected");
+#endif
     } else {
-      p.println("  Reboot was caused by software write to SCB_AIRCR or CPU lockup");
+      p.println("Reboot was caused by CPU lockup");
     }
   }
   if (SRSR & SRC_SRSR_CSU_RESET_B) {
-    p.println("  Reboot was caused by security monitor");
+    p.println("Reboot was caused by security monitor");
   }
   if (SRSR & SRC_SRSR_IPP_USER_RESET_B) {
     // This case probably can't occur on Teensy 4.x
     // because the bootloader chip monitors 3.3V power
     // and manages DCDC_PSWITCH and RESET, causing the
     // power on event to appear as a normal reset.
-    p.println("  Reboot was caused by power on/off button");
+    p.println("Reboot was caused by power on/off button");
   }
   if (SRSR & SRC_SRSR_WDOG_RST_B) {
-    p.println("  Reboot was caused by watchdog 1 or 2");
+    p.println("Reboot was caused by watchdog 1 or 2");
   }
   if (SRSR & SRC_SRSR_JTAG_RST_B) {
-    p.println("  Reboot was caused by JTAG boundary scan");
+    p.println("Reboot was caused by JTAG boundary scan");
   }
   if (SRSR & SRC_SRSR_JTAG_SW_RST) {
-    p.println("  Reboot was caused by JTAG debug");
+    p.println("Reboot was caused by JTAG debug");
   }
   if (SRSR & SRC_SRSR_WDOG3_RST_B) {
-    p.println("  Reboot was caused by watchdog 3");
+#ifdef ARDUINO_QUARTO
+	  p.println("Reboot was caused by watchdog3 timer because processor stopping running low-priority interrupt routines.");
+#else
+	  p.println("Reboot was caused by watchdog 3");
+#endif
   }
   if (SRSR & SRC_SRSR_TEMPSENSE_RST_B) {
     p.println("  Reboot was caused by temperature sensor");

@@ -122,7 +122,7 @@ void ResetHandler(void)
 	  SNVS_HPCR |= SNVS_HPCR_RTC_EN | SNVS_HPCR_HP_TS;
 
 	#else  //Set if not bootloader (app)
-		SRC_GPR5 = 0xFFFFEEEE; //Reset register on boot so registered on USB reboot can be detected
+		SRC_GPR5 = CRASHREPORT_APPLICATION_BOOTING; //Reset register on boot so registered on USB reboot can be detected
 	#endif
 
 	//Disable LPSPI if previously used
@@ -1051,13 +1051,6 @@ void unused_interrupt_vector(void)
 	count = 0;
 
 #ifdef ARDUINO_QUARTO
-	#ifdef PROG_BOOTLOADER //if bootloader
-		SRC_GPR5 = 0xBADB0000; // crash in bootloader
-	#else
-		SRC_GPR5 = 0xBADA0000; //crash in application
-	#endif
-
-	SRC_GPR5 |= (0xFF & ipsr); // store IPSR lower 8 bits for exception number (https://developer.arm.com/documentation/dui0552/a/the-cortex-m3-processor/programmers-model/core-registers?lang=en)
 	SCB_AIRCR = 0x05FA0004; //reboot device
 	while (1) ;
 #else
