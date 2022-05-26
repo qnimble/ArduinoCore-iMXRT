@@ -25,6 +25,8 @@ SECTIONS
         FILL(0xff)
         __boot_hdr_start__ = ABSOLUTE(.) ;
         KEEP(*(.boot_hdr.conf))
+        . = 0x0800 ;
+		KEEP(*(.lookup_table))
         . = 0x1000 ;
         KEEP(*(.boot_hdr.ivt))
         . = 0x1020 ;
@@ -33,6 +35,7 @@ SECTIONS
         KEEP(*(.boot_hdr.dcd_data))
         __boot_hdr_end__ = ABSOLUTE(.) ;
     } >FLASH
+
 
     /* MAIN TEXT SECTION */
     .text.bootinfo : ALIGN(4)

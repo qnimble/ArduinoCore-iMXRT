@@ -113,7 +113,7 @@ void ResetHandler(void)
 	configure_cache();
 
 #ifdef ARDUINO_QUARTO
-	#ifdef USB_REBOOT_DISABLE //if bootloader, sync clocks
+	#ifdef PROG_BOOTLOADER //if bootloader, sync clocks
 	  // stop the RTC
 	  SNVS_HPCR &= ~(SNVS_HPCR_RTC_EN | SNVS_HPCR_HP_TS);
 	  while (SNVS_HPCR & SNVS_HPCR_RTC_EN) ; // wait
@@ -121,7 +121,7 @@ void ResetHandler(void)
 	  SNVS_HPCR |= SNVS_HPCR_RTC_EN | SNVS_HPCR_HP_TS;
 
 	#else  //Set if not bootloader (app)
-		SRC_GPR5 = 0xFFFFEEEE; //Reset register on boot so registered on USB reboot can be detected
+		SRC_GPR5 = CRASHREPORT_APPLICATION_BOOTING; //Reset register on boot so registered on USB reboot can be detected
 	#endif
 
 	//Disable LPSPI if previously used
@@ -152,7 +152,6 @@ void ResetHandler(void)
 		CCM_ANALOG_MISC1 &= ~CCM_ANALOG_MISC1_LVDSCLK1_OBEN; //Turn off LVDS output
 		CCM_ANALOG_MISC1 |= CCM_ANALOG_MISC1_LVDSCLK1_IBEN; //Turn on LVDS input
 
-		CCM_CCR &= ~(CCM_CCR_COSC_EN); //Turn off on-chip oscillator since we will use FPGA clock instead
 	#endif
 #else
 	#define PLL_BYPASS_TO_EXTERNAL_LVDS 0
@@ -213,6 +212,7 @@ void ResetHandler(void)
 #ifdef F_CPU
 	set_arm_clock(F_CPU);
 #endif
+#ifndef PROG_BOOTLOADER //bootloader should not change PLL SYS state
 	if ((CCM_ANALOG_PLL_SYS & (1<<14) ) != PLL_BYPASS_TO_EXTERNAL_LVDS) {
 		//CCM_ANALOG_PLL_SYS |= CCM_ANALOG_PLL_SYS_POWERDOWN;
 		CCM_ANALOG_PLL_SYS &= ~(1<<14); //14bit is bypass source, clear it
@@ -220,7 +220,8 @@ void ResetHandler(void)
 		//CCM_ANALOG_PLL_SYS &= ~CCM_ANALOG_PLL_SYS_POWERDOWN; //power back up
 		while (!(CCM_ANALOG_PLL_SYS & CCM_ANALOG_PLL_SYS_LOCK)) ; // wait for lock
   }
-
+		CCM_CCR &= ~(CCM_CCR_COSC_EN); //Turn off on-chip oscillator, as not longer needed
+#endif
 
 	//Reenable interrupts
 	__asm volatile ("cpsie i");
@@ -428,7 +429,7 @@ FLASHMEM void configure_pins(void) {
         IOMUXC_SNVS_SW_MUX_CTL_PAD_PMIC_STBY_REQ = 0x05;
         GPIO5_GDIR |= 0x04;
 
-		#ifdef USB_REBOOT_DISABLE //if bootloader, set low (off)
+		#ifdef PROG_BOOTLOADER //if bootloader, set low (off)
             GPIO5_DR_CLEAR = 0x04;
 		#else
             GPIO5_DR_SET = 0x04; //turn on in application
@@ -783,15 +784,20 @@ FLASHMEM void usb_pll_start()
 		printf("CCM_ANALOG_PLL_USB1=%08lX\n", n);
 		if (n & CCM_ANALOG_PLL_USB1_DIV_SELECT) {
 			printf("  ERROR, 528 MHz mode!\n"); // never supposed to use this mode!
-			CCM_ANALOG_PLL_USB1_CLR = 0xC000;			// bypass 24 MHz
-			CCM_ANALOG_PLL_USB1_SET = CCM_ANALOG_PLL_USB1_BYPASS | PLL_BYPASS_TO_EXTERNAL_LVDS;	// bypass
+			#ifdef PROG_BOOTLOADER //leave 24MHz source unchanged
+				CCM_ANALOG_PLL_USB1_SET = CCM_ANALOG_PLL_USB1_BYPASS;	// bypass
+			#else
+				CCM_ANALOG_PLL_USB1_CLR = 0xC000;			// bypass 24 MHz, then set
+				CCM_ANALOG_PLL_USB1_SET = CCM_ANALOG_PLL_USB1_BYPASS | PLL_BYPASS_TO_EXTERNAL_LVDS;	// bypass
+			#endif
+
 			CCM_ANALOG_PLL_USB1_CLR = CCM_ANALOG_PLL_USB1_POWER |   // power down
 				CCM_ANALOG_PLL_USB1_DIV_SELECT |		// use 480 MHz
 				CCM_ANALOG_PLL_USB1_ENABLE |			// disable
 				CCM_ANALOG_PLL_USB1_EN_USB_CLKS;		// disable usb
 			continue;
 		}
-
+#ifndef PROG_BOOTLOADER
 		if ((n & 0xC000) != PLL_BYPASS_TO_EXTERNAL_LVDS) {
 			n &= ~(0xC000); //14bit is bypass source, clear it
 			n |= PLL_BYPASS_TO_EXTERNAL_LVDS; //set PLL source bits
@@ -800,11 +806,11 @@ FLASHMEM void usb_pll_start()
 			//CCM_ANALOG_PLL_USB1_CLR = CCM_ANALOG_PLL_USB1_POWER | CCM_ANALOG_PLL_USB1_ENABLE |  CCM_ANALOG_PLL_USB1_EN_USB_CLKS;
 			continue;
 		}
-
+#endif
 		if (!(n & CCM_ANALOG_PLL_USB1_ENABLE)) {
 			printf("  enable PLL\n");
 			// TODO: should this be done so early, or later??
-			CCM_ANALOG_PLL_USB1_SET = CCM_ANALOG_PLL_USB1_ENABLE | PLL_BYPASS_TO_EXTERNAL_LVDS;
+			CCM_ANALOG_PLL_USB1_SET = CCM_ANALOG_PLL_USB1_ENABLE;
 			continue;
 		}
 		if (!(n & CCM_ANALOG_PLL_USB1_POWER)) {
@@ -980,6 +986,12 @@ void unused_interrupt_vector(void)
 	// the Arduino Serial Monitor, and we remain responsive to Upload
 	// without requiring manual press of Teensy's pushbutton
 	count = 0;
+
+#ifdef ARDUINO_QUARTO
+	SCB_AIRCR = 0x05FA0004; //reboot device
+	while (1) ;
+#else
+
 	while (1) {
 		if (PIT_TFLG0) {
 			//GPIO7_DR_TOGGLE = (1 << 3); // blink LED
@@ -997,19 +1009,7 @@ void unused_interrupt_vector(void)
 	USBPHY1_CTRL_SET = USBPHY_CTRL_SFTRST;
 	while (PIT_TFLG0 == 0) /* wait 0.1 second for PC to know USB unplugged */
 	// reboot
-#ifdef ARDUINO_QUARTO
-	#ifdef USB_REBOOT_DISABLE //if bootloader
-		SRC_GPR5 = 0xBADB0000; // crash in bootloader
-	#else
-		SRC_GPR5 = 0xBADA0000; //crash in application
-	#endif
-
-	SRC_GPR5 |= (0xFF & ipsr); // store IPSR lower 8 bits for exception number (https://developer.arm.com/documentation/dui0552/a/the-cortex-m3-processor/programmers-model/core-registers?lang=en)
-#else
-	SRC_GPR5 = 0x0BAD00F1; // default
 #endif
-	SCB_AIRCR = 0x05FA0004; //reboot device
-	while (1) ;
 }
 
 __attribute__((section(".startup"), optimize("O1")))

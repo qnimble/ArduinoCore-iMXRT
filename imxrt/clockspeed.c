@@ -19,7 +19,6 @@ volatile uint32_t F_BUS_ACTUAL = 132000000;
 
 uint32_t set_arm_clock(uint32_t frequency);
 
-#define LVDS_CLK_ENABLE_BIT (1<<14)
 #ifdef ARDUINO_QUARTO
 	#ifdef QUARTO_PROTOTYPE
 		#define PLL_BYPASS_TO_EXTERNAL_LVDS 0
@@ -126,15 +125,20 @@ uint32_t set_arm_clock(uint32_t frequency)
 	frequency = mult * 12000000 / div_arm / div_ahb;
 
 	printf("ARM PLL=%lx\n", CCM_ANALOG_PLL_ARM);
-	const uint32_t arm_pll_mask = CCM_ANALOG_PLL_ARM_LOCK | CCM_ANALOG_PLL_ARM_BYPASS | PLL_BYPASS_TO_EXTERNAL_LVDS |
+#ifdef PROG_BOOTLOADER
+	const uint32_t target_EXTERNAL = CCM_ANALOG_PLL_ARM & PLL_BYPASS_TO_EXTERNAL_LVDS;
+#else
+	const uint32_t target_EXTERNAL = PLL_BYPASS_TO_EXTERNAL_LVDS;
+#endif
+	const uint32_t arm_pll_mask = CCM_ANALOG_PLL_ARM_LOCK | CCM_ANALOG_PLL_ARM_BYPASS | target_EXTERNAL |
 		CCM_ANALOG_PLL_ARM_ENABLE | CCM_ANALOG_PLL_ARM_POWERDOWN |
 		CCM_ANALOG_PLL_ARM_DIV_SELECT_MASK;
-	if ((CCM_ANALOG_PLL_ARM & arm_pll_mask) != (CCM_ANALOG_PLL_ARM_LOCK | PLL_BYPASS_TO_EXTERNAL_LVDS
+	if ((CCM_ANALOG_PLL_ARM & arm_pll_mask) != (CCM_ANALOG_PLL_ARM_LOCK | target_EXTERNAL
 	  | CCM_ANALOG_PLL_ARM_ENABLE | CCM_ANALOG_PLL_ARM_DIV_SELECT(mult))) {
 		printf("ARM PLL needs reconfigure\n");
 		CCM_ANALOG_PLL_ARM = CCM_ANALOG_PLL_ARM_POWERDOWN;
 		// TODO: delay needed?
-		CCM_ANALOG_PLL_ARM = CCM_ANALOG_PLL_ARM_ENABLE | PLL_BYPASS_TO_EXTERNAL_LVDS
+		CCM_ANALOG_PLL_ARM = CCM_ANALOG_PLL_ARM_ENABLE | target_EXTERNAL
 			| CCM_ANALOG_PLL_ARM_DIV_SELECT(mult);
 		while (!(CCM_ANALOG_PLL_ARM & CCM_ANALOG_PLL_ARM_LOCK)) ; // wait for lock
 		printf("ARM PLL=%lx\n", CCM_ANALOG_PLL_ARM);
