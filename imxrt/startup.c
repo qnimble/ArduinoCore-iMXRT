@@ -929,7 +929,7 @@ extern void usb_isr(void);
 __attribute__((naked))
 void unused_interrupt_vector(void)
 {
-	uint32_t i, ipsr, crc, count;
+	uint32_t i, ipsr, crc;
 	const uint32_t *stack;
 	struct arm_fault_info_struct *info;
 	const uint32_t *p, *end;
@@ -982,15 +982,15 @@ void unused_interrupt_vector(void)
 	NVIC_ICER3 = 0xFFFFFFFF;
 	NVIC_ICER4 = 0xFFFFFFFF;
 
-	// keep USB running, so any unsent Serial.print() actually arrives in
-	// the Arduino Serial Monitor, and we remain responsive to Upload
-	// without requiring manual press of Teensy's pushbutton
-	count = 0;
-
 #ifdef ARDUINO_QUARTO
 	SCB_AIRCR = 0x05FA0004; //reboot device
 	while (1) ;
 #else
+	// keep USB running, so any unsent Serial.print() actually arrives in
+	// the Arduino Serial Monitor, and we remain responsive to Upload
+	// without requiring manual press of Teensy's pushbutton
+
+	uint32_t count = 0;
 
 	while (1) {
 		if (PIT_TFLG0) {
