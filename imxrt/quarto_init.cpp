@@ -11,10 +11,6 @@
 #include "adc.h"
 #include "pins_arduino.h"
 #include "core_pins.h"
-#include "../../libraries/Time/Timelib.h"
-
-
-
 
 FLASHMEM void quarto_init(void) {
 	//Clear stale Data if available.
@@ -77,8 +73,5 @@ FLASHMEM void quarto_init(void) {
 	configureADC4(0,0,BIPOLAR_10V,&adc4_irq_ignoredata);
 
 	__asm volatile ("cpsie i");
-
-	setSyncProvider((getExternalTime) Teensy3Clock.get);
-
 }
 #endif
