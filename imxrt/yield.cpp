@@ -36,7 +36,7 @@ uint8_t yield_active_check_flags = YIELD_CHECK_USB_SERIAL | YIELD_CHECK_USB_SERI
 extern const uint8_t _serialEventUSB2_default;	
 extern const uint8_t _serialEventUSB1_default;	
 
-#elif defined(USB_DUAL_SERIAL)
+#elif defined(USB_DUAL_SERIAL) || defined(ARDUINO_QUARTO)
 uint8_t yield_active_check_flags = YIELD_CHECK_USB_SERIAL | YIELD_CHECK_USB_SERIALUSB1; // default to check USB.
 extern const uint8_t _serialEventUSB1_default;	
 
@@ -61,9 +61,13 @@ void yield(void)
 		if (_serialEvent_default) yield_active_check_flags &= ~YIELD_CHECK_USB_SERIAL;
 	}
 
-#if defined(USB_DUAL_SERIAL) || defined(USB_TRIPLE_SERIAL)
+#if defined(USB_DUAL_SERIAL) || defined(USB_TRIPLE_SERIAL) || defined(ARDUINO_QUARTO)
 	if (yield_active_check_flags & YIELD_CHECK_USB_SERIALUSB1) {
+#ifdef ARDUINO_QUARTO
+		if (Serial2.available()) serialEvent2();
+#else
 		if (SerialUSB1.available()) serialEventUSB1();
+#endif
 		if (_serialEventUSB1_default) yield_active_check_flags &= ~YIELD_CHECK_USB_SERIALUSB1;
 	}
 #endif

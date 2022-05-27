@@ -41,7 +41,11 @@ usb_serial_class Serial;
 
 #ifdef CDC2_DATA_INTERFACE
 #ifdef CDC2_STATUS_INTERFACE
+#ifdef ARDUINO_QUARTO
+usb_serial2_class Serial2;
+#else
 usb_serial2_class SerialUSB1;
+#endif
 #endif
 #endif
 

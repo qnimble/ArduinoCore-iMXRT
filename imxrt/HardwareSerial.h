@@ -294,18 +294,23 @@ private:
 
 
 };
+
+#ifndef ARDUINO_QUARTO
+
 extern HardwareSerial Serial1;
 extern HardwareSerial Serial2;
 extern HardwareSerial Serial3;
 extern HardwareSerial Serial4;
 extern HardwareSerial Serial5;
-extern HardwareSerial Serial6;
-extern HardwareSerial Serial7;
 extern void serialEvent1(void);
 extern void serialEvent2(void);
 extern void serialEvent3(void);
 extern void serialEvent4(void);
 extern void serialEvent5(void);
+
+#endif
+extern HardwareSerial Serial6;
+extern HardwareSerial Serial7;
 extern void serialEvent6(void);
 extern void serialEvent7(void);
 

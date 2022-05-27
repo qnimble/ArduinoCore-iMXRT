@@ -40,6 +40,7 @@
 #endif
 #define IRQ_PRIORITY  64  // 0 = highest priority, 255 = lowest
 
+#ifndef ARDUINO_QUARTO
 void IRQHandler_Serial1()
 {
 	Serial1.IRQHandler();
@@ -108,4 +109,4 @@ void serial_phex32(uint32_t n)
 	serial_phex(n >> 8);
 	serial_phex(n);
 }
-
+#endif
