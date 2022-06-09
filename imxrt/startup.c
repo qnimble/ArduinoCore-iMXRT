@@ -148,7 +148,7 @@ void ResetHandler(void)
 	#else
 		#define PLL_BYPASS_TO_EXTERNAL_LVDS (1<<14)
 		#define PERCLK_SOURCE 0
-		#define PERCLK_DIVIDER 1
+		#define PERCLK_DIVIDER 0
 		CCM_ANALOG_MISC1 &= ~CCM_ANALOG_MISC1_LVDSCLK1_OBEN; //Turn off LVDS output
 		CCM_ANALOG_MISC1 |= CCM_ANALOG_MISC1_LVDSCLK1_IBEN; //Turn on LVDS input
 

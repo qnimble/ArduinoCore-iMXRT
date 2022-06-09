@@ -42,7 +42,7 @@ extern "C" {
 	#ifdef QUARTO_PROTOTYPE
 		#define PIT_CLOCK_FREQ 24000000
 	#else
-		#define PIT_CLOCK_FREQ 66000000
+		#define PIT_CLOCK_FREQ 132000000
 	#endif
 #else
 	#define PIT_CLOCK_FREQ 24000000
