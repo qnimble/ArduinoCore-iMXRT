@@ -175,6 +175,7 @@ SECTIONS
        _data = . ;
        PROVIDE(__start_data_RAM = .) ;
        PROVIDE(__start_data_SRAM_DTC = .) ;
+       *(.vectorsram)
        *(.vectors)
        *(vtable)
        *(.ramfunc*)
@@ -233,6 +234,11 @@ SECTIONS
         
 	} > DTCM AT >DTCM
 
+ .extra _binary_load_addr : ALIGN(1024)
+    {
+        *(.binary.load)
+    } > FLASH
+
  
     _itcm_block_count = (SIZEOF(.data.ITCM) + SIZEOF(.bss.ITCM) + 0x7FFF) >> 15;
 	_flexram_bank_config = 0xAAAAAAAA | ((1 << (_itcm_block_count * 2)) - 1);
@@ -240,6 +246,5 @@ SECTIONS
     _vStackTop = 0x2001f000; /* Initial Stack pointer */
      _heap_start = ADDR(.data.RAM) + SIZEOF(.data.RAM);
     _heap_end = ORIGIN(RAM) + LENGTH(RAM);
-    
-    
+    _binary_load_addr = 0x60080000;
 }

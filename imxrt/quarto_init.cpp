@@ -29,6 +29,7 @@ FLASHMEM void quarto_init(void) {
 	setWriteAddress(0x010); //Set Write address to 0x010 for Enabling Analog
 	writeData(cal_data); //Enable Analog Clock, Analog,
 
+	GPIO2_DR_TOGGLE = (0x000F0000 + 0x1000); //Do an FPGA read, seems to fix off by one on future reads
 	delay(50);
 
 	GPIO2_DR_TOGGLE = 0x00010000; //Set DAC1 to 0x0000 or 0V
