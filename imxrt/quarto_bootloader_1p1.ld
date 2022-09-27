@@ -180,6 +180,7 @@ SECTIONS
        _data = . ;
        PROVIDE(__start_data_RAM = .) ;
        PROVIDE(__start_data_SRAM_DTC = .) ;
+       *(.vectorsram)
        *(.vectors)
        *(vtable)
        *(.ramfunc*)
