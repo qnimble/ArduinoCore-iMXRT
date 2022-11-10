@@ -24,6 +24,13 @@ FLASHMEM void quarto_init(void) {
 		writeData(cal_data);
 	}
 
+	// Load ADC calibration data
+	for(int i = 0; i<8; i++) {
+		cal_data = readNVM(769*128 + (i+4)*2);
+		setWriteAddress(0x60 + i);
+		writeData(cal_data);
+	}
+
 	cal_data = readData(0x010) ; //read current analog settings
 	cal_data |= 0x03; //enable Analog Power if not already on
 	setWriteAddress(0x010); //Set Write address to 0x010 for Enabling Analog
