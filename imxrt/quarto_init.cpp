@@ -24,11 +24,13 @@ FLASHMEM void quarto_init(void) {
 		writeData(cal_data);
 	}
 
-	// Load ADC calibration data
-	for(int i = 0; i<8; i++) {
-		cal_data = readNVM(769*128 + (i+4)*2);
-		setWriteAddress(0x60 + i);
-		writeData(cal_data);
+	// Load ADC calibration data for newer hardware
+	if ( getHardwareMajorRev() >= 5) {
+		for(int i = 0; i<8; i++) {
+			cal_data = readNVM(769*128 + (i+4)*2);
+			setWriteAddress(0x60 + i);
+			writeData(cal_data);
+		}
 	}
 
 	cal_data = readData(0x010) ; //read current analog settings
