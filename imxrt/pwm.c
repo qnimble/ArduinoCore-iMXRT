@@ -27,10 +27,11 @@ const struct pwm_pin_info_struct pwm_pin_info[] = {
 	{1, M(1, 3), 0, 4},  // FlexPWM1_3_X   6  // AD_B0_13
 	{0, M(1, 0), 0, 0},
 	{0, M(1, 0), 0, 0},
-	{1, M(1, 3), 1, 2},  // FlexPWM1_3_A  20 // LED Red    // SD_B1_00
-	{1, M(1, 3), 2, 2},  // FlexPWM1_3_B  21 // LED Blue   // SD_B1_01
-	{1, M(2, 3), 1, 2},  // FlexPWM2_3_A  22 // LED Green  // SD_B1_02
-	{1, M(2, 3), 2, 0},  // FlexPWM2_3_B  21 // Trigger1   // AD_B0_01
+	{1, M(1, 3), 1, 2},  // FlexPWM1_3_A  9 // LED Red    // SD_B1_00
+	{1, M(1, 3), 2, 2},  // FlexPWM1_3_B  10 // LED Blue   // SD_B1_01
+	{1, M(2, 3), 1, 2},  // FlexPWM2_3_A  11 // LED Green  // SD_B1_02
+	{1, M(2, 3), 2, 0},  // FlexPWM2_3_B  12 // Trigger1   // AD_B0_01
+	{1, M(2, 3), 1, 0},  // FlexPWM2_3_A  13 // Trigger2   // AD_B0_00
 #else
 	{1, M(1, 1), 0, 4},  // FlexPWM1_1_X   0  // AD_B0_03
 	{1, M(1, 0), 0, 4},  // FlexPWM1_0_X   1  // AD_B0_02
@@ -207,6 +208,14 @@ void flexpwmFrequency(IMXRT_FLEXPWM_t *p, unsigned int submodule, uint8_t channe
 	p->MCTRL |= FLEXPWM_MCTRL_LDOK(mask);
 }
 
+int readflexpwmFrequency(IMXRT_FLEXPWM_t *p, unsigned int submodule, uint8_t channel)
+{
+	uint32_t divider = p->SM[submodule].VAL1 + 1;
+	uint8_t prescale = 	 (p->SM[submodule].CTRL & FLEXPWM_SMCTRL_PRSC(15))>>4;
+	return divider<<prescale;
+}
+
+
 void quadtimerWrite(IMXRT_TMR_t *p, unsigned int submodule, uint16_t val)
 {
 	uint32_t modulo = 65537 - p->CH[submodule].LOAD + p->CH[submodule].CMPLD1;
@@ -248,6 +257,17 @@ void quadtimerFrequency(IMXRT_TMR_t *p, unsigned int submodule, float frequency)
 	p->CH[submodule].CTRL = TMR_CTRL_CM(1) | TMR_CTRL_PCS(8 + prescale) |
 		TMR_CTRL_LENGTH | TMR_CTRL_OUTMODE(6);
 }
+
+
+int readquadtimerFrequency(IMXRT_TMR_t *p, unsigned int submodule)
+{
+	uint32_t high = p->CH[submodule].CMPLD1;
+	uint32_t low = 65537 - p->CH[submodule].LOAD;
+	uint32_t divider = low + high;
+	uint8_t prescale = 	( (p->CH[submodule].CTRL & TMR_CTRL_PCS(15))>>9) - 8;
+	return divider<<prescale;
+}
+
 
 void analogWrite(uint8_t pin, int val)
 {
@@ -311,6 +331,37 @@ void analogWriteFrequency(uint8_t pin, float frequency)
 		}
 		quadtimerFrequency(qtimer, info->module & 0x03, frequency);
 	}
+}
+
+float readAnalogWriteFrequency(uint8_t pin) {
+	const struct pwm_pin_info_struct *info;
+	uint32_t divider = 1;
+	if (pin >= CORE_NUM_DIGITAL) return 0 ;
+
+	info = pwm_pin_info + pin;
+	if (info->type == 1) {
+		// FlexPWM pin
+		IMXRT_FLEXPWM_t *flexpwm;
+		switch ((info->module >> 4) & 3) {
+		  case 0: flexpwm = &IMXRT_FLEXPWM1; break;
+		  case 1: flexpwm = &IMXRT_FLEXPWM2; break;
+		  case 2: flexpwm = &IMXRT_FLEXPWM3; break;
+		  default: flexpwm = &IMXRT_FLEXPWM4;
+		}
+		divider =  readflexpwmFrequency(flexpwm, info->module & 0x03, info->channel);
+	} else if (info->type == 2) {
+		// QuadTimer pin
+		IMXRT_TMR_t *qtimer;
+		switch ((info->module >> 4) & 3) {
+		  case 0: qtimer = &IMXRT_TMR1; break;
+		  case 1: qtimer = &IMXRT_TMR2; break;
+		  case 2: qtimer = &IMXRT_TMR3; break;
+		  default: qtimer = &IMXRT_TMR4;
+		}
+		divider = readquadtimerFrequency(qtimer, info->module & 0x03);
+	}
+	return ((float)F_BUS_ACTUAL / divider);
+
 }
 
 void flexpwm_init(IMXRT_FLEXPWM_t *p)
