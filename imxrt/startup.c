@@ -114,7 +114,16 @@ void ResetHandler(void)
 
 #ifdef ARDUINO_QUARTO
 	#ifdef PROG_BOOTLOADER //if bootloader, sync clocks
-	  // stop the RTC
+		// initialize RTC
+		if (!(SNVS_LPCR & SNVS_LPCR_SRTC_ENV)) {
+			// if SRTC isn't running, start it with default Jan 1, 2019
+			SNVS_LPSRTCLR = 1546300800u << 15;
+			SNVS_LPSRTCMR = 1546300800u >> 17;
+			SNVS_LPCR |= SNVS_LPCR_SRTC_ENV;
+			while (!(SNVS_LPCR & SNVS_LPCR_SRTC_ENV)); // wait
+		}
+
+	// stop the RTC
 	  SNVS_HPCR &= ~(SNVS_HPCR_RTC_EN | SNVS_HPCR_HP_TS);
 	  while (SNVS_HPCR & SNVS_HPCR_RTC_EN) ; // wait
 	  // start the RTC and sync it to the SRTC
@@ -233,14 +242,6 @@ void ResetHandler(void)
 	PIT_TCTRL1 = 0;
 	PIT_TCTRL2 = 0;
 	PIT_TCTRL3 = 0;
-	// initialize RTC
-	if (!(SNVS_LPCR & SNVS_LPCR_SRTC_ENV)) {
-		// if SRTC isn't running, start it with default Jan 1, 2019
-		SNVS_LPSRTCLR = 1546300800u << 15;
-		SNVS_LPSRTCMR = 1546300800u >> 17;
-		SNVS_LPCR |= SNVS_LPCR_SRTC_ENV;
-	}
-	SNVS_HPCR |= SNVS_HPCR_RTC_EN | SNVS_HPCR_HP_TS;
 
 #ifdef ARDUINO_TEENSY41
 	configure_external_ram();
