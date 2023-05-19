@@ -4,6 +4,7 @@ MEMORY
 	DTCM (rwx) : ORIGIN = 0x20000000, LENGTH = 0x80000
 	RAM (rwx) : ORIGIN = 0x20200000, LENGTH = 0x20000
 	FLASH (rx) : ORIGIN = DEFINED(QUARTO_1064) ? 0x70000000 : 0x60000000, LENGTH = 0x40000
+	FLASH2 (rx) : ORIGIN = DEFINED(QUARTO_1064) ? 0x70040000 : 0x60040000, LENGTH = 0x400000
 }
 /* 
 GROUP (
@@ -91,6 +92,14 @@ SECTIONS
         . = ALIGN(16);
               
     } > FLASH
+
+     .text.flash2 : ALIGN(4)
+    {
+       *(.extraflash*)
+        . = ALIGN(16);
+
+    } > FLASH2
+
     /*
      * for exception handling/unwind - some Newlib functions (in common
      * with C++ and STDC++) use this.
