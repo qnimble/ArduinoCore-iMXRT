@@ -221,7 +221,7 @@ void ResetHandler(void)
 #ifdef F_CPU
 	set_arm_clock(F_CPU);
 #endif
-#ifndef PROG_BOOTLOADER //bootloader should not change PLL SYS state
+#if !defined(PROG_BOOTLOADER) && !defined(INTERNAL_CLOCK) //bootloader should not change PLL SYS state
 	if ((CCM_ANALOG_PLL_SYS & (1<<14) ) != PLL_BYPASS_TO_EXTERNAL_LVDS) {
 		//CCM_ANALOG_PLL_SYS |= CCM_ANALOG_PLL_SYS_POWERDOWN;
 		CCM_ANALOG_PLL_SYS &= ~(1<<14); //14bit is bypass source, clear it
@@ -789,7 +789,7 @@ FLASHMEM void usb_pll_start()
 		printf("CCM_ANALOG_PLL_USB1=%08lX\n", n);
 		if (n & CCM_ANALOG_PLL_USB1_DIV_SELECT) {
 			printf("  ERROR, 528 MHz mode!\n"); // never supposed to use this mode!
-			#ifdef PROG_BOOTLOADER //leave 24MHz source unchanged
+			#if defined(PROG_BOOTLOADER) || defined(INTERNAL_CLOCK) //leave 24MHz source unchanged
 				CCM_ANALOG_PLL_USB1_SET = CCM_ANALOG_PLL_USB1_BYPASS;	// bypass
 			#else
 				CCM_ANALOG_PLL_USB1_CLR = 0xC000;			// bypass 24 MHz, then set
@@ -802,7 +802,7 @@ FLASHMEM void usb_pll_start()
 				CCM_ANALOG_PLL_USB1_EN_USB_CLKS;		// disable usb
 			continue;
 		}
-#ifndef PROG_BOOTLOADER
+#if !defined(PROG_BOOTLOADER) && !defined(INTERNAL_CLOCK)
 		if ((n & 0xC000) != PLL_BYPASS_TO_EXTERNAL_LVDS) {
 			n &= ~(0xC000); //14bit is bypass source, clear it
 			n |= PLL_BYPASS_TO_EXTERNAL_LVDS; //set PLL source bits

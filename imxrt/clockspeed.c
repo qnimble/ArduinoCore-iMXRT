@@ -125,7 +125,7 @@ uint32_t set_arm_clock(uint32_t frequency)
 	frequency = mult * 12000000 / div_arm / div_ahb;
 
 	printf("ARM PLL=%lx\n", CCM_ANALOG_PLL_ARM);
-#ifdef PROG_BOOTLOADER
+#if defined(PROG_BOOTLOADER) || defined(INTERNAL_CLOCK)
 	const uint32_t target_EXTERNAL = CCM_ANALOG_PLL_ARM & PLL_BYPASS_TO_EXTERNAL_LVDS;
 #else
 	const uint32_t target_EXTERNAL = PLL_BYPASS_TO_EXTERNAL_LVDS;
