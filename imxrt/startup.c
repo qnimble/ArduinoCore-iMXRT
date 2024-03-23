@@ -394,7 +394,7 @@ FLASHMEM void configure_pins(void) {
 
 #ifdef ARDUINO_QUARTO
         //Configure GPIO pins as GPIO with default speed, etc
-        for(uint i=1; i<9;i++) {
+        for(unsigned int i=1; i<9;i++) {
             *digital_pin_to_info_PGM[i].pad = 0x10b0;
             *digital_pin_to_info_PGM[i].mux = 0x05;
         }

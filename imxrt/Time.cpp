@@ -28,8 +28,6 @@
 */
 
 #include <Arduino.h>
-
-
 // TODO: replace this slow Time library code with faster 32 bit approach
 
 
@@ -122,5 +120,5 @@ uint32_t makeTime(const DateTimeFields &tm)
   seconds += tm.hour * SECS_PER_HOUR;
   seconds += tm.min * SECS_PER_MIN;
   seconds += tm.sec;
-  return (time_t)seconds;
+  return seconds;
 }
