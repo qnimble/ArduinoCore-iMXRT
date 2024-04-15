@@ -90,10 +90,11 @@ size_t Print::println(void)
 
 extern "C" {
 __attribute__((weak))
-int _writeCausesProblems(int file, char *ptr, int len)
+int _write(int file, char *ptr, int len)
 {
-	((class Print *)file)->write((uint8_t *)ptr, len);
-	return len;
+	if (file >= 0 && file <= 2) return 0;
+	return ((class Print *)file)->write((uint8_t *)ptr, len);
+
 }
 }
 
