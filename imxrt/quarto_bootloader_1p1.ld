@@ -55,7 +55,7 @@ SECTIONS
         LONG(  SIZEOF(.data));
         LONG(LOADADDR(.data_RAM2));
         LONG(    ADDR(.data_RAM2));
-        LONG(  SIZEOF(.data_RAM2));
+        LONG(  SIZEOF(.data_RAM2) + SIZEOF(.ARM.exidx));
         LONG(LOADADDR(.data_RAM3));
         LONG(    ADDR(.data_RAM3));
         LONG(  SIZEOF(.data_RAM3));
@@ -70,18 +70,15 @@ SECTIONS
         __bss_section_table_end = .;
         __section_table_end = . ;
         /* End of Global Section Table */
-				
-        *(.after_vectors*)
-        *(.startup*)
-
     } > FLASH
 
     .text.flash : ALIGN(4)
     {       
-       *(.progmem*)   
+       KEEP(*(.startup))
+       . = ALIGN(4);
        *(.flashmem*)           
        . = ALIGN(4);
-       
+              
         KEEP(*(.init))
         __preinit_array_start = .;
         KEEP (*(.preinit_array))
@@ -89,8 +86,9 @@ SECTIONS
         __init_array_start = .;
         KEEP (*(.init_array))
         __init_array_end = .;
-        . = ALIGN(16);
-              
+        . = ALIGN(4);
+       *(.progmem*)  
+       . = ALIGN(4);     
     } > FLASH
 
      .text.flash2 : ALIGN(4)
@@ -111,30 +109,23 @@ SECTIONS
      } > RAM
      
      
-     
+   /*   
     .ARM.extab : ALIGN(4)
     {
         *(.ARM.extab* .gnu.linkonce.armextab.*)
-    } > DTCM AT >FLASH 
-    
-    
-     .ARM : ALIGN(4)
-    {
-        __exidx_start = .;
-        *(.ARM.exidx* .gnu.linkonce.armexidx.*)
-        __exidx_end = .;
-     } > DTCM AT >FLASH 
- 	
-     
+    } > DTCM AT >FLASH
+*/
+
     _etext = .;
         
     /* DATA section for SRAM_ITC */
 
     .data_RAM2 : ALIGN(4)
     {
-        FILL(0xff)
+        . = . + 32; /* MPU to trap NULL pointer deref */        
         PROVIDE(__start_data_RAM2 = .) ;
         PROVIDE(__start_data_SRAM_ITC = .) ;       
+        
         *(.fastrun)		
 		*(.text*)		
         *(.ramfunc.$RAM2)
@@ -142,12 +133,20 @@ SECTIONS
         *(.data.$RAM2)      
         *(.data.$SRAM_ITC)      
         *(.data.$RAM2.*)        
-        *(.data.$SRAM_ITC.*)       
+        *(.data.$SRAM_ITC.*)
+        
         . = ALIGN(4) ;        
         PROVIDE(__end_data_RAM2 = .) ;
         PROVIDE(__end_data_SRAM_ITC = .) ;
       } > ITCM AT>FLASH 
-     
+
+	.ARM.exidx :  ALIGN(16)
+	{
+        __exidx_start = .;        
+        *(.ARM.exidx* .ARM.extab.text* .gnu.linkonce.armexidx.*)        
+		__exidx_end = .;
+     } > ITCM AT>FLASH   
+
 
     /* DATA section for SRAM_OC */
 
@@ -295,7 +294,7 @@ SECTIONS
        PROVIDE(__end_noinit_SRAM_DTC = .) ;        
     } > DTCM AT> DTCM
 
-    _itcm_block_count = (SIZEOF(.data_RAM2) + 0x7FFF) >> 15;
+    _itcm_block_count = (SIZEOF(.data_RAM2) + SIZEOF(.ARM.exidx) + 0x7FFF) >> 15;
 	_flexram_bank_config = 0xAAAAAAAA | ((1 << (_itcm_block_count * 2)) - 1);
 	_estack = ORIGIN(DTCM) + ((16 - _itcm_block_count) << 15) - 32;
     _vStackTop = 0x2001f000; /* Initial Stack pointer */

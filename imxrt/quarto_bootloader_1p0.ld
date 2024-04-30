@@ -95,16 +95,8 @@ SECTIONS
     {
         *(.ARM.extab* .gnu.linkonce.armextab.*)
     } > DTCM AT >FLASH 
-    
-    
-     .ARM : ALIGN(4)
-    {
-        __exidx_start = .;
-        *(.ARM.exidx* .gnu.linkonce.armexidx.*)
-        __exidx_end = .;
-     } > DTCM AT >FLASH 
- 	
-     
+
+
     _etext = .;
         
     /* DATA section for SRAM_ITC */
@@ -114,6 +106,7 @@ SECTIONS
         FILL(0xff)
         PROVIDE(__start_data_RAM2 = .) ;
         PROVIDE(__start_data_SRAM_ITC = .) ;       
+        . = . + 32; /* MPU to trap NULL pointer deref */
         *(.fastrun)		
 		*(.text*)		
         *(.ramfunc.$RAM2)
@@ -122,6 +115,7 @@ SECTIONS
         *(.data.$SRAM_ITC)      
         *(.data.$RAM2.*)        
         *(.data.$SRAM_ITC.*)       
+        *(.ARM.exidx* .gnu.linkonce.armexidx.*)
         . = ALIGN(4) ;        
         PROVIDE(__end_data_RAM2 = .) ;
         PROVIDE(__end_data_SRAM_ITC = .) ;
