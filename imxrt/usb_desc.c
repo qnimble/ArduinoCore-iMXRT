@@ -2756,9 +2756,11 @@ void usb_init_serialnumber(void)
 		//Bootloader using lookup table version 1 or higher, so 0.6.0 or higher,
 		//so we can use serial number set function
 		void (*set_usb_serial)(struct usb_string_descriptor_struct*) = (void (*)(struct usb_string_descriptor_struct*))*(ptr + 5);
-		set_usb_serial(&usb_string_serial_number_default);
-		//after running, do not run the default serial number command, so return
-		return;
+		if (set_usb_serial != NULL ) {
+			set_usb_serial(&usb_string_serial_number_default);
+			//after running, do not run the default serial number command, so return
+			return;
+		}
 	}
 
 	num = HW_OCOTP_CFG0 & 0xFFFFFF;
