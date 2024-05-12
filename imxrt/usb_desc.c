@@ -38,6 +38,10 @@
 #include "avr_functions.h"
 #include "avr/pgmspace.h"
 
+#if ARDUINO_QUARTO
+	#include "comm.h"
+#endif
+
 // At very slow CPU speeds, the OCRAM just isn't fast enough for
 // USB to work reliably.  But the precious/limited DTCM is.  So
 // as an ugly workaround, undefine DMAMEM so all buffers which
@@ -2747,6 +2751,16 @@ void usb_init_serialnumber(void)
 	uint32_t i, num;
 
 #if ARDUINO_QUARTO
+	uint32_t* ptr = (uint32_t*) 0x60000800;
+	if ( (*ptr >= LOOKUP_TABLE_START_CODE + 1) && (*ptr <= LOOKUP_TABLE_START_CODE + 255)) {
+		//Bootloader using lookup table version 1 or higher, so 0.6.0 or higher,
+		//so we can use serial number set function
+		void (*set_usb_serial)(struct usb_string_descriptor_struct*) = (void (*)(struct usb_string_descriptor_struct*))*(ptr + 5);
+		set_usb_serial(&usb_string_serial_number_default);
+		//after running, do not run the default serial number command, so return
+		return;
+	}
+
 	num = HW_OCOTP_CFG0 & 0xFFFFFF;
 #else
 	num = HW_OCOTP_MAC0 & 0xFFFFFF;

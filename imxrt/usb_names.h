@@ -43,7 +43,7 @@ extern "C" {
 struct usb_string_descriptor_struct {
 	uint8_t bLength;
 	uint8_t bDescriptorType;
-	uint16_t wString[];
+	uint16_t wString[16];
 };
 
 extern struct usb_string_descriptor_struct usb_string_manufacturer_name;
