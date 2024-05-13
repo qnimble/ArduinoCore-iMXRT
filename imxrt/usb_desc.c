@@ -2733,9 +2733,9 @@ PROGMEM const struct usb_string_descriptor_struct usb_string_product_name_defaul
         PRODUCT_NAME
 };
 struct usb_string_descriptor_struct usb_string_serial_number_default = {
-        12,
+        16,
         3,
-        {0,0,0,0,0,0,0,0,0,0}
+        {'U','n','k','n','o','w','n'}
 };
 #ifdef MTP_INTERFACE
 PROGMEM const struct usb_string_descriptor_struct usb_string_mtp = {
