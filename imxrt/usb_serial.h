@@ -85,7 +85,7 @@ public:
 				// USB host has begun the USB enumeration process.
 				if (elapsed > 750) break;
 			}
-			yeild();
+			yield();
 		}
 #endif
 	}
