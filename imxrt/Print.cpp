@@ -94,7 +94,6 @@ int _write(int file, char *ptr, int len)
 {
 	if (file >= 0 && file <= 2) return 0;
 	return ((class Print *)file)->write((uint8_t *)ptr, len);
-
 }
 }
 
