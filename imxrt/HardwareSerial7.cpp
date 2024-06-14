@@ -39,6 +39,7 @@
 #endif
 #define IRQ_PRIORITY  64  // 0 = highest priority, 255 = lowest
 
+#ifndef ARDUINO_QUARTO
 void IRQHandler_Serial7()
 {
 	Serial7.IRQHandler();
@@ -62,3 +63,5 @@ static HardwareSerial::hardware_t UART7_Hardware = {
 };
 HardwareSerial Serial7(&IMXRT_LPUART7, &UART7_Hardware, tx_buffer7, SERIAL7_TX_BUFFER_SIZE,
 	rx_buffer7,  SERIAL7_RX_BUFFER_SIZE);
+
+#endif
