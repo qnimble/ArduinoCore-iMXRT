@@ -1023,7 +1023,7 @@ void unused_interrupt_vector(void)
 	// turn off USB
 	USB1_USBCMD = USB_USBCMD_RST;
 	USBPHY1_CTRL_SET = USBPHY_CTRL_SFTRST;
-	while (PIT_TFLG0 == 0) /* wait 0.1 second for PC to know USB unplugged */
+	while (PIT_TFLG0 == 0); /* wait 0.1 second for PC to know USB unplugged */
 	// reboot
 #endif
 }
