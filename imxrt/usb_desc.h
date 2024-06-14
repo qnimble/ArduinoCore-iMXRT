@@ -916,6 +916,7 @@ let me know?  http://forum.pjrc.com/forums/4-Suggestions-amp-Bug-Reports
 
 #elif defined(ARDUINO_QUARTO)
 #if defined(USB_SERIAL)
+  #define EXPERIMENTAL_INTERFACE 5
   #define VENDOR_ID		0x1781
   #define PRODUCT_ID		0x0941
 //  #define DEVICE_CLASS		2	// 2 = Communication Class
@@ -925,7 +926,7 @@ let me know?  http://forum.pjrc.com/forums/4-Suggestions-amp-Bug-Reports
   #define PRODUCT_NAME_LEN	6
   #define EP0_SIZE		64
   #define NUM_ENDPOINTS		9 //was 4
-  #define NUM_INTERFACE		7 // was 2
+  #define NUM_INTERFACE		6 // was 2
   #define CDC_IAD_DESCRIPTOR	1 //was not defined
   #define CDC_STATUS_INTERFACE	0
   #define CDC_DATA_INTERFACE	1
@@ -950,7 +951,7 @@ let me know?  http://forum.pjrc.com/forums/4-Suggestions-amp-Bug-Reports
   #define ENDPOINT5_CONFIG	ENDPOINT_RECEIVE_BULK + ENDPOINT_TRANSMIT_BULK
 
 
-
+/*
   #define CDC3_STATUS_INTERFACE 4       // SerialUSB2
   #define CDC3_DATA_INTERFACE   5
   #define CDC3_ACM_ENDPOINT     6
@@ -958,18 +959,18 @@ let me know?  http://forum.pjrc.com/forums/4-Suggestions-amp-Bug-Reports
   #define CDC3_TX_ENDPOINT      7
   #define ENDPOINT6_CONFIG	ENDPOINT_RECEIVE_UNUSED + ENDPOINT_TRANSMIT_INTERRUPT
   #define ENDPOINT7_CONFIG	ENDPOINT_RECEIVE_BULK + ENDPOINT_TRANSMIT_BULK
-
+*/
 
   #define RAWHID_USAGE_PAGE	0xFFAB  // recommended: 0xFF00 to 0xFFFF
   #define RAWHID_USAGE		0x0200  // recommended: 0x0100 to 0xFFFF
-  #define RAWHID_INTERFACE      6	// RawHID
-  #define RAWHID_TX_ENDPOINT    8
+  #define RAWHID_INTERFACE      4	// RawHID
+  #define RAWHID_TX_ENDPOINT    6
   #define RAWHID_TX_SIZE        64
   #define RAWHID_TX_INTERVAL    1	 // TODO: is this ok for 480 Mbit speed
-  #define RAWHID_RX_ENDPOINT    8
+  #define RAWHID_RX_ENDPOINT    6
   #define RAWHID_RX_SIZE        64
   #define RAWHID_RX_INTERVAL    1	 // TODO: is this ok for 480 Mbit speed
-  #define ENDPOINT8_CONFIG	ENDPOINT_RECEIVE_INTERRUPT + ENDPOINT_TRANSMIT_INTERRUPT
+  #define ENDPOINT6_CONFIG	ENDPOINT_RECEIVE_INTERRUPT + ENDPOINT_TRANSMIT_INTERRUPT
 
 /*
   #define MTP_INTERFACE		5	// MTP Disk

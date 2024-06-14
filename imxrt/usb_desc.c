@@ -832,8 +832,8 @@ PROGMEM const uint8_t usb_config_descriptor_480[CONFIG_DESC_SIZE] = {
         11,                                     // bDescriptorType
         CDC3_STATUS_INTERFACE,                  // bFirstInterface
         2,                                      // bInterfaceCount
-        0x02,                                   // bFunctionClass
-        0x02,                                   // bFunctionSubClass
+        0xFF,                                   // bFunctionClass
+        0x6a,                                   // bFunctionSubClass
         0x01,                                   // bFunctionProtocol
         0,                                      // iFunction
         // interface descriptor, USB spec 9.6.5, page 267-269, Table 9-12
@@ -842,8 +842,8 @@ PROGMEM const uint8_t usb_config_descriptor_480[CONFIG_DESC_SIZE] = {
         CDC3_STATUS_INTERFACE,                  // bInterfaceNumber
         0,                                      // bAlternateSetting
         1,                                      // bNumEndpoints
-        0x02,                                   // bInterfaceClass
-        0x02,                                   // bInterfaceSubClass
+        0xFF,                                   // bInterfaceClass
+        0x6b,                                   // bInterfaceSubClass
         0x01,                                   // bInterfaceProtocol
         0,                                      // iInterface
         // CDC Header Functional Descriptor, CDC Spec 5.2.3.1, Table 26
@@ -881,9 +881,10 @@ PROGMEM const uint8_t usb_config_descriptor_480[CONFIG_DESC_SIZE] = {
         CDC3_DATA_INTERFACE,                    // bInterfaceNumber
         0,                                      // bAlternateSetting
         2,                                      // bNumEndpoints
-        0x0A,                                   // bInterfaceClass
-        0x00,                                   // bInterfaceSubClass
-        0x00,                                   // bInterfaceProtocol
+       
+        0xFF,                                   // bInterfaceClass
+        0x6c,                                   // bInterfaceSubClass
+        0x01,                                   // bInterfaceProtocol       
         0,                                      // iInterface
         // endpoint descriptor, USB spec 9.6.6, page 269-271, Table 9-13
         7,                                      // bLength
@@ -2779,6 +2780,52 @@ void usb_init_serialnumber(void)
 	usb_string_serial_number_default.bLength = i * 2 + 2;
 }
 
+static uint8_t microsoft_os_string_desc[] = {
+	18, 3,
+	'M', 0, 'S', 0, 'F', 0, 'T', 0, '1', 0, '0', 0, '0', 0,
+	0xF8, 0  // GET_MS_DESCRIPTOR will use bRequest=0xF8
+};
+static uint8_t microsoft_os_compatible_id_desc[] = {
+	40  /* +24 */, 0, 0, 0, // total length, 16 header + 24 function * 1
+	0, 1, 4, 0,  // version 1.00, wIndex=4 (Compat ID)
+	1, 0, 0, 0, 0, 0, 0, 0, // 1 function
+	5, // interface
+       1,
+	'W','I','N','U','S','B',0,0, // compatibleID
+	0,0,0,0,0,0,0,0,             // subCompatibleID
+	0,0,0,0,0,0
+
+/*
+      ,
+      //second interface
+      5, // interface
+       1,
+	'W','I','N','U','S','B',0,0, // compatibleID
+	0,0,0,0,0,0,0,0,             // subCompatibleID
+	0,0,0,0,0,0
+      */
+};
+
+
+const uint8_t BOS[] = {
+    // BOS descriptor.
+    0x05, 0x0F, 0x4C, 0x00, 0x03,
+
+    // Container ID descriptor.
+    0x14, 0x10, 0x04, 0x00, 0x2A, 0xF9, 0xF6, 0xC2, 0x98, 0x10, 0x2B, 0x49,
+    0x8E, 0x64, 0xFF, 0x01, 0x0C, 0x7F, 0x94, 0xE1,
+
+    // WebUSB Platform Capability descriptor.
+    0x1B, 0x10, 0x05, 0x00, 0x38, 0xB6, 0x08, 0x34, 0xA9, 0x09, 0xA0, 0x47,
+    0x8B, 0xFD, 0xA0, 0x76, 0x88, 0x15, 0xB6, 0x65, 0x00, 0x01, 0x42, 0x01,
+    0x02, 0x04, 0x05, 0x00,
+
+    // Microsoft OS 2.0 Platform Capability descriptor.
+    0x1C, 0x10, 0x05, 0x00, 0xDF, 0x60, 0xDD, 0xD8, 0x89, 0x45, 0xC7, 0x4C,
+    0x9C, 0xD2, 0x65, 0x9D, 0x9E, 0x64, 0x8A, 0x9F, 0x00, 0x00, 0x03, 0x06,
+    0x00, 0x00, 0x01, 0x00
+};
+
 
 // **************************************************************
 //   Descriptors List
@@ -2827,6 +2874,9 @@ const usb_descriptor_list_t usb_descriptor_list[] = {
 #ifdef MTP_INTERFACE
 	{0x0304, 0x0409, (const uint8_t *)&usb_string_mtp, 0},
 #endif
+        /*{0x0F00, 0x0000,BOS, sizeof(BOS)},*/
+        {0x03EE, 0x0000, microsoft_os_string_desc, 18},
+	  {0x0000, 0xEE04, microsoft_os_compatible_id_desc, 40},
         {0x0300, 0x0000, (const uint8_t *)&string0, 0},
         {0x0301, 0x0409, (const uint8_t *)&usb_string_manufacturer_name, 0},
         {0x0302, 0x0409, (const uint8_t *)&usb_string_product_name, 0},
