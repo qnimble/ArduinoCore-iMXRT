@@ -103,13 +103,14 @@ int Print::printf(const char *format, ...)
 	va_list ap;
 	va_start(ap, format);
 #ifdef __STRICT_ANSI__
+	va_end(ap);
 	return 0;  // TODO: make this work with -std=c++0x
 #else
 	 char buf[PRINTF_BUF];
-	 int temp = vsnprintf(buf, sizeof(buf), format, ap);
+	 int retval = vsnprintf(buf, sizeof(buf), format, ap);
 	  write(buf);
 	  va_end(ap);
-	  return temp;
+	  return retval;
 #endif
 }
 
@@ -118,6 +119,7 @@ int Print::printf(const __FlashStringHelper *format, ...)
 	va_list ap;
 	va_start(ap, format);
 #ifdef __STRICT_ANSI__
+	va_end(ap);
 	return 0;
 #else
 
