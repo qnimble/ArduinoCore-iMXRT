@@ -349,8 +349,13 @@ public:
         }
 
 };
+#ifdef ARDUINO_QUARTO
+extern usb_serial3_class Serial3;
+extern void serialEvent3(void);
+#else
 extern usb_serial3_class SerialUSB2;
 extern void serialEventUSB2(void);
+#endif
 #endif // __cplusplus
 
 #endif // CDC3_STATUS_INTERFACE && CDC3_DATA_INTERFACE
