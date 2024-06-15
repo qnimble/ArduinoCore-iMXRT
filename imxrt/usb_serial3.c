@@ -39,7 +39,7 @@
 #include "core_pins.h"
 
 // defined by usb_dev.h -> usb_desc.h
-#if defined(CDC3_STATUS_INTERFACE) && defined(CDC3_DATA_INTERFACE)
+#if defined(ARDUINO_QUARTO) || (defined(CDC3_STATUS_INTERFACE) && defined(CDC3_DATA_INTERFACE))
 
 uint32_t usb_cdc3_line_coding[2];
 volatile uint32_t usb_cdc3_line_rtsdtr_millis;
@@ -100,7 +100,9 @@ void usb_serial3_configure(void)
 	rx_head = 0;
 	rx_tail = 0;
 	rx_available = 0;
+	#ifndef ARDUINO_QUARTO // Arduino uses CDC3 as generic USB device, not CDC so only configure rx/tx
 	usb_config_tx(CDC3_ACM_ENDPOINT, CDC_ACM_SIZE, 0, NULL); // size same 12 & 480
+	#endif
 	usb_config_rx(CDC3_RX_ENDPOINT, rx_packet_size, 0, rx_event);
 	usb_config_tx(CDC3_TX_ENDPOINT, tx_packet_size, 1, NULL);
 	for (i=0; i < RX_NUM; i++) rx_queue_transfer(i);

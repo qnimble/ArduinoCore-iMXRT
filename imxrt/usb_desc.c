@@ -94,7 +94,7 @@
 static uint8_t device_descriptor[] = {
         18,                                     // bLength
         1,                                      // bDescriptorType
-        0x00, 0x02,                             // bcdUSB
+        0x01, 0x02,                             // bcdUSB
 #ifdef DEVICE_CLASS
         DEVICE_CLASS,                           // bDeviceClass
 #else
@@ -126,7 +126,7 @@ static uint8_t device_descriptor[] = {
   #elif defined(__IMXRT1062__) && defined(ARDUINO_TEENSY_MICROMOD)
         0x81, 0x02, // Teensy MicroMod
   #elif defined(__IMXRT1062__) && defined(ARDUINO_QUARTO)
-        0x22, 0x23, // qNimble Quarto, Rev1
+        0x24, 0x23, // qNimble Quarto, Rev1
   #else
         0x00, 0x02,
   #endif
@@ -1658,17 +1658,17 @@ PROGMEM const uint8_t usb_config_descriptor_480[CONFIG_DESC_SIZE] = {
         // endpoint descriptor, USB spec 9.6.6, page 269-271, Table 9-13
         7,                                      // bLength
         5,                                      // bDescriptorType
-        1 | 0x80,                               // bEndpointAddress
+        EXPERIMENTAL_ENDPOINT | 0x80,           // bEndpointAddress
         0x02,                                   // bmAttributes (0x02=bulk)
-        LSB(512), MSB(512),                     // wMaxPacketSize
-        1,                                      // bInterval
+        LSB(CDC_RX_SIZE_480), MSB(CDC_RX_SIZE_480),                     // wMaxPacketSize
+        0,                                      // bInterval
         // endpoint descriptor, USB spec 9.6.6, page 269-271, Table 9-13
         7,                                      // bLength
         5,                                      // bDescriptorType
-        1,                                      // bEndpointAddress
+        EXPERIMENTAL_ENDPOINT,                  // bEndpointAddress
         0x02,                                   // bmAttributes (0x02=bulk)
-        LSB(512), MSB(512),                     // wMaxPacketSize
-        1,                                      // bInterval
+        LSB(CDC_RX_SIZE_480), MSB(CDC_RX_SIZE_480),                     // wMaxPacketSize
+        0,                                      // bInterval
 #endif // EXPERIMENTAL_INTERFACE
 };
 
@@ -2672,17 +2672,17 @@ PROGMEM const uint8_t usb_config_descriptor_12[CONFIG_DESC_SIZE] = {
         // endpoint descriptor, USB spec 9.6.6, page 269-271, Table 9-13
         7,                                      // bLength
         5,                                      // bDescriptorType
-        1 | 0x80,                               // bEndpointAddress
+        EXPERIMENTAL_ENDPOINT  | 0x80,                               // bEndpointAddress
         0x02,                                   // bmAttributes (0x02=bulk)
         LSB(64), MSB(64),                       // wMaxPacketSize
-        1,                                      // bInterval
+        0,                                      // bInterval
         // endpoint descriptor, USB spec 9.6.6, page 269-271, Table 9-13
         7,                                      // bLength
         5,                                      // bDescriptorType
         1,                                      // bEndpointAddress
         0x02,                                   // bmAttributes (0x02=bulk)
         LSB(64), MSB(64),                       // wMaxPacketSize
-        1,                                      // bInterval
+        0,                                      // bInterval
 #endif // EXPERIMENTAL_INTERFACE
 };
 
@@ -2780,52 +2780,47 @@ void usb_init_serialnumber(void)
 	usb_string_serial_number_default.bLength = i * 2 + 2;
 }
 
-static uint8_t microsoft_os_string_desc[] = {
-	18, 3,
-	'M', 0, 'S', 0, 'F', 0, 'T', 0, '1', 0, '0', 0, '0', 0,
-	0xF8, 0  // GET_MS_DESCRIPTOR will use bRequest=0xF8
-};
-static uint8_t microsoft_os_compatible_id_desc[] = {
-	40  /* +24 */, 0, 0, 0, // total length, 16 header + 24 function * 1
-	0, 1, 4, 0,  // version 1.00, wIndex=4 (Compat ID)
-	1, 0, 0, 0, 0, 0, 0, 0, // 1 function
-	5, // interface
-       1,
-	'W','I','N','U','S','B',0,0, // compatibleID
-	0,0,0,0,0,0,0,0,             // subCompatibleID
-	0,0,0,0,0,0
 
-/*
-      ,
-      //second interface
-      5, // interface
-       1,
-	'W','I','N','U','S','B',0,0, // compatibleID
-	0,0,0,0,0,0,0,0,             // subCompatibleID
-	0,0,0,0,0,0
-      */
-};
+const PROGMEM uint8_t microsoft_os_20compatible_id_desc[] = {
+    0x0A, 0x00,             // wLength
+    0x00, 0x00,             // wDescriptorType (MS OS 2.0 descriptor set header)
+    0x00, 0x00, 0x03, 0x06, // dwWindowsVersion (Windows 8.1)
+    0x2E,0x00,                  // wTotalLength
 
+    // Configuration Subset Header
+    0x08, 0x00, // wLength
+    0x01, 0x00, // wDescriptorType (Configuration Subset header)
+    0x00,       // bConfigurationValue
+    0x00,       // bReserved
+    0x24, 0x00, // wTotalLength
 
-const uint8_t BOS[] = {
-    // BOS descriptor.
-    0x05, 0x0F, 0x4C, 0x00, 0x03,
+    // Function Subset Header
+    0x08, 0x00, // wLength
+    0x02, 0x00, // wDescriptorType (Function Subset header)
+    0x05,       // bFirstInterface
+    0x00,       // bReserved
+    0x1C, 0x00, // wTotalLength
 
-    // Container ID descriptor.
-    0x14, 0x10, 0x04, 0x00, 0x2A, 0xF9, 0xF6, 0xC2, 0x98, 0x10, 0x2B, 0x49,
-    0x8E, 0x64, 0xFF, 0x01, 0x0C, 0x7F, 0x94, 0xE1,
-
-    // WebUSB Platform Capability descriptor.
-    0x1B, 0x10, 0x05, 0x00, 0x38, 0xB6, 0x08, 0x34, 0xA9, 0x09, 0xA0, 0x47,
-    0x8B, 0xFD, 0xA0, 0x76, 0x88, 0x15, 0xB6, 0x65, 0x00, 0x01, 0x42, 0x01,
-    0x02, 0x04, 0x05, 0x00,
-
-    // Microsoft OS 2.0 Platform Capability descriptor.
-    0x1C, 0x10, 0x05, 0x00, 0xDF, 0x60, 0xDD, 0xD8, 0x89, 0x45, 0xC7, 0x4C,
-    0x9C, 0xD2, 0x65, 0x9D, 0x9E, 0x64, 0x8A, 0x9F, 0x00, 0x00, 0x03, 0x06,
-    0x00, 0x00, 0x01, 0x00
+    // Compatible ID Descriptor
+    0x14, 0x00, // wLength
+    0x03, 0x00, // wDescriptorType (Compatible ID descriptor)
+    'W', 'I', 'N', 'U', 'S', 'B', 0x00, 0x00, // CompatibleID
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // SubCompatibleID
 };
 
+const PROGMEM uint8_t BOS[] = {
+      // BOS descriptor.
+      0x05, 0x0f, 0x39, 0x00, 0x02,
+
+      //Container ID descriptor
+      0x18, 0x10, 0x05, 0x00, 0x38, 0xb6, 0x08, 0x34, 0xa9, 0x09, 0xa0, 0x47,
+      0x8b, 0xfd, 0xa0, 0x76, 0x88, 0x15, 0xb6, 0x65,
+
+      // WebUSB Platform Capability descriptor.
+      0x00, 0x01, 0x01, 0x01, 0x1c, 0x10, 0x05, 0x00, 0xdf, 0x60, 0xdd, 0xd8,
+      0x89, 0x45, 0xc7, 0x4c, 0x9c, 0xd2, 0x65, 0x9d, 0x9e, 0x64, 0x8a, 0x9f,
+      0x00, 0x00, 0x03, 0x06, 0x2e, 0x00, 0x02, 0x00
+};
 
 // **************************************************************
 //   Descriptors List
@@ -2833,7 +2828,7 @@ const uint8_t BOS[] = {
 
 // This table provides access to all the descriptor data above.
 
-const usb_descriptor_list_t usb_descriptor_list[] = {
+const PROGMEM usb_descriptor_list_t usb_descriptor_list[] = {
 	//wValue, wIndex, address,          length
 	{0x0100, 0x0000, device_descriptor, sizeof(device_descriptor)},
 	{0x0600, 0x0000, qualifier_descriptor, sizeof(qualifier_descriptor)},
@@ -2874,13 +2869,12 @@ const usb_descriptor_list_t usb_descriptor_list[] = {
 #ifdef MTP_INTERFACE
 	{0x0304, 0x0409, (const uint8_t *)&usb_string_mtp, 0},
 #endif
-        /*{0x0F00, 0x0000,BOS, sizeof(BOS)},*/
-        {0x03EE, 0x0000, microsoft_os_string_desc, 18},
-	  {0x0000, 0xEE04, microsoft_os_compatible_id_desc, 40},
-        {0x0300, 0x0000, (const uint8_t *)&string0, 0},
-        {0x0301, 0x0409, (const uint8_t *)&usb_string_manufacturer_name, 0},
-        {0x0302, 0x0409, (const uint8_t *)&usb_string_product_name, 0},
-        {0x0303, 0x0409, (const uint8_t *)&usb_string_serial_number, 0},
+      /* wValue, wIndex, pointer to data, size of data (0 for strings, (0x03XX for wValue) since read from content)*/
+      {0x0F00, 0x0000, BOS, sizeof(BOS)},
+      {0x0300, 0x0000, (const uint8_t *)&string0, 0},
+      {0x0301, 0x0409, (const uint8_t *)&usb_string_manufacturer_name, 0},
+      {0x0302, 0x0409, (const uint8_t *)&usb_string_product_name, 0},
+      {0x0303, 0x0409, (const uint8_t *)&usb_string_serial_number, 0},
 	{0, 0, NULL, 0}
 };
 

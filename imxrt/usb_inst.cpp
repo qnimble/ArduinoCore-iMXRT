@@ -49,13 +49,15 @@ usb_serial2_class SerialUSB1;
 #endif
 #endif
 
-#ifdef CDC3_DATA_INTERFACE
-#ifdef CDC3_STATUS_INTERFACE
+
 #ifdef ARDUINO_QUARTO
 usb_serial3_class Serial3;
-#else
-usb_serial3_class SerialUSB2;
 #endif
+
+
+#ifdef CDC3_DATA_INTERFACE
+#ifdef CDC3_STATUS_INTERFACE
+usb_serial3_class SerialUSB2;
 #endif
 #endif
 

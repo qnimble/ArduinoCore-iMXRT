@@ -331,7 +331,7 @@ extern void serialEventUSB1(void);
 
 
 
-#if defined(CDC3_STATUS_INTERFACE) && defined(CDC3_DATA_INTERFACE)
+#if defined(ARDUINO_QUARTO) || (defined(CDC3_STATUS_INTERFACE) && defined(CDC3_DATA_INTERFACE))
 
 // C language implementation
 #ifdef __cplusplus

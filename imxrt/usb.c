@@ -102,6 +102,8 @@ extern uint8_t usb_descriptor_buffer[]; // defined in usb_desc.c
 extern const uint8_t usb_config_descriptor_480[];
 extern const uint8_t usb_config_descriptor_12[];
 
+extern const uint8_t microsoft_os_20compatible_id_desc[];
+
 void (*usb_timer0_callback)(void) = NULL;
 void (*usb_timer1_callback)(void) = NULL;
 
@@ -478,7 +480,7 @@ static void endpoint0_setup(uint64_t setupdata)
 		#if defined(CDC2_STATUS_INTERFACE) && defined(CDC2_DATA_INTERFACE)
 		usb_serial2_configure();
 		#endif
-		#if defined(CDC3_STATUS_INTERFACE) && defined(CDC3_DATA_INTERFACE)
+		#if defined(ARDUINO_QUARTO) || (defined(CDC3_STATUS_INTERFACE) && defined(CDC3_DATA_INTERFACE))
 		usb_serial3_configure();
 		#endif
 		#if defined(RAWHID_INTERFACE)
@@ -508,13 +510,11 @@ static void endpoint0_setup(uint64_t setupdata)
 		#if defined(MTP_INTERFACE)
 		usb_mtp_configure();
 		#endif
-		//#if defined(EXPERIMENTAL_INTERFACE)
-		//endpoint_queue_head[2].unused1 = (uint32_t)experimental_buffer;
+		#if defined(EXPERIMENTAL_INTERFACE) && ~defined(ARDUINO_QUARTO)
 		memset(endpoint_queue_head + 2, 0, sizeof(endpoint_t) * 2);
 		endpoint_queue_head[2].pointer4 = 0xB8C6CF5D;
 		endpoint_queue_head[3].pointer4 = 0x74D59319;
-
-		//#endif
+		#endif
 		endpoint0_receive(NULL, 0, 0);
 		return;
 	  case 0x0880: // GET_CONFIGURATION
@@ -526,6 +526,15 @@ static void endpoint0_setup(uint64_t setupdata)
 		reply_buffer[1] = 0;
 		endpoint0_transmit(reply_buffer, 2, 0);
 		return;
+	  case 0x02C0:
+		//handle MS OS 2.0 descriptor
+		if (setup.wValue == 0x00 && setup.wIndex == 0x07) {
+			endpoint0_transmit(microsoft_os_20compatible_id_desc, 0x2E, 0);
+			return;
+		} else {
+			endpoint0_receive(NULL, 0, 0);
+			return;
+		}
 	  case 0x0082: // GET_STATUS (endpoint)
 		endpoint = setup.wIndex & 0x7F;
 		if (endpoint > 7) break;

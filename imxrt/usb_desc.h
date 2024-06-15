@@ -953,7 +953,6 @@ let me know?  http://forum.pjrc.com/forums/4-Suggestions-amp-Bug-Reports
 
 #elif defined(ARDUINO_QUARTO)
 #if defined(USB_SERIAL)
-  #define EXPERIMENTAL_INTERFACE 5
   #define VENDOR_ID		0x1781
   #define PRODUCT_ID		0x0941
 //  #define DEVICE_CLASS		2	// 2 = Communication Class
@@ -962,7 +961,7 @@ let me know?  http://forum.pjrc.com/forums/4-Suggestions-amp-Bug-Reports
   #define PRODUCT_NAME		{'Q','u','a','r','t','o'}
   #define PRODUCT_NAME_LEN	6
   #define EP0_SIZE		64
-  #define NUM_ENDPOINTS		9 //was 4
+  #define NUM_ENDPOINTS		8 //was 4
   #define NUM_INTERFACE		6 // was 2
   #define CDC_IAD_DESCRIPTOR	1 //was not defined
   #define CDC_STATUS_INTERFACE	0
@@ -987,7 +986,10 @@ let me know?  http://forum.pjrc.com/forums/4-Suggestions-amp-Bug-Reports
   #define ENDPOINT4_CONFIG	ENDPOINT_RECEIVE_UNUSED + ENDPOINT_TRANSMIT_INTERRUPT
   #define ENDPOINT5_CONFIG	ENDPOINT_RECEIVE_BULK + ENDPOINT_TRANSMIT_BULK
 
-
+ #define EXPERIMENTAL_INTERFACE 5
+ #define EXPERIMENTAL_ENDPOINT      7
+ #define CDC3_RX_ENDPOINT      EXPERIMENTAL_ENDPOINT
+  #define CDC3_TX_ENDPOINT      EXPERIMENTAL_ENDPOINT
 /*
   #define CDC3_STATUS_INTERFACE 4       // SerialUSB2
   #define CDC3_DATA_INTERFACE   5
