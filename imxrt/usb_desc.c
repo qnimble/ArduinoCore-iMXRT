@@ -1652,8 +1652,8 @@ PROGMEM const uint8_t usb_config_descriptor_480[CONFIG_DESC_SIZE] = {
         0,                                      // bAlternateSetting
         2,                                      // bNumEndpoints
         0xFF,                                   // bInterfaceClass (0xFF = Vendor)
-        0x6A,                                   // bInterfaceSubClass
-        0xFF,                                   // bInterfaceProtocol
+        0x00,                                   // bInterfaceSubClass
+        0x00,                                   // bInterfaceProtocol
         0,                                      // iInterface
         // endpoint descriptor, USB spec 9.6.6, page 269-271, Table 9-13
         7,                                      // bLength
@@ -2666,8 +2666,8 @@ PROGMEM const uint8_t usb_config_descriptor_12[CONFIG_DESC_SIZE] = {
         0,                                      // bAlternateSetting
         2,                                      // bNumEndpoints
         0xFF,                                   // bInterfaceClass (0xFF = Vendor)
-        0x6A,                                   // bInterfaceSubClass
-        0xFF,                                   // bInterfaceProtocol
+        0x00,                                   // bInterfaceSubClass
+        0x00,                                   // bInterfaceProtocol
         0,                                      // iInterface
         // endpoint descriptor, USB spec 9.6.6, page 269-271, Table 9-13
         7,                                      // bLength
