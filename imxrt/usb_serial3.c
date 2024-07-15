@@ -100,7 +100,7 @@ void usb_serial3_configure(void)
 	rx_head = 0;
 	rx_tail = 0;
 	rx_available = 0;
-	#ifndef ARDUINO_QUARTO // Arduino uses CDC3 as generic USB device, not CDC so only configure rx/tx
+	#ifndef ARDUINO_QUARTO // Quarto uses USBSerial3 as generic USB device, not CDC so only configure rx/tx
 	usb_config_tx(CDC3_ACM_ENDPOINT, CDC_ACM_SIZE, 0, NULL); // size same 12 & 480
 	#endif
 	usb_config_rx(CDC3_RX_ENDPOINT, rx_packet_size, 0, rx_event);

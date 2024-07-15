@@ -510,7 +510,7 @@ static void endpoint0_setup(uint64_t setupdata)
 		#if defined(MTP_INTERFACE)
 		usb_mtp_configure();
 		#endif
-		#if defined(EXPERIMENTAL_INTERFACE) && ~defined(ARDUINO_QUARTO)
+		#if defined(EXPERIMENTAL_INTERFACE) && !defined(ARDUINO_QUARTO)
 		memset(endpoint_queue_head + 2, 0, sizeof(endpoint_t) * 2);
 		endpoint_queue_head[2].pointer4 = 0xB8C6CF5D;
 		endpoint_queue_head[3].pointer4 = 0x74D59319;
