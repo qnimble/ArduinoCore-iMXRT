@@ -5,7 +5,7 @@ MEMORY
 	RAM (rwx) : ORIGIN = 0x20200000, LENGTH = 0x20000
 	FLASH (rx) : ORIGIN = DEFINED(QUARTO_1064) ? 0x70000000 : 0x60000000, LENGTH = 0x40000
 }
-/* 
+ 
 GROUP (
   "libm.a"
   "libgcc.a"
@@ -13,7 +13,7 @@ GROUP (
   "libstdc++.a"
   "libcr_newlib_semihost.a"
 )
-*/
+
 
 ENTRY(ResetHandler)
 
