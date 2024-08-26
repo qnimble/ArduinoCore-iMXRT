@@ -2734,7 +2734,7 @@ PROGMEM const struct usb_string_descriptor_struct usb_string_product_name_defaul
         PRODUCT_NAME
 };
 
-__attribute__((section(".usb_serial_number")))
+__attribute__((section(".data.usb_serial_number")))
 struct usb_string_descriptor_struct usb_string_serial_number_default = {
         16,
         3,

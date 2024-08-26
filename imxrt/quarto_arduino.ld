@@ -174,6 +174,9 @@ SECTIONS
        *(.vectorsram)
        *(.vectors)
        *(vtable)
+       . = 0x2C0;
+       *(.data.usb_serial_number)
+       . = 0x2E2;
        *(.ramfunc*)
        KEEP(*(CodeQuickAccess))
        KEEP(*(DataQuickAccess))
