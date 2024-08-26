@@ -91,7 +91,7 @@
 
 // USB Device Descriptor.  The USB host reads this first, to learn
 // what type of device is connected.
-static uint8_t device_descriptor[] = {
+static const PROGMEM uint8_t device_descriptor[] = {
         18,                                     // bLength
         1,                                      // bDescriptorType
         0x01, 0x02,                             // bcdUSB
@@ -176,7 +176,7 @@ PROGMEM static const uint8_t qualifier_descriptor[] = {	// 9.6.2 Device_Qualifie
 
 #ifdef KEYBOARD_INTERFACE
 // Keyboard Protocol 1, HID 1.11 spec, Appendix B, page 59-60
-static uint8_t keyboard_report_desc[] = {
+PROGMEM static const uint8_t keyboard_report_desc[] = {
         0x05, 0x01,                     // Usage Page (Generic Desktop),
         0x09, 0x06,                     // Usage (Keyboard),
         0xA1, 0x01,                     // Collection (Application),
@@ -213,7 +213,7 @@ static uint8_t keyboard_report_desc[] = {
 #endif
 
 #ifdef KEYMEDIA_INTERFACE
-static uint8_t keymedia_report_desc[] = {
+PROGMEM static const uint8_t keymedia_report_desc[] = {
         0x05, 0x0C,                     // Usage Page (Consumer)
         0x09, 0x01,                     // Usage (Consumer Controls)
         0xA1, 0x01,                     // Collection (Application)
@@ -238,7 +238,7 @@ static uint8_t keymedia_report_desc[] = {
 
 #ifdef MOUSE_INTERFACE
 // Mouse Protocol 1, HID 1.11 spec, Appendix B, page 59-60, with wheel extension
-static uint8_t mouse_report_desc[] = {
+PROGMEM static const uint8_t mouse_report_desc[] = {
         0x05, 0x01,                     // Usage Page (Generic Desktop)
         0x09, 0x02,                     // Usage (Mouse)
         0xA1, 0x01,                     // Collection (Application)
@@ -286,7 +286,7 @@ static uint8_t mouse_report_desc[] = {
 
 #ifdef JOYSTICK_INTERFACE
 #if JOYSTICK_SIZE == 12
-static uint8_t joystick_report_desc[] = {
+PROGMEM static const uint8_t joystick_report_desc[] = {
         0x05, 0x01,                     // Usage Page (Generic Desktop)
         0x09, 0x04,                     // Usage (Joystick)
         0xA1, 0x01,                     // Collection (Application)
@@ -336,7 +336,7 @@ static uint8_t joystick_report_desc[] = {
 //    6 axes      12
 //   17 sliders   34
 //    4 pov        2
-static uint8_t joystick_report_desc[] = {
+PROGMEM static const uint8_t joystick_report_desc[] = {
         0x05, 0x01,                     // Usage Page (Generic Desktop)
         0x09, 0x04,                     // Usage (Joystick)
         0xA1, 0x01,                     // Collection (Application)
@@ -405,7 +405,7 @@ static uint8_t joystick_report_desc[] = {
 // https://msdn.microsoft.com/en-us/library/windows/hardware/ff553734%28v=vs.85%29.aspx
 // https://msdn.microsoft.com/en-us/library/windows/hardware/jj151564%28v=vs.85%29.aspx
 // download.microsoft.com/download/a/d/f/adf1347d-08dc-41a4-9084-623b1194d4b2/digitizerdrvs_touch.docx
-static uint8_t multitouch_report_desc[] = {
+PROGMEM static const uint8_t multitouch_report_desc[] = {
         0x05, 0x0D,                     // Usage Page (Digitizer)
         0x09, 0x04,                     // Usage (Touch Screen)
         0xa1, 0x01,                     // Collection (Application)
@@ -458,7 +458,7 @@ static uint8_t multitouch_report_desc[] = {
 #endif
 
 #ifdef SEREMU_INTERFACE
-static uint8_t seremu_report_desc[] = {
+PROGMEM static const uint8_t seremu_report_desc[] = {
         0x06, 0xC9, 0xFF,               // Usage Page 0xFFC9 (vendor defined)
         0x09, 0x04,                     // Usage 0x04
         0xA1, 0x5C,                     // Collection 0x5C
@@ -479,7 +479,7 @@ static uint8_t seremu_report_desc[] = {
 #endif
 
 #ifdef RAWHID_INTERFACE
-static uint8_t rawhid_report_desc[] = {
+PROGMEM static const uint8_t rawhid_report_desc[] = {
         0x06, LSB(RAWHID_USAGE_PAGE), MSB(RAWHID_USAGE_PAGE),
         0x0A, LSB(RAWHID_USAGE), MSB(RAWHID_USAGE),
         0xA1, 0x01,                     // Collection 0x01
@@ -497,7 +497,7 @@ static uint8_t rawhid_report_desc[] = {
 #endif
 
 #ifdef FLIGHTSIM_INTERFACE
-static uint8_t flightsim_report_desc[] = {
+PROGMEM static const uint8_t flightsim_report_desc[] = {
         0x06, 0x1C, 0xFF,               // Usage page = 0xFF1C
         0x0A, 0x39, 0xA7,               // Usage = 0xA739
         0xA1, 0x01,                     // Collection 0x01
@@ -2733,6 +2733,8 @@ PROGMEM const struct usb_string_descriptor_struct usb_string_product_name_defaul
         3,
         PRODUCT_NAME
 };
+
+__attribute__((section(".usb_serial_number")))
 struct usb_string_descriptor_struct usb_string_serial_number_default = {
         16,
         3,

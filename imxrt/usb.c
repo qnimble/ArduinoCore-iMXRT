@@ -574,7 +574,18 @@ static void endpoint0_setup(uint64_t setupdata)
 		    setup.wIndex |= 0xEE00; // alter wIndex and treat as normal USB descriptor
 	  case 0x0680: // GET_DESCRIPTOR
 	  case 0x0681:
-		for (list = usb_descriptor_list; list->addr != NULL; list++) {
+#if defined(ARDUINO_QUARTO) && !defined(PROG_BOOTLOADER)
+#include "comm.h"
+		  uint32_t* ptr = (uint32_t*) 0x60000800;
+		  list = usb_descriptor_list;
+          if ( (*ptr >= LOOKUP_TABLE_START_CODE + 2) && (*ptr <= LOOKUP_TABLE_START_CODE + 255)) {
+            //if bootloader version 2 or higher, use bootloader descriptor
+            list = (usb_descriptor_list_t*) *(ptr+6);
+          }
+          for ( ; list->addr != NULL; list++) {
+#else
+		  for (list = usb_descriptor_list; list->addr != NULL; list++) {
+#endif
 			if (setup.wValue == list->wValue && setup.wIndex == list->wIndex) {
 				uint32_t datalen;
 				if ((setup.wValue >> 8) == 3) {
