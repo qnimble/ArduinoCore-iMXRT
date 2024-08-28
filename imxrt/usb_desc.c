@@ -640,7 +640,7 @@ PROGMEM static const uint8_t flightsim_report_desc[] = {
 #endif
 
 #define EXPERIMENTAL_INTERFACE_DESC_POS	MULTITOUCH_INTERFACE_DESC_POS+MULTITOUCH_INTERFACE_DESC_SIZE
-#ifdef  EXPERIMENTAL_INTERFACE
+#if defined(EXPERIMENTAL_INTERFACE) && ( defined(PROG_BOOTLOADER) || !defined(ARDUINO_QUARTO))
 #define EXPERIMENTAL_INTERFACE_DESC_SIZE 9+7+7
 #define EXPERIMENTAL_HID_DESC_OFFSET	MULTITOUCH_INTERFACE_DESC_POS+9
 #else
@@ -1643,7 +1643,7 @@ PROGMEM const uint8_t usb_config_descriptor_480[CONFIG_DESC_SIZE] = {
         4,                                      // bInterval, 4 = 1ms
 #endif // MULTITOUCH_INTERFACE
 
-#ifdef EXPERIMENTAL_INTERFACE
+#if defined(EXPERIMENTAL_INTERFACE) && ( defined(PROG_BOOTLOADER) || !defined(ARDUINO_QUARTO))
 	// configuration for 480 Mbit/sec speed
         // interface descriptor, USB spec 9.6.5, page 267-269, Table 9-12
         9,                                      // bLength
@@ -2657,7 +2657,7 @@ PROGMEM const uint8_t usb_config_descriptor_12[CONFIG_DESC_SIZE] = {
         1,                                      // bInterval
 #endif // MULTITOUCH_INTERFACE
 
-#ifdef EXPERIMENTAL_INTERFACE
+#if defined(EXPERIMENTAL_INTERFACE) && ( defined(PROG_BOOTLOADER) || !defined(ARDUINO_QUARTO))
 	// configuration for 12 Mbit/sec speed
         // interface descriptor, USB spec 9.6.5, page 267-269, Table 9-12
         9,                                      // bLength

@@ -962,7 +962,11 @@ let me know?  http://forum.pjrc.com/forums/4-Suggestions-amp-Bug-Reports
   #define PRODUCT_NAME_LEN	6
   #define EP0_SIZE		64
   #define NUM_ENDPOINTS		8 //was 4
-  #define NUM_INTERFACE		6 // was 2
+#if defined(PROG_BOOTLOADER)
+	#define NUM_INTERFACE		6 // 2xCDC*2, HID,WinUSB
+#else
+	#define NUM_INTERFACE		5 // 2xCDC*2, HID, only WinUSB if using bootloader's usb descriptors
+#endif
   #define CDC_IAD_DESCRIPTOR	1 //was not defined
   #define CDC_STATUS_INTERFACE	0
   #define CDC_DATA_INTERFACE	1
