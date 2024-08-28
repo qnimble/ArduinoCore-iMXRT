@@ -573,7 +573,7 @@ static void endpoint0_setup(uint64_t setupdata)
 		if ((setup.wIndex & 0xFF00) != 0) break; // 1=Genre, 4=Compat ID, 5=Properties
 		    setup.wIndex |= 0xEE00; // alter wIndex and treat as normal USB descriptor
 	  case 0x0680: // GET_DESCRIPTOR
-	  case 0x0681:
+	  case 0x0681: {
 #if defined(ARDUINO_QUARTO) && !defined(PROG_BOOTLOADER)
 #include "comm.h"
 		  uint32_t* ptr = (uint32_t*) 0x60000800;
@@ -619,6 +619,7 @@ static void endpoint0_setup(uint64_t setupdata)
 			}
 		}
 		break;
+      }
 #if defined(CDC_STATUS_INTERFACE)
 	  case 0x2221: // CDC_SET_CONTROL_LINE_STATE
 		#ifdef CDC_STATUS_INTERFACE
