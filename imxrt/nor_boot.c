@@ -13,6 +13,7 @@ extern void ResetHandler(void);
 
 #ifdef ARDUINO_QUARTO
 
+extern const uint8_t microsoft_os_20compatible_id_desc[];
 
 __attribute__ ((used, section(".isr_vector")))
 void (* const g_pfnVectors[])(void) = {
@@ -21,7 +22,8 @@ void (* const g_pfnVectors[])(void) = {
     NMI_Handler,                       // The NMI handler
     HardFault_Handler,                 // The hard fault handler
 	(void*) APPLICATION_BOOT_HEADER,           // Header to know we have legit application code
-	(void*) APPLICATION_BOOT_HEADER_AND_VERSION
+	(void*) APPLICATION_BOOT_HEADER_AND_VERSION,
+	(void*) microsoft_os_20compatible_id_desc
 };
 
 __attribute__((section(".boot_hdr.dcd_data")))

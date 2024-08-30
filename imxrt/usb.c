@@ -98,7 +98,6 @@ static uint8_t endpoint0_buffer[8];
 static uint8_t sof_usage = 0;
 static uint8_t usb_reboot_timer = 0;
 
-extern uint8_t usb_descriptor_buffer[]; // defined in usb_desc.c
 extern const uint8_t usb_config_descriptor_480[];
 extern const uint8_t usb_config_descriptor_12[];
 
@@ -117,8 +116,23 @@ static void endpoint0_complete(void);
 static void run_callbacks(endpoint_t *ep);
 
 
+const static usb_descriptor_list_t* usb_descriptor_active = usb_descriptor_list;
+const static uint8_t* ms20_active = microsoft_os_20compatible_id_desc;
+
+
 FLASHMEM void usb_init(void)
 {
+	//Initialize some variables
+#if defined(ARDUINO_QUARTO) && !defined(PROG_BOOTLOADER)
+	#include "comm.h"
+	uint32_t* ptr = (uint32_t*) 0x60000800;
+	if ( (*ptr >= LOOKUP_TABLE_START_CODE + 2) && (*ptr <= LOOKUP_TABLE_START_CODE + 255)) {
+		//if bootloader version 2 or higher, use bootloader descriptor
+		usb_descriptor_active = (usb_descriptor_list_t*) *(ptr+6);
+		ms20_active = (uint8_t*) *(ptr+7);
+		}
+#endif
+
 	// TODO: only enable when VBUS detected
 	// TODO: return to low power mode when VBUS removed
 	// TODO: protect PMU access with MPU
@@ -574,18 +588,7 @@ static void endpoint0_setup(uint64_t setupdata)
 		    setup.wIndex |= 0xEE00; // alter wIndex and treat as normal USB descriptor
 	  case 0x0680: // GET_DESCRIPTOR
 	  case 0x0681: {
-#if defined(ARDUINO_QUARTO) && !defined(PROG_BOOTLOADER)
-#include "comm.h"
-		  uint32_t* ptr = (uint32_t*) 0x60000800;
-		  list = usb_descriptor_list;
-          if ( (*ptr >= LOOKUP_TABLE_START_CODE + 2) && (*ptr <= LOOKUP_TABLE_START_CODE + 255)) {
-            //if bootloader version 2 or higher, use bootloader descriptor
-            list = (usb_descriptor_list_t*) *(ptr+6);
-          }
-          for ( ; list->addr != NULL; list++) {
-#else
-		  for (list = usb_descriptor_list; list->addr != NULL; list++) {
-#endif
+        for (list = usb_descriptor_active; list->addr != NULL; list++) {
 			if (setup.wValue == list->wValue && setup.wIndex == list->wIndex) {
 				uint32_t datalen;
 				if ((setup.wValue >> 8) == 3) {
@@ -599,25 +602,30 @@ static void endpoint0_setup(uint64_t setupdata)
 
 				// copy the descriptor, from PROGMEM to DMAMEM
 				if (setup.wValue == 0x200) {
-					// config descriptor needs to adapt to speed
-					const uint8_t *src = usb_config_descriptor_12;
-					if (usb_high_speed) src = usb_config_descriptor_480;
-					memcpy(usb_descriptor_buffer, src, datalen);
+					if (usb_high_speed) {
+						endpoint0_transmit(usb_descriptor_active[2].addr, datalen, 0);//3rd entry is USB 2.0 HS
+						return;
+					} else {
+						endpoint0_transmit(usb_descriptor_active[3].addr, datalen, 0);//4th entry is low speed
+						return;
+					}
 				} else if (setup.wValue == 0x700) {
-					// other speed config also needs to adapt
-					const uint8_t *src = usb_config_descriptor_480;
-					if (usb_high_speed) src = usb_config_descriptor_12;
-					memcpy(usb_descriptor_buffer, src, datalen);
-					usb_descriptor_buffer[1] = 7;
+					uint8_t temp_data[200];
+					if (usb_high_speed) {
+						memcpy(temp_data, usb_descriptor_active[3].addr, datalen); // if high speed, report other option low speed 4th entry
+					} else {
+						memcpy(temp_data, usb_descriptor_active[2].addr, datalen);  // if low speed, report other option high speed 3rd entry
+					}
+					temp_data[1] = 7; //original is set as 0x02 config descriptor, not other speed descriptor
+					endpoint0_transmit(temp_data, datalen, 0);
+					return;
 				} else {
-					memcpy(usb_descriptor_buffer, list->addr, datalen);
+					endpoint0_transmit(list->addr, datalen, 0);
+					return;
 				}
-				// prep transmit
-				arm_dcache_flush_delete(usb_descriptor_buffer, datalen);
-				endpoint0_transmit(usb_descriptor_buffer, datalen, 0);
-				return;
 			}
 		}
+
 		break;
       }
 #if defined(CDC_STATUS_INTERFACE)
