@@ -13,8 +13,6 @@ extern void ResetHandler(void);
 
 #ifdef ARDUINO_QUARTO
 
-extern const uint8_t microsoft_os_20compatible_id_desc[];
-
 __attribute__ ((used, section(".isr_vector")))
 void (* const g_pfnVectors[])(void) = {
     &_vStackTop,                       // The initial stack pointer
@@ -23,7 +21,6 @@ void (* const g_pfnVectors[])(void) = {
     HardFault_Handler,                 // The hard fault handler
 	(void*) APPLICATION_BOOT_HEADER,           // Header to know we have legit application code
 	(void*) APPLICATION_BOOT_HEADER_AND_VERSION,
-	(void*) microsoft_os_20compatible_id_desc
 };
 
 __attribute__((section(".boot_hdr.dcd_data")))
