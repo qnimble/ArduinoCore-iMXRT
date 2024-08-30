@@ -543,7 +543,7 @@ static void endpoint0_setup(uint64_t setupdata)
 	  case 0x02C0:
 		//handle MS OS 2.0 descriptor
 		if (setup.wValue == 0x00 && setup.wIndex == 0x07) {
-			endpoint0_transmit(microsoft_os_20compatible_id_desc, 0x2E, 0);
+			endpoint0_transmit(ms20_active, 0x2E, 0);
 			return;
 		} else {
 			endpoint0_receive(NULL, 0, 0);
