@@ -167,8 +167,9 @@ static const uint8_t SCL = 19;
 
 #define NOT_AN_INTERRUPT -1
 
-
-#if defined(__IMXRT1062__) && defined(ARDUINO_TEENSY40)
+#if defined(__IMXRT1062__) && defined(ARDUINO_QUARTO)
+	#define digitalPinHasPWM(p) ((p) == 5 || (p) == 6 || (p) == 12 || (p) == 12)
+#elif defined(__IMXRT1062__) && defined(ARDUINO_TEENSY40)
   #define analogInputToDigitalPin(p) (((p) <= 9) ? (p) + 14 : (( ((p) >= 14 && (p) <= 27)) ? (p) : -1))
   #define digitalPinHasPWM(p) ((p) <= 15 || (p) == 18 || (p) == 19 || ((p) >= 22 && (p) <= 25) || (p) == 28 || (p) == 29 || ((p) >= 33 && (p) <= 39))
 
