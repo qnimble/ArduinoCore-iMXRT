@@ -102,6 +102,7 @@ extern const uint8_t usb_config_descriptor_480[];
 extern const uint8_t usb_config_descriptor_12[];
 
 extern const uint8_t microsoft_os_20compatible_id_desc[];
+extern const uint8_t WinUSB_URL[];
 
 void (*usb_timer0_callback)(void) = NULL;
 void (*usb_timer1_callback)(void) = NULL;
@@ -118,6 +119,7 @@ static void run_callbacks(endpoint_t *ep);
 
 const static usb_descriptor_list_t* usb_descriptor_active = usb_descriptor_list;
 const static uint8_t* ms20_active = microsoft_os_20compatible_id_desc;
+const static uint8_t* WinUSB_Url_active = WinUSB_URL;
 
 
 FLASHMEM void usb_init(void)
@@ -543,10 +545,22 @@ static void endpoint0_setup(uint64_t setupdata)
 	  case 0x02C0:
 		//handle MS OS 2.0 descriptor
 		if (setup.wValue == 0x00 && setup.wIndex == 0x07) {
-			endpoint0_transmit(ms20_active, 0x2E, 0);
+			// cast to uint16 array to get length of packet from 5th position (+4 from start) which is packet size
+			const uint16_t* ms20_asu16 = (uint16_t*) ms20_active;
+			endpoint0_transmit(ms20_active, ms20_asu16[4], 0);
 			return;
 		} else {
-			endpoint0_receive(NULL, 0, 0);
+			endpoint0_transmit(NULL, 0, 0);
+			return;
+		 }
+		break;
+	  case 0x01C0:
+		//handle WebUSB URL
+		if  (setup.wValue == 0x01 && setup.wIndex == 0x02) {
+			endpoint0_transmit(WinUSB_Url_active, WinUSB_Url_active[0], 0);
+			return;
+		} else {
+			endpoint0_transmit(NULL, 0, 0);
 			return;
 		}
 	  case 0x0082: // GET_STATUS (endpoint)

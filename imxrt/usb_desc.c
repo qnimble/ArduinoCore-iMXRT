@@ -94,7 +94,7 @@
 static const PROGMEM uint8_t device_descriptor[] = {
         18,                                     // bLength
         1,                                      // bDescriptorType
-        0x01, 0x02,                             // bcdUSB
+        0x10, 0x02,                             // bcdUSB
 #ifdef DEVICE_CLASS
         DEVICE_CLASS,                           // bDeviceClass
 #else
@@ -126,7 +126,7 @@ static const PROGMEM uint8_t device_descriptor[] = {
   #elif defined(__IMXRT1062__) && defined(ARDUINO_TEENSY_MICROMOD)
         0x81, 0x02, // Teensy MicroMod
   #elif defined(__IMXRT1062__) && defined(ARDUINO_QUARTO)
-        0x24, 0x23, // qNimble Quarto, Rev1
+        0x25, 0x23, // qNimble Quarto, Rev1
   #else
         0x00, 0x02,
   #endif
@@ -1658,14 +1658,14 @@ PROGMEM const uint8_t usb_config_descriptor_480[CONFIG_DESC_SIZE] = {
         // endpoint descriptor, USB spec 9.6.6, page 269-271, Table 9-13
         7,                                      // bLength
         5,                                      // bDescriptorType
-        EXPERIMENTAL_ENDPOINT | 0x80,           // bEndpointAddress
+        EXPERIMENTAL_ENDPOINT_IN | 0x80,           // bEndpointAddress
         0x02,                                   // bmAttributes (0x02=bulk)
         LSB(CDC_RX_SIZE_480), MSB(CDC_RX_SIZE_480),                     // wMaxPacketSize
         0,                                      // bInterval
         // endpoint descriptor, USB spec 9.6.6, page 269-271, Table 9-13
         7,                                      // bLength
         5,                                      // bDescriptorType
-        EXPERIMENTAL_ENDPOINT,                  // bEndpointAddress
+        EXPERIMENTAL_ENDPOINT_OUT,                  // bEndpointAddress
         0x02,                                   // bmAttributes (0x02=bulk)
         LSB(CDC_RX_SIZE_480), MSB(CDC_RX_SIZE_480),                     // wMaxPacketSize
         0,                                      // bInterval
@@ -2672,14 +2672,14 @@ PROGMEM const uint8_t usb_config_descriptor_12[CONFIG_DESC_SIZE] = {
         // endpoint descriptor, USB spec 9.6.6, page 269-271, Table 9-13
         7,                                      // bLength
         5,                                      // bDescriptorType
-        EXPERIMENTAL_ENDPOINT  | 0x80,                               // bEndpointAddress
+        EXPERIMENTAL_ENDPOINT_IN  | 0x80,                               // bEndpointAddress
         0x02,                                   // bmAttributes (0x02=bulk)
         LSB(64), MSB(64),                       // wMaxPacketSize
         0,                                      // bInterval
         // endpoint descriptor, USB spec 9.6.6, page 269-271, Table 9-13
         7,                                      // bLength
         5,                                      // bDescriptorType
-        1,                                      // bEndpointAddress
+        EXPERIMENTAL_ENDPOINT_OUT,                                      // bEndpointAddress
         0x02,                                   // bmAttributes (0x02=bulk)
         LSB(64), MSB(64),                       // wMaxPacketSize
         0,                                      // bInterval
@@ -2780,41 +2780,68 @@ const PROGMEM uint8_t microsoft_os_20compatible_id_desc[] = {
     0x0A, 0x00,             // wLength
     0x00, 0x00,             // wDescriptorType (MS OS 2.0 descriptor set header)
     0x00, 0x00, 0x03, 0x06, // dwWindowsVersion (Windows 8.1)
-    0x2E,0x00,                  // wTotalLength
+    0xB2,0x00,                  // wTotalLength
 
     // Configuration Subset Header
     0x08, 0x00, // wLength
     0x01, 0x00, // wDescriptorType (Configuration Subset header)
     0x00,       // bConfigurationValue
     0x00,       // bReserved
-    0x24, 0x00, // wTotalLength
+    0xA8, 0x00, // wTotalLength
 
     // Function Subset Header
     0x08, 0x00, // wLength
     0x02, 0x00, // wDescriptorType (Function Subset header)
     0x05,       // bFirstInterface
     0x00,       // bReserved
-    0x1C, 0x00, // wTotalLength
+    0xA0, 0x00, // wTotalLength
 
     // Compatible ID Descriptor
     0x14, 0x00, // wLength
     0x03, 0x00, // wDescriptorType (Compatible ID descriptor)
     'W', 'I', 'N', 'U', 'S', 'B', 0x00, 0x00, // CompatibleID
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // SubCompatibleID
+
+	0x84, 0x00, // wLength
+	0x04, 0x00, // wDescriptorType (Property Descriptor)
+	0x07, 0x00, //wPropertyType (unicode string, 7)
+	0x2a, 0x00, //wPropertyNameLength
+	0x44, 0x00, 0x65, 0x00, 0x76, 0x00, 0x69, 0x00, 0x63, 0x00, 0x65, 0x00, 0x49, 0x00, 0x6e, 0x00,
+	0x74, 0x00, 0x65, 0x00, 0x72, 0x00, 0x66, 0x00, 0x61, 0x00,	0x63, 0x00, 0x65, 0x00, 0x47, 0x00,
+	0x55, 0x00, 0x49, 0x00, 0x44, 0x00, 0x73, 0x00, 0x00, 0x00,// 'DeviceInterfaceGUIDs'
+
+	0x50, 0x00,//wPropertyDataLength
+
+	0x7B, 0x00, 0x34, 0x00, 0x39, 0x00, 0x65, 0x00, 0x39, 0x00, 0x33, 0x00, 0x30, 0x00, 0x30, 0x00,
+	0x33, 0x00, 0x2D, 0x00, 0x35, 0x00, 0x32, 0x00, 0x39, 0x00, 0x37, 0x00, 0x2D, 0x00, 0x34, 0x00,
+	0x37, 0x00, 0x31, 0x00, 0x62, 0x00, 0x2D, 0x00, 0x61, 0x00, 0x39, 0x00, 0x64, 0x00, 0x30, 0x00,
+	0x2D, 0x00, 0x35, 0x00, 0x35, 0x00, 0x36, 0x00, 0x63, 0x00, 0x35, 0x00, 0x30, 0x00, 0x36, 0x00,
+	0x30, 0x00, 0x66, 0x00, 0x33, 0x00, 0x37, 0x00, 0x66, 0x00, 0x7D, 0x00, 0x00, 0x00,
+	// GUID as uint16 string '{49e93003-5297-471b-a9d0-556c5060f37f}'
+
+	0x00, 0x00 // end of property section
+
 };
 
+const PROGMEM uint8_t WinUSB_URL[] = {
+	0x03, 0x03, 0x01, //Length, URL descriptor flat (03), bScheme = https
+    //'q','c','o','n','t','r','o','l', '.','q', 'n','i','m','b','l','e','.','c','o','m'
+};
+
+
 const PROGMEM uint8_t BOS[] = {
-      // BOS descriptor.
+      // BOS descriptor.  size 5, 2 descriptors
       0x05, 0x0f, 0x39, 0x00, 0x02,
 
-      //Container ID descriptor
+      //Descritpor 1: WebUSB Container ID descriptor
       0x18, 0x10, 0x05, 0x00, 0x38, 0xb6, 0x08, 0x34, 0xa9, 0x09, 0xa0, 0x47,
       0x8b, 0xfd, 0xa0, 0x76, 0x88, 0x15, 0xb6, 0x65,
+	  0x00, 0x01, 0x01, 0x01,
 
       // WebUSB Platform Capability descriptor.
-      0x00, 0x01, 0x01, 0x01, 0x1c, 0x10, 0x05, 0x00, 0xdf, 0x60, 0xdd, 0xd8,
+      0x1c, 0x10, 0x05, 0x00, 0xdf, 0x60, 0xdd, 0xd8,
       0x89, 0x45, 0xc7, 0x4c, 0x9c, 0xd2, 0x65, 0x9d, 0x9e, 0x64, 0x8a, 0x9f,
-      0x00, 0x00, 0x03, 0x06, 0x2e, 0x00, 0x02, 0x00
+      0x00, 0x00, 0x03, 0x06, 0xB2, 0x00, 0x02, 0x00
 };
 
 // **************************************************************
