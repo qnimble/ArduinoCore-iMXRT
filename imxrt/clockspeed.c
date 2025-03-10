@@ -187,7 +187,11 @@ uint32_t set_arm_clock(uint32_t frequency)
 	F_CPU_ACTUAL = frequency;
 	F_BUS_ACTUAL = frequency / div_ipg;
 	scale_cpu_cycles_to_microseconds = 0xFFFFFFFFu / (uint32_t)(frequency / 1000000u);
-
+#if defined(ARDUINO_QUARTO)
+	//Quarto uses CPU for systick, so needs update.
+	void configure_systick(void);
+	configure_systick();
+#endif
 	printf("New Frequency: ARM=%lu, IPG=%lu\n", frequency, frequency / div_ipg);
 
 	// if voltage needs to decrease, do it after switch clock speed

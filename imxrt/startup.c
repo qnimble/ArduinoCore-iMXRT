@@ -41,7 +41,7 @@ void bss_init(unsigned int start, unsigned int len);
 void approxMSdelay(unsigned int ms);
 void foreverLoopAndToggle(void);
 
-static void configure_systick(void);
+void configure_systick(void);
 static void reset_PFD();
 extern void systick_isr(void);
 extern void pendablesrvreq_isr(void);
@@ -294,16 +294,21 @@ void ResetHandler(void)
 #define SYSTICK_EXT_FREQ 100000
 
 extern volatile uint32_t systick_cycle_count;
-static void configure_systick(void)
+void configure_systick(void)
 {
 	_VectorsRam[14] = pendablesrvreq_isr;
 	_VectorsRam[15] = systick_isr;
+#if ARDUINO_QUARTO
+	//Quarto uses external 24 MHz clock that is not derived from 24 MHz osc, so
+	//switch CPU clock instead and set divider based on CPU frequency
+	SYST_RVR = (F_CPU_ACTUAL / 1000) - 1;
+	SYST_CVR = 0;
+	SYST_CSR = SYST_CSR_CLKSOURCE| SYST_CSR_TICKINT | SYST_CSR_ENABLE;
+	SCB_SHPR3 = 0x40400000;  // Systick, pendablesrvreq_isr = priority 64;
+#else
 	SYST_RVR = (SYSTICK_EXT_FREQ / 1000) - 1;
 	SYST_CVR = 0;
 	SYST_CSR = SYST_CSR_TICKINT | SYST_CSR_ENABLE;
-#if QUARTO_ARDUINO
-	SCB_SHPR3 = 0x40400000;  // Systick, pendablesrvreq_isr = priority 64;
-#else
 	SCB_SHPR3 = 0x20200000;  // Systick, pendablesrvreq_isr = priority 32;
 #endif
 	ARM_DEMCR |= ARM_DEMCR_TRCENA;
