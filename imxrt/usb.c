@@ -1015,49 +1015,40 @@ static void schedule_transfer(endpoint_t *endpoint, uint32_t epmask, transfer_t 
 	transfer_t *last = endpoint->last_transfer;
 	if (last) {
 		last->next = (uint32_t)transfer;
+		endpoint->last_transfer = transfer;
 		uint32_t prime_check = USB1_ENDPTPRIME & epmask;
-		__enable_irq();
 
-		if (prime_check) goto end_irq_enabled;
-		//ret |= 0x01;
-		uint32_t status, cyccnt=ARM_DWT_CYCCNT;
-		do {
-			USB1_USBCMD |= USB_USBCMD_ATDTW;
-			status = USB1_ENDPTSTATUS;
-		} while (!(USB1_USBCMD & USB_USBCMD_ATDTW) && (ARM_DWT_CYCCNT - cyccnt < 2400));
-		//USB1_USBCMD &= ~USB_USBCMD_ATDTW;
-		if (status & epmask) goto end_irq_enabled;
-		//ret |= 0x02;
-		__disable_irq();
+		if (!prime_check) {
+			uint32_t status;
+			__enable_irq();
+			//ret |= 0x01;
+			uint32_t cyccnt=ARM_DWT_CYCCNT;
+			do {
+				USB1_USBCMD |= USB_USBCMD_ATDTW;
+				status = USB1_ENDPTSTATUS;
+			} while (!(USB1_USBCMD & USB_USBCMD_ATDTW) && (ARM_DWT_CYCCNT - cyccnt < 2400));
+
+			//USB1_USBCMD &= ~USB_USBCMD_ATDTW;
+			if (status & epmask) { //endpoint is active, need to update:
+				//ret |= 0x02;
+				__disable_irq();
+				endpoint->next = (uint32_t)transfer;
+				endpoint->status = 0;
+				USB1_ENDPTPRIME |= epmask;
+				endpoint->last_transfer = transfer;
+				__enable_irq();
+			}
+		} else {
+			__enable_irq();
+		}
+	} else {
 		endpoint->next = (uint32_t)transfer;
 		endpoint->status = 0;
 		USB1_ENDPTPRIME |= epmask;
-		goto end;
+		endpoint->first_transfer = transfer;
+		endpoint->last_transfer = transfer;
+		__enable_irq();
 	}
-	//digitalWriteFast(4, HIGH);
-	__disable_irq();
-	endpoint->next = (uint32_t)transfer;
-	endpoint->status = 0;
-	USB1_ENDPTPRIME |= epmask;
-	endpoint->first_transfer = transfer;
-end:
-	endpoint->last_transfer = transfer;
-	__enable_irq();
-	return;
-
-end_irq_enabled:
-__disable_irq();
-	endpoint->last_transfer = transfer;
-__enable_irq();
-	return;
-
-	//digitalWriteFast(4, LOW);
-	//digitalWriteFast(3, LOW);
-	//digitalWriteFast(2, LOW);
-	//digitalWriteFast(1, LOW);
-	//if (transfer_log_head > LOG_SIZE) transfer_log_head = 0;
-	//transfer_log[transfer_log_head++] = ret;
-	//transfer_log_count++;
 }
 	// ENDPTPRIME -  Software should write a one to the corresponding bit when
 	//		 posting a new transfer descriptor to an endpoint queue head.
