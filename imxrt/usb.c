@@ -1003,53 +1003,53 @@ void usb_print_transfer_log(void)
 
 static void schedule_transfer(endpoint_t *endpoint, uint32_t epmask, transfer_t *transfer)
 {
-    // Setup transfer flags before critical section
-    if (endpoint->callback_function) {
-        transfer->status |= (1<<15);
-    }
-    
-    // Store transfer in a local variable to ensure consistency
-    transfer_t *const new_transfer = transfer;
-    
-    __disable_irq();
-    transfer_t *last = endpoint->last_transfer;
-    if (last) {
-        // Link the new transfer
-        last->next = (uint32_t)new_transfer;
-        
-        // Update last_transfer before enabling interrupts to prevent race condition
-        endpoint->last_transfer = new_transfer;
-        
-        uint32_t prime_check = USB1_ENDPTPRIME & epmask;
-        __enable_irq();
-        
-        if (prime_check) return;  // Already primed, and last_transfer is updated
-        
-        // Polling with interrupts enabled
-        uint32_t status, cyccnt=ARM_DWT_CYCCNT;
-        do {
-            USB1_USBCMD |= USB_USBCMD_ATDTW;
-            status = USB1_ENDPTSTATUS;
-        } while (!(USB1_USBCMD & USB_USBCMD_ATDTW) && (ARM_DWT_CYCCNT - cyccnt < 2400));
-        
-        if (status & epmask) return;  // Active endpoint, and last_transfer is updated
-        
-        // Need to prime the endpoint
-        __disable_irq();
-        endpoint->next = (uint32_t)new_transfer;
-        endpoint->status = 0;
-        USB1_ENDPTPRIME |= epmask;
-        __enable_irq();
-        return;
-    }
-    
-    // First transfer in the queue
-    endpoint->next = (uint32_t)new_transfer;
-    endpoint->status = 0;
-    USB1_ENDPTPRIME |= epmask;
-    endpoint->first_transfer = new_transfer;
-    endpoint->last_transfer = new_transfer;
-    __enable_irq();
+	// when we stop at 6, why is the last transfer missing from the USB output?
+	//if (transfer_log_count >= 6) return;
+
+	//uint32_t ret = (*(const uint8_t *)transfer->pointer0) << 8;
+	if (endpoint->callback_function) {
+		transfer->status |= (1<<15);
+	}
+	__disable_irq();
+	// Executing A Transfer Descriptor, page 2468 (RT1060 manual, Rev 1, 12/2018)
+	transfer_t *last = endpoint->last_transfer;
+	if (last) {
+		last->next = (uint32_t)transfer;
+		uint32_t prime_check = USB1_ENDPTPRIME & epmask;
+
+		__enable_irq();
+		if (prime_check) goto end_irq_enabled ;
+
+		uint32_t status, cyccnt=ARM_DWT_CYCCNT;
+		do {
+			USB1_USBCMD |= USB_USBCMD_ATDTW;
+			status = USB1_ENDPTSTATUS;
+		} while (!(USB1_USBCMD & USB_USBCMD_ATDTW) && (ARM_DWT_CYCCNT - cyccnt < 2400));
+
+		//USB1_USBCMD &= ~USB_USBCMD_ATDTW;
+		if (status & epmask) goto end_irq_enabled;
+
+		__disable_irq();
+		endpoint->next = (uint32_t)transfer;
+		endpoint->status = 0;
+		USB1_ENDPTPRIME |= epmask;
+		goto end;
+	}
+	
+	endpoint->next = (uint32_t)transfer;
+	endpoint->status = 0;
+	USB1_ENDPTPRIME |= epmask;
+	endpoint->first_transfer = transfer;
+end:
+	endpoint->last_transfer = transfer;
+	__enable_irq();
+	return;
+
+end_irq_enabled:
+	__disable_irq();
+	endpoint->last_transfer = transfer;
+	__enable_irq();
+	return;
 }
 	// ENDPTPRIME -  Software should write a one to the corresponding bit when
 	//		 posting a new transfer descriptor to an endpoint queue head.
