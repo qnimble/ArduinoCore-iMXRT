@@ -413,18 +413,14 @@ void usb_isr(void)
 
 void usb_start_sof_interrupts(int interface)
 {
-#ifndef ARDUINO_QUARTO
 	__disable_irq();
-#endif
 	sof_usage |= (1 << interface);
 	uint32_t intr = USB1_USBINTR;
 	if (!(intr & USB_USBINTR_SRE)) {
 		USB1_USBSTS = USB_USBSTS_SRI; // clear prior SOF before SOF IRQ enable
 		USB1_USBINTR = intr | USB_USBINTR_SRE;
 	}
-#ifndef ARDUINO_QUARTO
 	__enable_irq();
-#endif
 }
 
 void usb_stop_sof_interrupts(int interface)

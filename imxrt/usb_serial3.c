@@ -262,7 +262,7 @@ int usb_serial3_getchar(void)
 // When the PC isn't listening, how long do we wait before discarding data?  If this is
 // too short, we risk losing data during the stalls that are common with ordinary desktop
 // software.  If it's too long, we stall the user's program when no software is running.
-#define TX_TIMEOUT_MSEC 120
+#define TX_TIMEOUT_MSEC 500
 
 
 // When we've suffered the transmit timeout, don't wait again until the computer
@@ -384,7 +384,13 @@ int usb_serial3_write(const void *buffer, uint32_t size)
 			timer_stop();
 		} else {
 			memcpy(txdata, data, size);
-			tx_available -= size;
+			__disable_irq();
+			if (tx_available > size) {
+				tx_available -= size;
+			} else {
+				tx_available = 0;
+			}
+			__enable_irq();
 			sent += size;
 			size = 0;
 			timer_start_oneshot();
