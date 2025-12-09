@@ -271,7 +271,7 @@ int usb_serial3_getchar(void)
 // actually receive it.
 static uint8_t transmit_previous_timeout=0;
 
-
+static uint8_t timer_is_running = 0;
 // transmit a character.  0 returned on success, -1 on error
 int usb_serial3_putchar(uint8_t c)
 {
@@ -288,6 +288,7 @@ static void quadtimer_isr(void)
 {
 	TMR1_SCTRL3 = 0;
 	usb_serial3_flush_callback();
+	timer_is_running = 0;
 }
 
 static void timer_config(void (*callback)(void), uint32_t microseconds)
@@ -312,15 +313,19 @@ static void timer_config(void (*callback)(void), uint32_t microseconds)
 static void timer_start_oneshot(void)
 {
 	TMR1_CTRL3 = 0;
+	NVIC_CLEAR_PENDING(IRQ_QTIMER1);
 	TMR1_CNTR3 = 0;
 	TMR1_COMP13 = TRANSMIT_FLUSH_TIMEOUT * (F_BUS_ACTUAL >> 10) / (16000000 >> 10);
 	TMR1_SCTRL3 = TMR_SCTRL_TCFIE;
 	TMR1_CTRL3 = TMR_CTRL_CM(1) | TMR_CTRL_PCS(12) | TMR_CTRL_ONCE;
+	timer_is_running = 1;
 }
 
 static void timer_stop(void)
 {
 	TMR1_CTRL3 = 0;
+	NVIC_CLEAR_PENDING(IRQ_QTIMER1);
+	timer_is_running = 0;
 }
 
 
@@ -329,7 +334,12 @@ int usb_serial3_write(const void *buffer, uint32_t size)
 	uint32_t sent=0;
 	const uint8_t *data = (const uint8_t *)buffer;
 
-	if (!usb_configuration) return 0;
+	NVIC_DISABLE_IRQ(IRQ_QTIMER1);
+
+	if (!usb_configuration) {
+		NVIC_ENABLE_IRQ(IRQ_QTIMER1);
+		return 0;
+	}
 	while (size > 0) {
 		transfer_t *xfer = tx_transfer + tx_head;
 		int waiting=0;
@@ -351,10 +361,14 @@ int usb_serial3_write(const void *buffer, uint32_t size)
 				wait_begin_at = systick_millis_count;
 				waiting = 1;
 			}
-			if (transmit_previous_timeout) return sent;
+			if (transmit_previous_timeout) {
+				NVIC_ENABLE_IRQ(IRQ_QTIMER1);
+				return sent;
+			}
 			if (systick_millis_count - wait_begin_at > TX_TIMEOUT_MSEC) {
 				// waited too long, assume the USB host isn't listening
 				transmit_previous_timeout = 1;
+				NVIC_ENABLE_IRQ(IRQ_QTIMER1);
 				return sent;
 				//printf("\nstop, waited too long\n");
 				//printf("status = %x\n", status);
@@ -363,12 +377,18 @@ int usb_serial3_write(const void *buffer, uint32_t size)
 				//usb_print_transfer_log();
 				//while (1) ;
 			}
-			if (!usb_configuration) return sent;
+			if (!usb_configuration) {
+				NVIC_ENABLE_IRQ(IRQ_QTIMER1);
+				return sent;
+			}
 			yield();
 		}
 		//digitalWriteFast(3, LOW);
+		transmit_previous_timeout = 0; //if we got here, comms are working again
+
 		uint8_t *txdata = txbuffer + (tx_head * TX_SIZE) + (TX_SIZE - tx_available);
 		if (size >= tx_available) {
+			timer_stop(); // stop the timer to flush first as we are doing a full buffer now
 			memcpy(txdata, data, tx_available);
 			//*(txbuffer + (tx_head * TX_SIZE)) = 'A' + tx_head; // to see which buffer
 			//*(txbuffer + (tx_head * TX_SIZE) + 1) = ' '; // really see it
@@ -381,21 +401,17 @@ int usb_serial3_write(const void *buffer, uint32_t size)
 			sent += tx_available;
 			data += tx_available;
 			tx_available = 0;
-			timer_stop();
 		} else {
 			memcpy(txdata, data, size);
-			__disable_irq();
-			if (tx_available > size) {
-				tx_available -= size;
-			} else {
-				tx_available = 0;
-			}
-			__enable_irq();
+			tx_available -= size;
 			sent += size;
 			size = 0;
-			timer_start_oneshot();
+			if (timer_is_running == 0) {
+				timer_start_oneshot(); // only start if not already running
+			}
 		}
 	}
+	NVIC_ENABLE_IRQ(IRQ_QTIMER1);
 	return sent;
 }
 
