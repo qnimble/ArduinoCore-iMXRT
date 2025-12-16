@@ -280,10 +280,6 @@ int usb_serial3_putchar(uint8_t c)
 
 extern volatile uint32_t systick_millis_count;
 
-static void timer_config(void (*callback)(void), uint32_t microseconds);
-static void timer_start_oneshot();
-static void timer_stop();
-
 static void quadtimer_isr(void)
 {
 	TMR1_SCTRL3 = 0;
