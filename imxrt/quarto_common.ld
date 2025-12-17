@@ -130,11 +130,11 @@ SECTIONS
  	
 
     /* DATA section for SRAM_OC */
-
+/*
  	.data.ITCM.padding  (NOLOAD) : {
 		. = ALIGN(32768);		
 	} > ITCM
- 	
+ */	
 
 
     .data.RAM : ALIGN(4)
